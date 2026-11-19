@@ -49,8 +49,8 @@
         <input type="hidden" id="mode-edit" value="false">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="block text-sm text-gray-600 mb-1">NISN</label>
-            <input type="text" id="input-nisn" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500" placeholder="Contoh: 0012345">
+            <label class="block text-sm text-gray-600 mb-1">NISN / NIS</label>
+            <input type="text" id="input-nisn" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500" placeholder="Contoh: 0012345 / 2425101">
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">Nama Lengkap</label>
@@ -84,7 +84,7 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="p-4 text-gray-600">NISN</th>
+                <th class="p-4 text-gray-600">NISN / NIS</th>
                 <th class="p-4 text-gray-600">Nama Lengkap</th>
                 <th class="p-4 text-gray-600">L/P</th>
                 <th class="p-4 text-gray-600">Kelas</th>
@@ -256,6 +256,11 @@
       return configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
     }
 
+    // Helper ambil nilai NISN/NIS dari baris Excel impor (mendukung header "NISN / NIS", "NISN", maupun "NIS")
+    function ambilIdSiswaExcel(row) {
+      return String(row["NISN / NIS"] ?? row["NISN/NIS"] ?? row["NISN"] ?? row["NIS"] ?? "").trim();
+    }
+
     // --- NAVIGASI MENU ---
     function gantiMenu(namaMenu) {
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
@@ -376,14 +381,14 @@
     }
 
     async function hapusDataSiswa(nisn) {
-      if (!confirm(`Yakin ingin menghapus siswa dengan NISN ${nisn}?`)) return;
+      if (!confirm(`Yakin ingin menghapus siswa dengan NISN / NIS ${nisn}?`)) return;
       setLoading(true);
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "delete", data: { NISN: nisn } }) });
       muatSemuaData();
     }
 
     function downloadTemplate() {
-      const ws = XLSX.utils.json_to_sheet([{ NISN: "", Nama_Lengkap: "", "L/P": "L", ID_Kelas: "" }]);
+      const ws = XLSX.utils.json_to_sheet([{ "NISN / NIS": "", Nama_Lengkap: "", "L/P": "L", ID_Kelas: "" }]);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Template");
       XLSX.writeFile(wb, "Template_Siswa.xlsx");
@@ -391,7 +396,13 @@
 
     function exportExcel() {
       if (dataSiswaGlobal.length === 0) return alert("Data kosong!");
-      const ws = XLSX.utils.json_to_sheet(dataSiswaGlobal);
+      const formattedExport = dataSiswaGlobal.map(s => ({
+        "NISN / NIS": s.NISN,
+        Nama_Lengkap: s.Nama_Lengkap,
+        "L/P": s["L/P"],
+        ID_Kelas: s.ID_Kelas
+      }));
+      const ws = XLSX.utils.json_to_sheet(formattedExport);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
       XLSX.writeFile(wb, "Ekspor_Data_Siswa.xlsx");
@@ -405,12 +416,21 @@
       reader.onload = async (evt) => {
         const wb = XLSX.read(evt.target.result, { type: "binary" });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const importedData = XLSX.utils.sheet_to_json(ws);
+        const rawData = XLSX.utils.sheet_to_json(ws);
+        const importedData = rawData
+          .map(row => ({
+            NISN: ambilIdSiswaExcel(row),
+            Nama_Lengkap: row.Nama_Lengkap || "",
+            "L/P": row["L/P"] || "L",
+            ID_Kelas: row.ID_Kelas || ""
+          }))
+          .filter(item => item.NISN !== "");
+
         if (importedData.length > 0) {
           await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "import", data: importedData }) });
           muatSemuaData();
         } else {
-          setLoading(false); alert("File Excel kosong!");
+          setLoading(false); alert("File Excel kosong atau kolom NISN / NIS tidak terisi!");
         }
       };
       reader.readAsBinaryString(file);
@@ -422,7 +442,7 @@
     // =========================================================================
     function isiDropdownMapel() {
       const select = document.getElementById('pilih-mapel');
-      select.innerHTML = configGlobal.mapels.map(m => 
+      select.innerHTML = configGlobal.map(m => 
         `<option value="${m.id}" ${m.id === mapelAktifId ? 'selected' : ''}>📚 ${m.nama}</option>`
       ).join('');
       
@@ -672,7 +692,7 @@
 
         thead.innerHTML = `
           <tr>
-            <th class="p-3 border-r">NISN</th>
+            <th class="p-3 border-r">NISN / NIS</th>
             <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
             ${bab.tugas.map(t => `<th class="p-3 text-center bg-blue-50/50 border-r min-w-[110px]">${t}</th>`).join('')}
             <th class="p-3 text-center bg-blue-100/50 border-r font-bold text-blue-900">Rata Tugas</th>
@@ -714,7 +734,7 @@
 
         thead.innerHTML = `
           <tr>
-            <th class="p-3 border-r">NISN</th>
+            <th class="p-3 border-r">NISN / NIS</th>
             <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
             ${mAktif.babs.map(b => `<th class="p-3 text-center border-r bg-gray-100">${b.nama.split('-')[0]}</th>`).join('')}
             <th class="p-3 text-center border-r bg-blue-50 font-bold text-blue-900">Rata-rata BAB</th>
@@ -813,7 +833,7 @@
             body: JSON.stringify({ action: "saveNilaiBab", mapelId: mAktif.id, babId: bab.id, updates: updates })
           });
         } else {
-          const headers = ["ID_Mapel", "Nama_Mapel", "NISN", "Nama_Lengkap", "ID_Kelas", ...mAktif.babs.map(b => b.nama), "Rata_Rata_BAB", "Nilai_PSAS", "Nilai_Rapor"];
+          const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "ID_Kelas", ...mAktif.babs.map(b => b.nama), "Rata_Rata_BAB", "Nilai_PSAS", "Nilai_Rapor"];
           const rows = dataSiswaGlobal.map(s => {
             let sumBab = 0;
             const nilaiBabs = mAktif.babs.map(b => {
@@ -864,11 +884,10 @@
           const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
           const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
           let row = {
-            NISN: s.NISN,
+            "NISN / NIS": s.NISN,
             Nama_Lengkap: s.Nama_Lengkap,
             Kelas: s.ID_Kelas
           };
-          // Sertakan kolom tugas & nilai yang sudah ada (jika sebelumnya pernah diisi)
           bab.tugas.forEach(t => {
             row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "";
           });
@@ -880,7 +899,7 @@
         templateRows = siswaList.map(s => {
           const psasKey = `${mAktif.id}_${s.NISN}`;
           return {
-            NISN: s.NISN,
+            "NISN / NIS": s.NISN,
             Nama_Lengkap: s.Nama_Lengkap,
             Kelas: s.ID_Kelas,
             Nilai_PSAS: nilaiPSASGlobal[psasKey] !== undefined ? nilaiPSASGlobal[psasKey] : ""
@@ -917,21 +936,19 @@
             const bab = mAktif.babs.find(b => b.id === tabAktif);
             
             rows.forEach(row => {
-              const nisn = String(row.NISN || "").trim();
+              const nisn = ambilIdSiswaExcel(row);
               if (!nisn) return;
 
               const key = `${mAktif.id}_${nisn}_${bab.id}`;
               if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
               if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
 
-              // Baca setiap kolom tugas sesuai struktur BAB aktif
               bab.tugas.forEach(namaTugas => {
                 if (row[namaTugas] !== undefined && row[namaTugas] !== "") {
                   nilaiDetailGlobal[key].tugas[namaTugas] = Number(row[namaTugas]);
                 }
               });
 
-              // Baca kolom Nilai_PSH
               if (row["Nilai_PSH"] !== undefined && row["Nilai_PSH"] !== "") {
                 nilaiDetailGlobal[key].psh = Number(row["Nilai_PSH"]);
               }
@@ -939,9 +956,8 @@
               jumlahTerupdate++;
             });
           } else {
-            // Impor Nilai_PSAS pada tab Rekap Rapor
             rows.forEach(row => {
-              const nisn = String(row.NISN || "").trim();
+              const nisn = ambilIdSiswaExcel(row);
               if (!nisn) return;
 
               if (row["Nilai_PSAS"] !== undefined && row["Nilai_PSAS"] !== "") {
@@ -978,7 +994,7 @@
           const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
           const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
           const hasil = hitungNilaiBabSiswa(s.NISN, bab);
-          let row = { Mata_Pelajaran: mAktif.nama, NISN: s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+          let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
           bab.tugas.forEach(t => row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
           row["Rata_Rata_Tugas"] = hasil.rataTugas;
           row["Nilai_PSH"] = hasil.nilaiPSH;
@@ -988,7 +1004,7 @@
       } else {
         namaFile = `Rekap_Rapor_${cleanMapel}.xlsx`;
         dataExport = siswaList.map(s => {
-          let row = { Mata_Pelajaran: mAktif.nama, NISN: s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+          let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
           let sumBab = 0;
           mAktif.babs.forEach(b => {
             const h = hitungNilaiBabSiswa(s.NISN, b);
