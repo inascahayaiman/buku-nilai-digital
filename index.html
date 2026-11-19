@@ -3,69 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buku Nilai Digital</title>
-  <!-- Tailwind CSS & SheetJS (Excel) via CDN -->
+  <title>Buku Nilai Digital PAI-BP</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-gray-50 flex h-screen font-sans text-gray-800">
 
   <!-- Sidebar Kiri -->
-  <aside class="w-64 bg-blue-800 text-white flex flex-col shadow-lg">
-    <div class="p-5 text-xl font-bold border-b border-blue-700">Buku Nilai Digital</div>
+  <aside class="w-64 bg-emerald-800 text-white flex flex-col shadow-lg shrink-0">
+    <div class="p-5 border-b border-emerald-700">
+      <div class="text-xl font-bold">Buku Nilai Digital</div>
+      <div class="text-xs text-emerald-200 mt-1">Mapel: PAI & Budi Pekerti</div>
+    </div>
     <nav class="flex-1 p-4 space-y-2 mt-2">
-      <button onclick="gantiMenu('Data Siswa')" id="btn-Data Siswa" class="menu-btn w-full text-left p-3 rounded-lg font-medium bg-blue-700 transition">Data Siswa</button>
-      <button onclick="gantiMenu('Input Nilai')" id="btn-Input Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-blue-700 transition">Input Nilai</button>
+      <button onclick="gantiMenu('Data Siswa')" id="btn-Data Siswa" class="menu-btn w-full text-left p-3 rounded-lg font-medium bg-emerald-700 transition">👥 Data Siswa</button>
+      <button onclick="gantiMenu('Input Nilai')" id="btn-Input Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-emerald-700 transition">📝 Input Nilai PAI-BP</button>
     </nav>
-    <div class="p-4 text-xs text-blue-300 border-t border-blue-700">Cloud Mode (GitHub + Vercel)</div>
+    <div class="p-4 text-xs text-emerald-300 border-t border-emerald-700">Cloud Mode (GitHub + Vercel)</div>
   </aside>
 
   <!-- Konten Utama -->
-  <main class="flex-1 p-8 overflow-y-auto">
+  <main class="flex-1 p-6 md:p-8 overflow-y-auto">
     
-    <!-- HALAMAN DATA SISWA -->
+    <!-- ===================================================================== -->
+    <!-- HALAMAN 1: DATA SISWA                                                 -->
+    <!-- ===================================================================== -->
     <div id="halaman-Data Siswa" class="halaman">
       <header class="mb-6">
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Data Siswa</h1>
         <div class="flex flex-wrap gap-2 justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-          <div class="space-x-2">
-            <button onclick="ambilDataSiswa()" class="bg-gray-100 text-gray-700 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-gray-200">🔄 Muat Ulang</button>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="muatSemuaData()" class="bg-gray-100 text-gray-700 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-gray-200">🔄 Muat Ulang</button>
             <button onclick="downloadTemplate()" class="bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-teal-100">📄 Unduh Template</button>
             <button onclick="document.getElementById('file-excel').click()" class="bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-orange-100">📥 Impor (Excel)</button>
             <input type="file" id="file-excel" onchange="handleImport(event)" accept=".xlsx, .xls" class="hidden" />
             <button onclick="exportExcel()" class="bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-purple-100">📤 Ekspor (Excel)</button>
           </div>
-          <button onclick="bukaFormTambah()" class="bg-blue-600 text-white px-4 py-2 text-sm rounded shadow hover:bg-blue-700 font-medium">+ Tambah Siswa</button>
+          <button onclick="bukaFormTambah()" class="bg-emerald-600 text-white px-4 py-2 text-sm rounded shadow hover:bg-emerald-700 font-medium">+ Tambah Siswa</button>
         </div>
       </header>
 
       <!-- Formulir Tambah / Edit -->
-      <form id="form-siswa" onsubmit="simpanData(event)" class="hidden bg-blue-50/50 p-6 rounded-xl shadow-sm border border-blue-200 mb-6">
+      <form id="form-siswa" onsubmit="simpanDataSiswa(event)" class="hidden bg-emerald-50/50 p-6 rounded-xl shadow-sm border border-emerald-200 mb-6">
         <h3 id="judul-form" class="text-lg font-bold text-gray-800 mb-4">✨ Formulir Siswa Baru</h3>
         <input type="hidden" id="mode-edit" value="false">
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label class="block text-sm text-gray-600 mb-1">NISN</label>
-            <input type="text" id="input-nisn" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Contoh: 0012345">
+            <input type="text" id="input-nisn" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500" placeholder="Contoh: 0012345">
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">Nama Lengkap</label>
-            <input type="text" id="input-nama" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Nama Lengkap">
+            <input type="text" id="input-nama" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500" placeholder="Nama Lengkap">
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">Laki-laki / Perempuan</label>
-            <select id="input-lp" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+            <select id="input-lp" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500">
               <option value="L">Laki-laki (L)</option>
               <option value="P">Perempuan (P)</option>
             </select>
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">ID Kelas</label>
-            <input type="text" id="input-kelas" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Contoh: 10-A">
+            <input type="text" id="input-kelas" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-emerald-500" placeholder="Contoh: 10-A">
           </div>
         </div>
         <div class="flex gap-2">
-          <button type="submit" id="btn-simpan" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">Simpan Data</button>
+          <button type="submit" id="btn-simpan" class="bg-emerald-600 text-white px-6 py-2 rounded shadow hover:bg-emerald-700">Simpan Data</button>
           <button type="button" onclick="tutupForm()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">Batal</button>
         </div>
       </form>
@@ -73,8 +77,8 @@
       <!-- Tabel Data Siswa -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div id="loading-box" class="hidden flex flex-col items-center p-12">
-          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
-          <p class="text-gray-500">Memproses data ke Google Sheets...</p>
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600 mb-4"></div>
+          <p class="text-gray-500">Menghubungkan dengan Google Sheets...</p>
         </div>
         <div id="tabel-container" class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -93,13 +97,103 @@
       </div>
     </div>
 
-    <!-- HALAMAN INPUT NILAI (Tahap Berikutnya) -->
+    <!-- ===================================================================== -->
+    <!-- HALAMAN 2: INPUT NILAI DINAMIS PAI-BP                                 -->
+    <!-- ===================================================================== -->
     <div id="halaman-Input Nilai" class="halaman hidden">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">Input Nilai Siswa</h1>
-      <p class="text-gray-500 mb-6">Area ini siap kita rancang setelah koneksi Vercel berhasil.</p>
+      <header class="mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">Input Nilai PAI-BP</h1>
+          <p class="text-sm text-gray-500 mt-1">Kelola tugas dinamis per BAB, PSH, PSAS, dan bobot nilai akhir.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <select id="filter-kelas" onchange="renderAreaNilai()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:border-emerald-500">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+          <button onclick="bukaModalPengaturan()" class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow hover:bg-slate-900 text-sm font-medium flex items-center gap-2">
+            ⚙️ Atur BAB, Tugas & Bobot
+          </button>
+        </div>
+      </header>
+
+      <!-- Tab Navigasi BAB & Rekap Rapor -->
+      <div id="tabs-bab" class="flex flex-wrap gap-2 mb-4 border-b border-gray-200 pb-3"></div>
+
+      <!-- Area Tabel Input Nilai -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-4 bg-emerald-50/60 border-b border-gray-200 flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h2 id="judul-tab-aktif" class="text-lg font-bold text-emerald-900">BAB 1</h2>
+            <p id="info-bobot-aktif" class="text-xs text-emerald-700 mt-0.5">Bobot: Tugas 70% + PSH 30%</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="exportNilaiExcel()" class="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 text-sm font-medium">📤 Ekspor Tabel Ini (Excel)</button>
+            <button onclick="simpanNilaiTabAktif()" id="btn-simpan-nilai" class="bg-emerald-600 text-white px-5 py-2 rounded-lg shadow hover:bg-emerald-700 text-sm font-bold">💾 Simpan Nilai</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead id="thead-nilai" class="bg-gray-50 border-b border-gray-200 text-gray-700"></thead>
+            <tbody id="tbody-nilai"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL PENGATURAN BAB, TUGAS DINAMIS & BOBOT                           -->
+  <!-- ===================================================================== -->
+  <div id="modal-pengaturan" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="p-5 bg-slate-800 text-white flex justify-between items-center">
+        <h3 class="text-lg font-bold">⚙️ Pengaturan Struktur BAB, Kolom Tugas & Bobot</h3>
+        <button onclick="tutupModalPengaturan()" class="text-gray-300 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto space-y-6 flex-1">
+        <!-- Bagian 1: Pengaturan Bobot -->
+        <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+          <h4 class="font-bold text-amber-900 mb-3">1. Pengaturan Bobot Penilaian (%)</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Bobot Tugas (%)</label>
+              <input type="number" id="cfg-bobot-tugas" class="w-full border p-2 rounded bg-white">
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Bobot PSH (%)</label>
+              <input type="number" id="cfg-bobot-psh" class="w-full border p-2 rounded bg-white">
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Bobot Rata-rata BAB (%)</label>
+              <input type="number" id="cfg-bobot-bab" class="w-full border p-2 rounded bg-white">
+            </div>
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">Bobot PSAS (%)</label>
+              <input type="number" id="cfg-bobot-psas" class="w-full border p-2 rounded bg-white">
+            </div>
+          </div>
+          <p class="text-xs text-amber-700 mt-2">*Pastikan Tugas + PSH = 100%, dan Rata-rata BAB + PSAS = 100%.</p>
+        </div>
+
+        <!-- Bagian 2: Struktur BAB & Tugas Dinamis -->
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="font-bold text-gray-800">2. Daftar BAB & Jenis Tugas (Hafalan, Video, Tulis, dll.)</h4>
+            <button onclick="tambahBabBaru()" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-emerald-700">+ Tambah BAB Baru</button>
+          </div>
+          <div id="daftar-bab-editor" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-gray-100 border-t flex justify-end gap-2">
+        <button onclick="tutupModalPengaturan()" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium hover:bg-gray-400">Batal</button>
+        <button onclick="simpanPengaturanCloud()" id="btn-simpan-cfg" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-emerald-700">💾 Simpan Pengaturan ke Cloud</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // =========================================================================
@@ -108,37 +202,61 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
 
     let dataSiswaGlobal = [];
+    let configNilai = {
+      bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30,
+      babs: [{ id: "BAB1", nama: "BAB 1 - Materi Pertama", tugas: ["Tugas 1 (Hafalan)", "Tugas 2"] }]
+    };
+    let nilaiDetailGlobal = {}; // { "NISN_BABID": { tugas: { "Tugas 1": 85 }, psh: 90 } }
+    let nilaiPSASGlobal = {};   // { "NISN": 88 }
+    let tabAktif = "BAB1";      // Bisa ID BAB ("BAB1") atau "RAPOR"
+    let tempConfig = null;
 
-    // Navigasi Menu
+    // --- NAVIGASI MENU ---
     function gantiMenu(namaMenu) {
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
       document.getElementById('halaman-' + namaMenu).classList.remove('hidden');
-      
-      document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-blue-700'));
-      document.getElementById('btn-' + namaMenu).classList.add('bg-blue-700');
+      document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-emerald-700'));
+      document.getElementById('btn-' + namaMenu).classList.add('bg-emerald-700');
+
+      if (namaMenu === 'Input Nilai') {
+        isiDropdownKelas();
+        renderTabsBab();
+        renderAreaNilai();
+      }
     }
 
-    // Loading State
     function setLoading(status) {
       document.getElementById('loading-box').classList.toggle('hidden', !status);
       document.getElementById('tabel-container').classList.toggle('hidden', status);
     }
 
-    // 1. READ DATA
-    async function ambilDataSiswa() {
+    // --- MUAT SEMUA DATA AWAL ---
+    async function muatSemuaData() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}?action=getSiswa`);
-        const result = await res.json();
-        dataSiswaGlobal = result.data || [];
-        renderTabel();
+        const [resSiswa, resNilai] = await Promise.all([
+          fetch(`${API_URL}?action=getSiswa`).then(r => r.json()),
+          fetch(`${API_URL}?action=getAllNilaiData`).then(r => r.json())
+        ]);
+        dataSiswaGlobal = resSiswa.data || [];
+        if (resNilai.config) configNilai = resNilai.config;
+        if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
+        if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
+
+        if (configNilai.babs.length > 0 && tabAktif !== "RAPOR") {
+          tabAktif = configNilai.babs[0].id;
+        }
+        renderTabelSiswa();
       } catch (e) {
-        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS sudah benar.");
+        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS sudah benar dan sudah di-Deploy versi baru.");
       }
       setLoading(false);
     }
 
-    function renderTabel() {
+    // =========================================================================
+    // LOGIKA HALAMAN 1: DATA SISWA (CRUD & EXCEL)
+    // =========================================================================
+    function renderTabelSiswa() {
       const tbody = document.getElementById('tbody-siswa');
       if (dataSiswaGlobal.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">Belum ada data siswa.</td></tr>`;
@@ -151,14 +269,13 @@
           <td class="p-4 text-gray-700">${item["L/P"]}</td>
           <td class="p-4 text-gray-700">${item.ID_Kelas}</td>
           <td class="p-4 text-right space-x-2">
-            <button onclick="bukaFormEdit(${index})" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Edit</button>
-            <button onclick="hapusData('${item.NISN}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
+            <button onclick="bukaFormEdit(${index})" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">Edit</button>
+            <button onclick="hapusDataSiswa('${item.NISN}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
           </td>
         </tr>
       `).join('');
     }
 
-    // 2. CREATE & UPDATE DATA
     function bukaFormTambah() {
       document.getElementById('form-siswa').classList.remove('hidden');
       document.getElementById('judul-form').innerText = "✨ Formulir Siswa Baru";
@@ -184,16 +301,12 @@
       document.getElementById('input-kelas').value = item.ID_Kelas;
     }
 
-    function tutupForm() {
-      document.getElementById('form-siswa').classList.add('hidden');
-    }
+    function tutupForm() { document.getElementById('form-siswa').classList.add('hidden'); }
 
-    async function simpanData(e) {
+    async function simpanDataSiswa(e) {
       e.preventDefault();
       const btn = document.getElementById('btn-simpan');
-      btn.innerText = "Menyimpan...";
-      btn.disabled = true;
-
+      btn.innerText = "Menyimpan..."; btn.disabled = true;
       const isEdit = document.getElementById('mode-edit').value === "true";
       const payload = {
         action: isEdit ? "update" : "add",
@@ -204,24 +317,19 @@
           ID_Kelas: document.getElementById('input-kelas').value
         }
       };
-
       await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-      
-      btn.innerText = "Simpan Data";
-      btn.disabled = false;
+      btn.innerText = "Simpan Data"; btn.disabled = false;
       tutupForm();
-      ambilDataSiswa();
+      muatSemuaData();
     }
 
-    // 3. DELETE DATA
-    async function hapusData(nisn) {
+    async function hapusDataSiswa(nisn) {
       if (!confirm(`Yakin ingin menghapus siswa dengan NISN ${nisn}?`)) return;
       setLoading(true);
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "delete", data: { NISN: nisn } }) });
-      ambilDataSiswa();
+      muatSemuaData();
     }
 
-    // 4. EXCEL (TEMPLATE, EKSPOR, IMPOR)
     function downloadTemplate() {
       const ws = XLSX.utils.json_to_sheet([{ NISN: "", Nama_Lengkap: "", "L/P": "L", ID_Kelas: "" }]);
       const wb = XLSX.utils.book_new();
@@ -248,17 +356,399 @@
         const importedData = XLSX.utils.sheet_to_json(ws);
         if (importedData.length > 0) {
           await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "import", data: importedData }) });
-          ambilDataSiswa();
+          muatSemuaData();
         } else {
-          setLoading(false);
-          alert("File Excel kosong atau format kolom tidak sesuai!");
+          setLoading(false); alert("File Excel kosong!");
         }
       };
       reader.readAsBinaryString(file);
       e.target.value = "";
     }
 
-    window.onload = ambilDataSiswa;
+    // =========================================================================
+    // LOGIKA HALAMAN 2: PENGATURAN BAB, TUGAS DINAMIS & BOBOT
+    // =========================================================================
+    function bukaModalPengaturan() {
+      tempConfig = JSON.parse(JSON.stringify(configNilai)); // Clone object
+      document.getElementById('cfg-bobot-tugas').value = tempConfig.bobotTugas;
+      document.getElementById('cfg-bobot-psh').value = tempConfig.bobotPSH;
+      document.getElementById('cfg-bobot-bab').value = tempConfig.bobotBAB;
+      document.getElementById('cfg-bobot-psas').value = tempConfig.bobotPSAS;
+      renderEditorBab();
+      document.getElementById('modal-pengaturan').classList.remove('hidden');
+    }
+
+    function tutupModalPengaturan() {
+      document.getElementById('modal-pengaturan').classList.add('hidden');
+    }
+
+    function renderEditorBab() {
+      const container = document.getElementById('daftar-bab-editor');
+      container.innerHTML = tempConfig.babs.map((bab, bIdx) => `
+        <div class="border border-gray-300 rounded-xl p-4 bg-gray-50">
+          <div class="flex gap-2 items-center mb-3">
+            <input type="text" value="${bab.nama}" onchange="tempConfig.babs[${bIdx}].nama = this.value" class="flex-1 border border-gray-300 p-2 rounded font-bold text-gray-800 bg-white" placeholder="Nama BAB & Materi">
+            ${tempConfig.babs.length > 1 ? `<button onclick="hapusBab(${bIdx})" class="bg-red-100 text-red-700 px-3 py-2 rounded text-xs font-bold hover:bg-red-200">Hapus BAB</button>` : ''}
+          </div>
+          <div class="pl-3 border-l-2 border-emerald-400 space-y-2">
+            <div class="text-xs font-bold text-gray-600">Daftar Kolom Tugas di BAB ini:</div>
+            ${bab.tugas.map((t, tIdx) => `
+              <div class="flex gap-2 items-center">
+                <input type="text" value="${t}" onchange="tempConfig.babs[${bIdx}].tugas[${tIdx}] = this.value" class="flex-1 border border-gray-300 px-3 py-1.5 rounded text-sm bg-white" placeholder="Misal: Hafalan Ayat / Video">
+                <button onclick="hapusTugas(${bIdx}, ${tIdx})" class="text-red-500 hover:text-red-700 font-bold px-2">&times;</button>
+              </div>
+            `).join('')}
+            <button onclick="tambahTugas(${bIdx})" class="text-emerald-700 hover:text-emerald-900 text-xs font-bold mt-1 inline-block">+ Tambah Kolom Tugas</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function tambahBabBaru() {
+      const num = tempConfig.babs.length + 1;
+      tempConfig.babs.push({
+        id: "BAB" + Date.now(),
+        nama: `BAB ${num} - Materi Baru`,
+        tugas: ["Tugas 1"]
+      });
+      renderEditorBab();
+    }
+
+    function hapusBab(bIdx) {
+      if (!confirm("Hapus BAB ini?")) return;
+      tempConfig.babs.splice(bIdx, 1);
+      renderEditorBab();
+    }
+
+    function tambahTugas(bIdx) {
+      const num = tempConfig.babs[bIdx].tugas.length + 1;
+      tempConfig.babs[bIdx].tugas.push(`Tugas ${num}`);
+      renderEditorBab();
+    }
+
+    function hapusTugas(bIdx, tIdx) {
+      tempConfig.babs[bIdx].tugas.splice(tIdx, 1);
+      renderEditorBab();
+    }
+
+    async function simpanPengaturanCloud() {
+      tempConfig.bobotTugas = Number(document.getElementById('cfg-bobot-tugas').value) || 0;
+      tempConfig.bobotPSH = Number(document.getElementById('cfg-bobot-psh').value) || 0;
+      tempConfig.bobotBAB = Number(document.getElementById('cfg-bobot-bab').value) || 0;
+      tempConfig.bobotPSAS = Number(document.getElementById('cfg-bobot-psas').value) || 0;
+
+      if (tempConfig.bobotTugas + tempConfig.bobotPSH !== 100 || tempConfig.bobotBAB + tempConfig.bobotPSAS !== 100) {
+        return alert("Total persentase bobot harus pas 100%! Periksa kembali angka bobot Anda.");
+      }
+
+      const btn = document.getElementById('btn-simpan-cfg');
+      btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+      await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: tempConfig }) });
+      configNilai = tempConfig;
+      if (!configNilai.babs.find(b => b.id === tabAktif) && tabAktif !== "RAPOR") {
+        tabAktif = configNilai.babs[0].id;
+      }
+
+      btn.innerText = "💾 Simpan Pengaturan ke Cloud"; btn.disabled = false;
+      tutupModalPengaturan();
+      renderTabsBab();
+      renderAreaNilai();
+    }
+
+    // =========================================================================
+    // LOGIKA HALAMAN 2: TABEL INPUT NILAI & RUMUS PERHITUNGAN
+    // =========================================================================
+    function isiDropdownKelas() {
+      const select = document.getElementById('filter-kelas');
+      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
+      select.innerHTML = `<option value="ALL">Semua Kelas (${dataSiswaGlobal.length} Siswa)</option>` +
+        kelasUnik.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
+    }
+
+    function renderTabsBab() {
+      const container = document.getElementById('tabs-bab');
+      let html = configNilai.babs.map(bab => `
+        <button onclick="pilihTab('${bab.id}')" class="px-4 py-2 rounded-lg text-sm font-bold transition ${tabAktif === bab.id ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-600 hover:bg-gray-100 border'}">
+          ${bab.nama}
+        </button>
+      `).join('');
+
+      html += `
+        <button onclick="pilihTab('RAPOR')" class="px-4 py-2 rounded-lg text-sm font-bold transition ${tabAktif === 'RAPOR' ? 'bg-amber-600 text-white shadow' : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'}">
+          🏆 Rekap Nilai Akhir & PSAS
+        </button>
+      `;
+      container.innerHTML = html;
+    }
+
+    function pilihTab(id) {
+      tabAktif = id;
+      renderTabsBab();
+      renderAreaNilai();
+    }
+
+    function getSiswaTerfilter() {
+      const kls = document.getElementById('filter-kelas').value;
+      return kls === "ALL" ? dataSiswaGlobal : dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kls));
+    }
+
+    // Rumus Hitung Nilai Satu BAB untuk Satu Siswa
+    function hitungNilaiBabSiswa(nisn, babObj) {
+      const key = `${nisn}_${babObj.id}`;
+      const record = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+      
+      let totalTugas = 0;
+      let countTugas = 0;
+      babObj.tugas.forEach(namaTugas => {
+        const val = record.tugas ? record.tugas[namaTugas] : "";
+        if (val !== "" && val !== undefined && !isNaN(val)) {
+          totalTugas += Number(val);
+          countTugas++;
+        }
+      });
+
+      const rataTugas = countTugas > 0 ? (totalTugas / countTugas) : 0;
+      const nilaiPSH = (record.psh !== "" && record.psh !== undefined && !isNaN(record.psh)) ? Number(record.psh) : 0;
+      const nilaiAkhirBab = (rataTugas * (configNilai.bobotTugas / 100)) + (nilaiPSH * (configNilai.bobotPSH / 100));
+
+      return {
+        rataTugas: Number(rataTugas.toFixed(1)),
+        nilaiPSH: record.psh ?? "",
+        nilaiAkhirBab: Number(nilaiAkhirBab.toFixed(1))
+      };
+    }
+
+    function renderAreaNilai() {
+      const siswaList = getSiswaTerfilter();
+      const thead = document.getElementById('thead-nilai');
+      const tbody = document.getElementById('tbody-nilai');
+
+      // MODE A: TAMPILAN INPUT PER BAB
+      if (tabAktif !== "RAPOR") {
+        const bab = configNilai.babs.find(b => b.id === tabAktif);
+        if (!bab) return;
+
+        document.getElementById('judul-tab-aktif').innerText = bab.nama;
+        document.getElementById('info-bobot-aktif').innerText = `Rumus: (Rata-rata Tugas × ${configNilai.bobotTugas}%) + (PSH × ${configNilai.bobotPSH}%)`;
+
+        thead.innerHTML = `
+          <tr>
+            <th class="p-3 border-r">NISN</th>
+            <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
+            ${bab.tugas.map(t => `<th class="p-3 text-center bg-blue-50/50 border-r min-w-[110px]">${t}</th>`).join('')}
+            <th class="p-3 text-center bg-blue-100/50 border-r font-bold text-blue-900">Rata Tugas</th>
+            <th class="p-3 text-center bg-amber-50/60 border-r min-w-[100px] font-bold text-amber-900">Nilai PSH</th>
+            <th class="p-3 text-center bg-emerald-100/60 font-bold text-emerald-900">Total ${bab.nama.split('-')[0]}</th>
+          </tr>
+        `;
+
+        tbody.innerHTML = siswaList.map(s => {
+          const key = `${s.NISN}_${bab.id}`;
+          const record = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+          const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+
+          return `
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-3 border-r text-gray-600">${s.NISN}</td>
+              <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
+              ${bab.tugas.map(t => {
+                const val = (record.tugas && record.tugas[t] !== undefined) ? record.tugas[t] : "";
+                return `<td class="p-2 border-r text-center">
+                  <input type="number" min="0" max="100" value="${val}" 
+                    oninput="updateNilaiTugas('${s.NISN}', '${bab.id}', '${t}', this.value)"
+                    class="w-20 text-center border border-gray-300 rounded p-1 focus:border-emerald-500 focus:outline-none">
+                </td>`;
+              }).join('')}
+              <td id="rata-${s.NISN}" class="p-3 border-r text-center font-semibold text-blue-800 bg-blue-50/30">${hasil.rataTugas}</td>
+              <td class="p-2 border-r text-center bg-amber-50/30">
+                <input type="number" min="0" max="100" value="${hasil.nilaiPSH}"
+                  oninput="updateNilaiPSH('${s.NISN}', '${bab.id}', this.value)"
+                  class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
+              </td>
+              <td id="total-${s.NISN}" class="p-3 text-center font-bold text-emerald-800 bg-emerald-50/40 text-base">${hasil.nilaiAkhirBab}</td>
+            </tr>
+          `;
+        }).join('');
+      } 
+      // MODE B: TAMPILAN REKAP RAPOR & INPUT PSAS
+      else {
+        document.getElementById('judul-tab-aktif').innerText = "🏆 Rekap Nilai Akhir & PSAS PAI-BP";
+        document.getElementById('info-bobot-aktif').innerText = `Rumus Rapor: (Rata-rata Semua BAB × ${configNilai.bobotBAB}%) + (Nilai PSAS × ${configNilai.bobotPSAS}%)`;
+
+        thead.innerHTML = `
+          <tr>
+            <th class="p-3 border-r">NISN</th>
+            <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
+            ${configNilai.babs.map(b => `<th class="p-3 text-center border-r bg-gray-100">${b.nama.split('-')[0]}</th>`).join('')}
+            <th class="p-3 text-center border-r bg-blue-50 font-bold text-blue-900">Rata-rata BAB</th>
+            <th class="p-3 text-center border-r bg-amber-50 font-bold text-amber-900">Nilai PSAS</th>
+            <th class="p-3 text-center bg-emerald-100 font-bold text-emerald-900">Nilai Rapor</th>
+          </tr>
+        `;
+
+        tbody.innerHTML = siswaList.map(s => {
+          let sumBab = 0;
+          const kolomBabHtml = configNilai.babs.map(b => {
+            const h = hitungNilaiBabSiswa(s.NISN, b);
+            sumBab += h.nilaiAkhirBab;
+            return `<td class="p-3 text-center border-r text-gray-700">${h.nilaiAkhirBab}</td>`;
+          }).join('');
+
+          const rataSemuaBab = configNilai.babs.length > 0 ? (sumBab / configNilai.babs.length) : 0;
+          const psasVal = nilaiPSASGlobal[s.NISN] !== undefined ? nilaiPSASGlobal[s.NISN] : "";
+          const psasNum = (psasVal !== "" && !isNaN(psasVal)) ? Number(psasVal) : 0;
+          const nilaiRapor = (rataSemuaBab * (configNilai.bobotBAB / 100)) + (psasNum * (configNilai.bobotPSAS / 100));
+
+          return `
+            <tr class="border-b hover:bg-gray-50">
+              <td class="p-3 border-r text-gray-600">${s.NISN}</td>
+              <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
+              ${kolomBabHtml}
+              <td class="p-3 text-center border-r font-semibold text-blue-800 bg-blue-50/30">${rataSemuaBab.toFixed(1)}</td>
+              <td class="p-2 text-center border-r bg-amber-50/30">
+                <input type="number" min="0" max="100" value="${psasVal}"
+                  oninput="updateNilaiPSAS('${s.NISN}', ${rataSemuaBab}, this.value)"
+                  class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
+              </td>
+              <td id="rapor-${s.NISN}" class="p-3 text-center font-bold text-emerald-900 bg-emerald-100/50 text-base">${nilaiRapor.toFixed(1)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // --- LIVE UPDATE SAAT MENGETIK DI TABEL ---
+    function updateNilaiTugas(nisn, babId, namaTugas, val) {
+      const key = `${nisn}_${babId}`;
+      if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
+      if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
+      nilaiDetailGlobal[key].tugas[namaTugas] = val === "" ? "" : Number(val);
+
+      const babObj = configNilai.babs.find(b => b.id === babId);
+      const hasil = hitungNilaiBabSiswa(nisn, babObj);
+      document.getElementById(`rata-${nisn}`).innerText = hasil.rataTugas;
+      document.getElementById(`total-${nisn}`).innerText = hasil.nilaiAkhirBab;
+    }
+
+    function updateNilaiPSH(nisn, babId, val) {
+      const key = `${nisn}_${babId}`;
+      if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
+      nilaiDetailGlobal[key].psh = val === "" ? "" : Number(val);
+
+      const babObj = configNilai.babs.find(b => b.id === babId);
+      const hasil = hitungNilaiBabSiswa(nisn, babObj);
+      document.getElementById(`total-${nisn}`).innerText = hasil.nilaiAkhirBab;
+    }
+
+    function updateNilaiPSAS(nisn, rataSemuaBab, val) {
+      nilaiPSASGlobal[nisn] = val === "" ? "" : Number(val);
+      const psasNum = val === "" ? 0 : Number(val);
+      const nilaiRapor = (rataSemuaBab * (configNilai.bobotBAB / 100)) + (psasNum * (configNilai.bobotPSAS / 100));
+      document.getElementById(`rapor-${nisn}`).innerText = nilaiRapor.toFixed(1);
+    }
+
+    // --- SIMPAN NILAI KE GOOGLE SHEETS ---
+    async function simpanNilaiTabAktif() {
+      const btn = document.getElementById('btn-simpan-nilai');
+      btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+      const siswaList = getSiswaTerfilter();
+
+      try {
+        if (tabAktif !== "RAPOR") {
+          const bab = configNilai.babs.find(b => b.id === tabAktif);
+          const updates = siswaList.map(s => {
+            const key = `${s.NISN}_${bab.id}`;
+            const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+            return {
+              nisn: s.NISN,
+              kelas: s.ID_Kelas,
+              detailObj: nilaiDetailGlobal[key] || { tugas: {}, psh: "" },
+              nilaiAkhirBab: hasil.nilaiAkhirBab
+            };
+          });
+
+          await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "saveNilaiBab", babId: bab.id, updates: updates })
+          });
+        } else {
+          // Simpan Seluruh Rekap Rapor ke Sheet Rekap_Rapor
+          const headers = ["NISN", "Nama_Lengkap", "ID_Kelas", ...configNilai.babs.map(b => b.nama), "Rata_Rata_BAB", "Nilai_PSAS", "Nilai_Rapor"];
+          const rows = dataSiswaGlobal.map(s => {
+            let sumBab = 0;
+            const nilaiBabs = configNilai.babs.map(b => {
+              const h = hitungNilaiBabSiswa(s.NISN, b);
+              sumBab += h.nilaiAkhirBab;
+              return h.nilaiAkhirBab;
+            });
+            const rataBab = configNilai.babs.length > 0 ? Number((sumBab / configNilai.babs.length).toFixed(1)) : 0;
+            const psas = nilaiPSASGlobal[s.NISN] !== undefined && nilaiPSASGlobal[s.NISN] !== "" ? Number(nilaiPSASGlobal[s.NISN]) : 0;
+            const rapor = Number(((rataBab * (configNilai.bobotBAB / 100)) + (psas * (configNilai.bobotPSAS / 100))).toFixed(1));
+            return [s.NISN, s.Nama_Lengkap, s.ID_Kelas, ...nilaiBabs, rataBab, psas, rapor];
+          });
+
+          await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({ action: "saveRekapRapor", headers: headers, rows: rows })
+          });
+        }
+        alert("✅ Nilai berhasil disimpan ke Google Sheets!");
+      } catch (e) {
+        alert("Terjadi kesalahan saat menyimpan nilai.");
+      }
+
+      btn.innerText = "💾 Simpan Nilai"; btn.disabled = false;
+    }
+
+    // --- EKSPOR EXCEL UNTUK TABEL NILAI YANG SEDANG DIBUKA ---
+    function exportNilaiExcel() {
+      const siswaList = getSiswaTerfilter();
+      if (siswaList.length === 0) return alert("Tidak ada data siswa untuk diekspor!");
+
+      let dataExport = [];
+      let namaFile = "Nilai_PAI_BP.xlsx";
+
+      if (tabAktif !== "RAPOR") {
+        const bab = configNilai.babs.find(b => b.id === tabAktif);
+        namaFile = `Nilai_${bab.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
+        dataExport = siswaList.map(s => {
+          const key = `${s.NISN}_${bab.id}`;
+          const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+          const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+          let row = { NISN: s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+          bab.tugas.forEach(t => row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
+          row["Rata_Rata_Tugas"] = hasil.rataTugas;
+          row["Nilai_PSH"] = hasil.nilaiPSH;
+          row["Nilai_Total_BAB"] = hasil.nilaiAkhirBab;
+          return row;
+        });
+      } else {
+        namaFile = "Rekap_Rapor_PAI_BP.xlsx";
+        dataExport = siswaList.map(s => {
+          let row = { NISN: s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+          let sumBab = 0;
+          configNilai.babs.forEach(b => {
+            const h = hitungNilaiBabSiswa(s.NISN, b);
+            row[b.nama] = h.nilaiAkhirBab;
+            sumBab += h.nilaiAkhirBab;
+          });
+          const rataBab = configNilai.babs.length > 0 ? Number((sumBab / configNilai.babs.length).toFixed(1)) : 0;
+          const psas = nilaiPSASGlobal[s.NISN] !== undefined && nilaiPSASGlobal[s.NISN] !== "" ? Number(nilaiPSASGlobal[s.NISN]) : 0;
+          row["Rata_Rata_BAB"] = rataBab;
+          row["Nilai_PSAS"] = psas;
+          row["Nilai_Rapor"] = Number(((rataBab * (configNilai.bobotBAB / 100)) + (psas * (configNilai.bobotPSAS / 100))).toFixed(1));
+          return row;
+        });
+      }
+
+      const ws = XLSX.utils.json_to_sheet(dataExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Nilai");
+      XLSX.writeFile(wb, namaFile);
+    }
+
+    window.onload = muatSemuaData;
   </script>
 </body>
 </html>
