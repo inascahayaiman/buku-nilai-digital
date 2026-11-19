@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buku Nilai Digital</title>
+  <!-- Tailwind CSS & SheetJS (Excel) via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-50 flex h-screen font-sans text-gray-800">
+
+  <!-- Sidebar Kiri -->
+  <aside class="w-64 bg-blue-800 text-white flex flex-col shadow-lg">
+    <div class="p-5 text-xl font-bold border-b border-blue-700">Buku Nilai Digital</div>
+    <nav class="flex-1 p-4 space-y-2 mt-2">
+      <button onclick="gantiMenu('Data Siswa')" id="btn-Data Siswa" class="menu-btn w-full text-left p-3 rounded-lg font-medium bg-blue-700 transition">Data Siswa</button>
+      <button onclick="gantiMenu('Input Nilai')" id="btn-Input Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-blue-700 transition">Input Nilai</button>
+    </nav>
+    <div class="p-4 text-xs text-blue-300 border-t border-blue-700">Cloud Mode (GitHub + Vercel)</div>
+  </aside>
+
+  <!-- Konten Utama -->
+  <main class="flex-1 p-8 overflow-y-auto">
+    
+    <!-- HALAMAN DATA SISWA -->
+    <div id="halaman-Data Siswa" class="halaman">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Data Siswa</h1>
+        <div class="flex flex-wrap gap-2 justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+          <div class="space-x-2">
+            <button onclick="ambilDataSiswa()" class="bg-gray-100 text-gray-700 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-gray-200">🔄 Muat Ulang</button>
+            <button onclick="downloadTemplate()" class="bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-teal-100">📄 Unduh Template</button>
+            <button onclick="document.getElementById('file-excel').click()" class="bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-orange-100">📥 Impor (Excel)</button>
+            <input type="file" id="file-excel" onchange="handleImport(event)" accept=".xlsx, .xls" class="hidden" />
+            <button onclick="exportExcel()" class="bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 text-sm rounded shadow-sm hover:bg-purple-100">📤 Ekspor (Excel)</button>
+          </div>
+          <button onclick="bukaFormTambah()" class="bg-blue-600 text-white px-4 py-2 text-sm rounded shadow hover:bg-blue-700 font-medium">+ Tambah Siswa</button>
+        </div>
+      </header>
+
+      <!-- Formulir Tambah / Edit -->
+      <form id="form-siswa" onsubmit="simpanData(event)" class="hidden bg-blue-50/50 p-6 rounded-xl shadow-sm border border-blue-200 mb-6">
+        <h3 id="judul-form" class="text-lg font-bold text-gray-800 mb-4">✨ Formulir Siswa Baru</h3>
+        <input type="hidden" id="mode-edit" value="false">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">NISN</label>
+            <input type="text" id="input-nisn" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Contoh: 0012345">
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Nama Lengkap</label>
+            <input type="text" id="input-nama" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Nama Lengkap">
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">Laki-laki / Perempuan</label>
+            <select id="input-lp" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+              <option value="L">Laki-laki (L)</option>
+              <option value="P">Perempuan (P)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">ID Kelas</label>
+            <input type="text" id="input-kelas" required class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500" placeholder="Contoh: 10-A">
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" id="btn-simpan" class="bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">Simpan Data</button>
+          <button type="button" onclick="tutupForm()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">Batal</button>
+        </div>
+      </form>
+
+      <!-- Tabel Data Siswa -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div id="loading-box" class="hidden flex flex-col items-center p-12">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+          <p class="text-gray-500">Memproses data ke Google Sheets...</p>
+        </div>
+        <div id="tabel-container" class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="p-4 text-gray-600">NISN</th>
+                <th class="p-4 text-gray-600">Nama Lengkap</th>
+                <th class="p-4 text-gray-600">L/P</th>
+                <th class="p-4 text-gray-600">Kelas</th>
+                <th class="p-4 text-gray-600 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-siswa"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HALAMAN INPUT NILAI (Tahap Berikutnya) -->
+    <div id="halaman-Input Nilai" class="halaman hidden">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Input Nilai Siswa</h1>
+      <p class="text-gray-500 mb-6">Area ini siap kita rancang setelah koneksi Vercel berhasil.</p>
+    </div>
+
+  </main>
+
+  <script>
+    // =========================================================================
+    // WAJIB DIGANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // =========================================================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
+
+    let dataSiswaGlobal = [];
+
+    // Navigasi Menu
+    function gantiMenu(namaMenu) {
+      document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
+      document.getElementById('halaman-' + namaMenu).classList.remove('hidden');
+      
+      document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-blue-700'));
+      document.getElementById('btn-' + namaMenu).classList.add('bg-blue-700');
+    }
+
+    // Loading State
+    function setLoading(status) {
+      document.getElementById('loading-box').classList.toggle('hidden', !status);
+      document.getElementById('tabel-container').classList.toggle('hidden', status);
+    }
+
+    // 1. READ DATA
+    async function ambilDataSiswa() {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_URL}?action=getSiswa`);
+        const result = await res.json();
+        dataSiswaGlobal = result.data || [];
+        renderTabel();
+      } catch (e) {
+        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS sudah benar.");
+      }
+      setLoading(false);
+    }
+
+    function renderTabel() {
+      const tbody = document.getElementById('tbody-siswa');
+      if (dataSiswaGlobal.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">Belum ada data siswa.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = dataSiswaGlobal.map((item, index) => `
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="p-4 text-gray-700">${item.NISN}</td>
+          <td class="p-4 text-gray-700 font-medium">${item.Nama_Lengkap}</td>
+          <td class="p-4 text-gray-700">${item["L/P"]}</td>
+          <td class="p-4 text-gray-700">${item.ID_Kelas}</td>
+          <td class="p-4 text-right space-x-2">
+            <button onclick="bukaFormEdit(${index})" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Edit</button>
+            <button onclick="hapusData('${item.NISN}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Hapus</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 2. CREATE & UPDATE DATA
+    function bukaFormTambah() {
+      document.getElementById('form-siswa').classList.remove('hidden');
+      document.getElementById('judul-form').innerText = "✨ Formulir Siswa Baru";
+      document.getElementById('mode-edit').value = "false";
+      document.getElementById('input-nisn').value = "";
+      document.getElementById('input-nisn').readOnly = false;
+      document.getElementById('input-nisn').classList.remove('bg-gray-100');
+      document.getElementById('input-nama').value = "";
+      document.getElementById('input-lp').value = "L";
+      document.getElementById('input-kelas').value = "";
+    }
+
+    function bukaFormEdit(index) {
+      const item = dataSiswaGlobal[index];
+      document.getElementById('form-siswa').classList.remove('hidden');
+      document.getElementById('judul-form').innerText = "✏️ Edit Data Siswa";
+      document.getElementById('mode-edit').value = "true";
+      document.getElementById('input-nisn').value = item.NISN;
+      document.getElementById('input-nisn').readOnly = true;
+      document.getElementById('input-nisn').classList.add('bg-gray-100');
+      document.getElementById('input-nama').value = item.Nama_Lengkap;
+      document.getElementById('input-lp').value = item["L/P"];
+      document.getElementById('input-kelas').value = item.ID_Kelas;
+    }
+
+    function tutupForm() {
+      document.getElementById('form-siswa').classList.add('hidden');
+    }
+
+    async function simpanData(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-simpan');
+      btn.innerText = "Menyimpan...";
+      btn.disabled = true;
+
+      const isEdit = document.getElementById('mode-edit').value === "true";
+      const payload = {
+        action: isEdit ? "update" : "add",
+        data: {
+          NISN: document.getElementById('input-nisn').value,
+          Nama_Lengkap: document.getElementById('input-nama').value,
+          "L/P": document.getElementById('input-lp').value,
+          ID_Kelas: document.getElementById('input-kelas').value
+        }
+      };
+
+      await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+      
+      btn.innerText = "Simpan Data";
+      btn.disabled = false;
+      tutupForm();
+      ambilDataSiswa();
+    }
+
+    // 3. DELETE DATA
+    async function hapusData(nisn) {
+      if (!confirm(`Yakin ingin menghapus siswa dengan NISN ${nisn}?`)) return;
+      setLoading(true);
+      await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "delete", data: { NISN: nisn } }) });
+      ambilDataSiswa();
+    }
+
+    // 4. EXCEL (TEMPLATE, EKSPOR, IMPOR)
+    function downloadTemplate() {
+      const ws = XLSX.utils.json_to_sheet([{ NISN: "", Nama_Lengkap: "", "L/P": "L", ID_Kelas: "" }]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template");
+      XLSX.writeFile(wb, "Template_Siswa.xlsx");
+    }
+
+    function exportExcel() {
+      if (dataSiswaGlobal.length === 0) return alert("Data kosong!");
+      const ws = XLSX.utils.json_to_sheet(dataSiswaGlobal);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
+      XLSX.writeFile(wb, "Ekspor_Data_Siswa.xlsx");
+    }
+
+    function handleImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      setLoading(true);
+      const reader = new FileReader();
+      reader.onload = async (evt) => {
+        const wb = XLSX.read(evt.target.result, { type: "binary" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const importedData = XLSX.utils.sheet_to_json(ws);
+        if (importedData.length > 0) {
+          await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "import", data: importedData }) });
+          ambilDataSiswa();
+        } else {
+          setLoading(false);
+          alert("File Excel kosong atau format kolom tidak sesuai!");
+        }
+      };
+      reader.readAsBinaryString(file);
+      e.target.value = "";
+    }
+
+    window.onload = ambilDataSiswa;
+  </script>
+</body>
+</html>
