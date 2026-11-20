@@ -173,10 +173,10 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 2: INPUT NILAI TP (ALUR KARTU TUJUAN PEMBELAJARAN)          -->
+      <!-- HALAMAN 2: INPUT NILAI TP (AUTO-COLLAPSE SETELAH SELESAI)           -->
       <!-- =================================================================== -->
-      <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-6">
-        <div id="container-kartu-tp" class="space-y-6"></div>
+      <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-4">
+        <div id="container-kartu-tp" class="space-y-4"></div>
 
         <div id="area-tambah-tp-lanjut" class="hidden bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center">
           <p id="teks-status-tp" class="text-sm font-medium text-slate-600 mb-3">Seluruh Tujuan Pembelajaran (TP) yang terdaftar telah ditampilkan.</p>
@@ -223,7 +223,7 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 3: INPUT NILAI PSAS (MENU TERSENDIRI)                        -->
+      <!-- HALAMAN 3: INPUT NILAI PSAS                                         -->
       <!-- =================================================================== -->
       <div id="halaman-Input Nilai PSAS" class="halaman hidden max-w-7xl mx-auto">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
@@ -291,7 +291,6 @@
       <div id="halaman-Cetak & Kirim Nilai" class="halaman hidden max-w-6xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           
-          <!-- Kartu Kiri: Pusat Cetak Nilai (XLSX & PDF) -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between space-y-5">
             <div class="space-y-4">
               <div class="border-b border-slate-100 pb-3.5">
@@ -336,7 +335,6 @@
             </div>
           </div>
 
-          <!-- Kartu Kanan: Kirim Rekapitulasi ke Wali Kelas -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between space-y-5">
             <div class="space-y-4">
               <div class="border-b border-slate-100 pb-3.5">
@@ -452,6 +450,7 @@
     let nilaiDetailGlobal = {};
     let nilaiPSASGlobal = {};
     let menuAktif = "Data Siswa";
+    let kartuTerbukaManual = {}; // Menyimpan status buka/tutup manual kartu TP yang sudah selesai
 
     let tempConfig = null;
     let tempMapelModalId = null;
@@ -763,8 +762,25 @@
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP
+    // HALAMAN 2: INPUT NILAI TP (KARTU TERTUTUP OTOMATIS SETELAH SELESAI)
     // =========================================================================
+    function toggleKartuTP(tpId) {
+      const bodyEl = document.getElementById(`body-tp-${tpId}`);
+      const btnToggle = document.getElementById(`btn-toggle-${tpId}`);
+      if (!bodyEl) return;
+
+      const sedangTertutup = bodyEl.classList.contains('hidden');
+      if (sedangTertutup) {
+        bodyEl.classList.remove('hidden');
+        kartuTerbukaManual[tpId] = true;
+        if (btnToggle) btnToggle.innerText = "🔼 Tutup Tabel";
+      } else {
+        bodyEl.classList.add('hidden');
+        kartuTerbukaManual[tpId] = false;
+        if (btnToggle) btnToggle.innerText = "👁️ Lihat Nilai";
+      }
+    }
+
     function renderHalamanInputTP() {
       const mAktif = getMapelAktif();
       const container = document.getElementById('container-kartu-tp');
@@ -783,38 +799,50 @@
 
       container.innerHTML = mAktif.babs.map((tp) => {
         const isSelesai = tp.selesai === true;
+        // Jika sudah selesai, default tertutup kecuali dibuka manual oleh guru
+        const isTerbuka = !isSelesai || kartuTerbukaManual[tp.id] === true;
+
         return `
-          <div class="bg-white rounded-2xl shadow-sm border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden">
-            <div class="px-5 py-4 ${isSelesai ? 'bg-emerald-50/70 border-b border-emerald-200' : 'bg-slate-50 border-b border-slate-200'} flex flex-wrap justify-between items-center gap-3">
-              <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-lg text-[11px] font-extrabold tracking-wide uppercase ${isSelesai ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
+          <div class="bg-white rounded-2xl shadow-sm border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden transition-all">
+            <!-- Header Kartu TP (Bisa diklik atau via tombol untuk buka/tutup) -->
+            <div class="px-5 py-3.5 ${isSelesai ? 'bg-emerald-50/80' : 'bg-slate-50'} ${isTerbuka ? 'border-b border-slate-200' : ''} flex flex-wrap justify-between items-center gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <span class="px-3 py-1 rounded-lg text-[11px] font-extrabold tracking-wide uppercase shrink-0 ${isSelesai ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
                   ${isSelesai ? '✅ TP Selesai' : '⏳ Aktif'}
                 </span>
-                <div>
-                  <h3 class="text-base font-extrabold text-slate-900">${tp.nama}</h3>
-                  <p class="text-xs text-slate-500">Bobot: Rata-rata Tugas (${mAktif.bobotTugas}%) + Penilaian Harian / PH (${mAktif.bobotPSH}%)</p>
+                <div class="min-w-0">
+                  <h3 class="text-sm md:text-base font-extrabold text-slate-900 truncate">${tp.nama}</h3>
+                  <p class="text-[11px] text-slate-500 truncate">
+                    ${tp.tugas.length} Jenis Tugas (${tp.tugas.join(', ')}) • Bobot Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}%
+                  </p>
                 </div>
               </div>
 
-              <div class="flex flex-wrap gap-1.5">
-                <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit Tugas</button>
-                <button onclick="downloadTemplateTPById('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100 transition">📄 Template</button>
-                <button onclick="triggerImportTP('${tp.id}')" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100 transition">📥 Impor</button>
-                <button onclick="exportTPExcelById('${tp.id}')" class="h-8 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">📤 Ekspor</button>
-                <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-slate-800 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition">💾 Simpan Nilai</button>
-                ${!isSelesai ? `
-                  <button onclick="simpanNilaiSatuTP('${tp.id}', true)" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition">
-                    ✅ Selesai TP & Lanjut
+              <!-- Toolbar Kartu TP -->
+              <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                ${isSelesai ? `
+                  <button onclick="toggleKartuTP('${tp.id}')" id="btn-toggle-${tp.id}" class="h-8 bg-white border border-emerald-300 text-emerald-800 px-3 rounded-lg text-xs font-bold hover:bg-emerald-100 transition">
+                    ${isTerbuka ? '🔼 Tutup Tabel' : '👁️ Lihat Nilai'}
+                  </button>
+                  <button onclick="exportTPExcelById('${tp.id}')" class="h-8 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">📤 Ekspor</button>
+                  <button onclick="toggleStatusSelesaiTP('${tp.id}', false)" class="h-8 bg-slate-200 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
+                    🔓 Edit Kembali
                   </button>
                 ` : `
-                  <button onclick="toggleStatusSelesaiTP('${tp.id}', false)" class="h-8 bg-slate-200 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
-                    🔓 Buka Kembali
+                  <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit Tugas</button>
+                  <button onclick="downloadTemplateTPById('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100 transition">📄 Template</button>
+                  <button onclick="triggerImportTP('${tp.id}')" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100 transition">📥 Impor</button>
+                  <button onclick="exportTPExcelById('${tp.id}')" class="h-8 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">📤 Ekspor</button>
+                  <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-slate-800 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition">💾 Simpan Nilai</button>
+                  <button onclick="simpanNilaiSatuTP('${tp.id}', true)" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-xs">
+                    ✅ Selesai & Tutup Kartu
                   </button>
                 `}
               </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Isi Tabel Penilaian TP (Otomatis hidden jika TP sudah selesai) -->
+            <div id="body-tp-${tp.id}" class="${isTerbuka ? '' : 'hidden'} overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs tabular-nums">
                 <thead>
                   <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-700 uppercase tracking-wider">
@@ -870,7 +898,7 @@
       const semuaSelesai = mAktif.babs.every(b => b.selesai === true);
       areaLanjut.classList.remove('hidden');
       document.getElementById('teks-status-tp').innerText = semuaSelesai 
-        ? `🎉 Seluruh (${mAktif.babs.length}) Tujuan Pembelajaran telah selesai dinilai. Siap melanjutkan ke TP ke-${mAktif.babs.length + 1}.`
+        ? `🎉 Seluruh (${mAktif.babs.length}) Tujuan Pembelajaran telah selesai dan ditutup rapi. Klik tombol di bawah untuk membuat TP ke-${mAktif.babs.length + 1}.`
         : `Ingin menambahkan kartu Tujuan Pembelajaran (TP) ke-${mAktif.babs.length + 1}?`;
     }
 
@@ -1023,9 +1051,10 @@
 
       if (tandaiSelesai) {
         tp.selesai = true;
+        kartuTerbukaManual[tp.id] = false; // Otomatis tertutup rapi
         await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
         renderHalamanInputTP();
-        alert(`✅ Nilai ${tp.nama} tersimpan & ditandai SELESAI! Silakan lanjut ke TP berikutnya.`);
+        alert(`✅ Nilai ${tp.nama} tersimpan & kartu ditutup rapi! Silakan tambah TP berikutnya jika diperlukan.`);
       } else {
         if (btn) { btn.innerText = "💾 Simpan Nilai"; btn.disabled = false; }
         alert(`✅ Nilai ${tp.nama} berhasil disimpan ke Google Cloud!`);
@@ -1037,6 +1066,7 @@
       const tp = mAktif.babs.find(b => b.id === tpId);
       if (!tp) return;
       tp.selesai = statusBaru;
+      kartuTerbukaManual[tp.id] = !statusBaru;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
       renderHalamanInputTP();
     }
