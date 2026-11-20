@@ -2352,29 +2352,34 @@
 
       const siswaList = hanyaTampilkanRemedial ? siswaSemua.filter(s => hitungRekapSiswa(s.NISN, s.ID_Kelas).nilaiRapor < kktp) : siswaSemua;
 
-      let row1 = `<tr class="bg-slate-200 border-b border-slate-300 font-bold text-center text-[11px] uppercase">
-        <th rowspan="2" class="px-2 py-2 border-r">No</th>
-        <th rowspan="2" class="px-3 py-2 border-r">NISN</th>
-        <th rowspan="2" class="px-3 py-2 border-r text-left">Nama Lengkap</th>
-        <th rowspan="2" class="px-2 py-2 border-r">L/P</th>`;
+      // --- BAGIAN YANG DIGANTI MULAI DARI SINI ---
+      let row1 = `<tr class="bg-slate-200 border-b border-slate-300 font-bold text-center text-[11px] uppercase text-slate-800">
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300">No</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300">NISN / NIS</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 text-left">Nama Lengkap</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300">L/P</th>`;
       daftarTP.forEach(tp => {
-        row1 += `<th colspan="${tp.tugas.length + 3}" class="px-3 py-2 border-r bg-emerald-600 text-white">${tp.nama}</th>`;
+        row1 += `<th colspan="${tp.tugas.length + 3}" class="px-3 py-2 border-r border-emerald-700 bg-emerald-600 text-white">${tp.nama}</th>`;
       });
       row1 += `
-        <th rowspan="2" class="px-3 py-2 border-r bg-blue-100 text-blue-950">Rata TP</th>
-        <th rowspan="2" class="px-3 py-2 border-r bg-amber-100 text-amber-950">PSAS</th>
-        <th rowspan="2" class="px-3 py-2 border-r bg-emerald-700 text-white">Rapor</th>
-        <th rowspan="2" class="px-3 py-2 border-r bg-indigo-700 text-white">Predikat</th>
-        <th rowspan="2" class="px-4 py-2 bg-slate-800 text-white text-left min-w-[340px]">Deskripsi Capaian Pembelajaran (Otomatis)</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-blue-100 text-blue-950">Rata TP</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-amber-100 text-amber-950">PSAS</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-emerald-700 text-white">Rapor</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-indigo-700 text-white">Predikat</th>
+        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-4 py-2.5 bg-slate-800 text-white text-left min-w-[340px]">Deskripsi Capaian Pembelajaran (Otomatis)</th>
       </tr>`;
 
-      let row2 = `<tr class="bg-slate-100 border-b-2 border-slate-300 font-bold text-center text-[11px]">`;
-      daftarTP.forEach(tp => {
-        tp.tugas.forEach(t => { row2 += `<th class="px-2 py-1.5 border-r">${t}</th>`; });
-        row2 += `<th class="px-2 py-1.5 border-r bg-yellow-100">Rata</th><th class="px-2 py-1.5 border-r">PH</th><th class="px-2 py-1.5 border-r bg-emerald-100">Total</th>`;
-      });
-      row2 += `</tr>`;
-      thead.innerHTML = daftarTP.length ? (row1 + row2) : "";
+      let row2 = "";
+      if (daftarTP.length > 0) {
+        row2 = `<tr class="bg-slate-100 border-b-2 border-slate-300 font-bold text-center text-[11px] text-slate-700">`;
+        daftarTP.forEach(tp => {
+          tp.tugas.forEach(t => { row2 += `<th class="px-2 py-1.5 border-r border-slate-300">${t}</th>`; });
+          row2 += `<th class="px-2 py-1.5 border-r border-slate-300 bg-yellow-100">Rata</th><th class="px-2 py-1.5 border-r border-slate-300">PH</th><th class="px-2 py-1.5 border-r border-slate-300 bg-emerald-100">Total</th>`;
+        });
+        row2 += `</tr>`;
+      }
+      thead.innerHTML = row1 + row2;
+      // --- AKHIR BAGIAN YANG DIGANTI ---
 
       tbody.innerHTML = siswaList.map((s, idx) => {
         const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
