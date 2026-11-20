@@ -17,6 +17,12 @@
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
+
+    /* Custom Scrollbar Halus untuk Tabel Leger Lebar */
+    .table-scroll-x::-webkit-scrollbar { height: 10px; }
+    .table-scroll-x::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 12px 12px; }
+    .table-scroll-x::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 9999px; border: 2px solid #f1f5f9; }
+    .table-scroll-x::-webkit-scrollbar-thumb:hover { background: #64748b; }
   </style>
 </head>
 <body class="bg-slate-100 flex h-screen text-slate-800 overflow-hidden antialiased">
@@ -102,7 +108,7 @@
     </header>
 
     <!-- Workspace Scrollable -->
-    <main class="flex-1 p-6 overflow-y-auto">
+    <main class="flex-1 p-6 overflow-y-auto overflow-x-hidden">
       
       <!-- =================================================================== -->
       <!-- HALAMAN 1: DATA SISWA                                               -->
@@ -157,10 +163,10 @@
             <div class="animate-spin rounded-full h-9 w-9 border-2 border-emerald-600 border-t-transparent mb-3"></div>
             <p class="text-xs font-medium text-slate-500">Menyelaraskan data dengan Google Cloud...</p>
           </div>
-          <div id="tabel-siswa-container" class="overflow-x-auto">
+          <div id="tabel-siswa-container" class="overflow-x-auto table-scroll-x">
             <table class="w-full text-left border-collapse text-sm">
               <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider whitespace-nowrap">
                   <th class="py-3.5 px-4 w-14 text-center font-bold">No</th>
                   <th class="py-3.5 px-4 w-44 font-bold">NISN / NIS</th>
                   <th class="py-3.5 px-4 font-bold">Nama Lengkap</th>
@@ -178,7 +184,7 @@
       <!-- =================================================================== -->
       <!-- HALAMAN 2: INPUT NILAI TP (PILIH KELAS, TAMBAH TP/MATERI & TUGAS)   -->
       <!-- =================================================================== -->
-      <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-4">
+      <div id="halaman-Input Nilai TP" class="halaman hidden w-full max-w-full space-y-4">
         
         <!-- Bilah Aksi Manajemen Kelas, TP/Materi & Tugas -->
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/90 flex flex-wrap justify-between items-center gap-3">
@@ -204,7 +210,7 @@
           </div>
         </div>
 
-        <!-- Panel Cepat: Tambah Tugas Baru ke TP Tertentu (Tanpa Mengubah TP/Tugas Lama) -->
+        <!-- Panel Cepat: Tambah Tugas Baru ke TP Tertentu -->
         <div id="panel-tambah-tugas-cepat" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-md border-2 border-sky-500 p-5">
           <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
             <div>
@@ -292,8 +298,8 @@
               <button onclick="simpanNilaiPSASCloud()" id="btn-simpan-psas" class="h-9 bg-emerald-600 text-white px-5 rounded-xl shadow-sm hover:bg-emerald-700 text-xs font-bold transition">💾 Simpan Nilai PSAS</button>
             </div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm tabular-nums">
+          <div class="overflow-x-auto table-scroll-x">
+            <table class="w-full text-left border-collapse text-sm tabular-nums whitespace-nowrap">
               <thead>
                 <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-700 text-xs uppercase tracking-wider">
                   <th class="py-3 px-3 border-r border-slate-200 w-14 text-center font-bold">No</th>
@@ -313,24 +319,24 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 4: REKAP NILAI LEGER (TABEL BERTINGKAT PRESISI)             -->
+      <!-- HALAMAN 4: REKAP NILAI LEGER (SCROLL HORIZONTAL + KOLOM KIRI STICKY)-->
       <!-- =================================================================== -->
-      <div id="halaman-Rekap Nilai Leger" class="halaman hidden max-w-full mx-auto">
+      <div id="halaman-Rekap Nilai Leger" class="halaman hidden w-full max-w-full">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
           <div class="p-5 bg-slate-900 text-white flex flex-wrap justify-between items-center gap-4">
-            <div>
-              <h2 id="judul-rekap-leger" class="text-base font-extrabold tracking-tight">📊 Rekap Nilai Leger Lengkap</h2>
-              <p id="subjudul-rekap-leger" class="text-xs text-slate-300 mt-0.5">Menampilkan seluruh rincian nilai tugas per TP, PH, Total TP, PSAS, dan Nilai Rapor.</p>
+            <div class="min-w-0">
+              <h2 id="judul-rekap-leger" class="text-base font-extrabold tracking-tight truncate">📊 Rekap Nilai Leger Lengkap</h2>
+              <p id="subjudul-rekap-leger" class="text-xs text-slate-300 mt-0.5 truncate">Geser tabel ke samping kanan/kiri untuk melihat seluruh rincian nilai tugas, PH, Total TP, PSAS, dan Rapor.</p>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 shrink-0">
               <button onclick="simpanRekapCloud()" id="btn-simpan-leger" class="h-9 bg-emerald-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-emerald-500 transition">☁️ Sinkronkan Sheet</button>
               <button onclick="exportLegerExcel()" class="h-9 bg-indigo-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-indigo-500 transition">📤 Unduh XLSX</button>
               <button onclick="cetakPDF('LEGER')" class="h-9 bg-rose-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-rose-500 transition">📕 Unduh PDF</button>
             </div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table id="tabel-leger-bertingkat" class="w-full text-left border-collapse text-xs tabular-nums">
+          <div class="w-full overflow-x-auto table-scroll-x">
+            <table id="tabel-leger-bertingkat" class="min-w-max w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
               <thead id="thead-leger"></thead>
               <tbody id="tbody-leger"></tbody>
             </table>
@@ -354,7 +360,7 @@
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
                 <div class="font-bold text-slate-800 text-xs uppercase tracking-wider">1. Cetak Nilai Harian / Per TP</div>
                 <div class="flex gap-2 items-center">
-                  <select id="cetak-pilih-tp" class="flex-1 h-9 border border-slate-300 bg-white px-3 rounded-xl text-xs font-semibold focus:outline-none"></select>
+                  <select id="cetak-pilih-tp" class="flex-1 h-9 border border-slate-300 bg-white px-3 rounded-xl text-xs font-semibold focus:outline-none min-w-0"></select>
                   <button onclick="exportTPExcelById(document.getElementById('cetak-pilih-tp').value)" class="h-9 bg-emerald-700 text-white px-3.5 rounded-xl text-xs font-bold hover:bg-emerald-800 shrink-0">XLSX</button>
                   <button onclick="cetakPDF('TP', document.getElementById('cetak-pilih-tp').value)" class="h-9 bg-rose-600 text-white px-3.5 rounded-xl text-xs font-bold hover:bg-rose-700 shrink-0">PDF</button>
                 </div>
@@ -491,7 +497,7 @@
     // =========================================================================
     // WAJIB GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
+    const API_URL = "Mhttps://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
 
     let dataSiswaGlobal = [];
     let configGlobal = {
@@ -661,7 +667,6 @@
         `<option value="ALL" ${kelasAktifFilter === 'ALL' ? 'selected' : ''}>Semua Kelas (${dataSiswaGlobal.length})</option>` +
         kelasUnik.map(k => `<option value="${k}" ${String(kelasAktifFilter) === String(k) ? 'selected' : ''}>Kelas ${k}</option>`).join('');
 
-      // Sinkronkan juga dropdown pilih kelas di halaman Input Nilai TP
       const tpKelasSelect = document.getElementById('tp-pilih-kelas');
       if (tpKelasSelect) {
         tpKelasSelect.innerHTML = 
@@ -743,7 +748,7 @@
       tbody.innerHTML = siswaTampil.map((item, idx) => {
         const realIndex = dataSiswaGlobal.findIndex(s => String(s.NISN) === String(item.NISN));
         return `
-          <tr class="hover:bg-slate-50/80 transition">
+          <tr class="hover:bg-slate-50/80 transition whitespace-nowrap">
             <td class="py-3 px-4 text-center text-slate-400 text-xs font-semibold tabular-nums">${idx + 1}</td>
             <td class="py-3 px-4 text-slate-700 font-medium tabular-nums">${item.NISN}</td>
             <td class="py-3 px-4 text-slate-900 font-semibold">${item.Nama_Lengkap}</td>
@@ -1021,18 +1026,18 @@
               </div>
             </div>
 
-            <div id="body-tp-${tp.id}" class="${isTerbuka ? '' : 'hidden'} overflow-x-auto">
-              <table class="w-full text-left border-collapse text-xs tabular-nums">
+            <div id="body-tp-${tp.id}" class="${isTerbuka ? '' : 'hidden'} w-full overflow-x-auto table-scroll-x">
+              <table class="min-w-max w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
                 <thead>
                   <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-700 uppercase tracking-wider">
                     <th class="py-3 px-3 border-r border-slate-200 w-12 text-center font-bold">No</th>
                     <th class="py-3 px-3 border-r border-slate-200 w-36 font-bold">NISN / NIS</th>
                     <th class="py-3 px-3 border-r border-slate-200 min-w-[200px] font-bold">Nama Lengkap</th>
                     <th class="py-3 px-3 border-r border-slate-200 w-14 text-center font-bold">L/P</th>
-                    ${tp.tugas.map(t => `<th class="py-3 px-2 border-r border-slate-200 w-28 text-center bg-blue-50/70 text-blue-950 font-bold">${t}</th>`).join('')}
-                    <th class="py-3 px-2 border-r border-slate-200 w-24 text-center bg-yellow-100/80 text-yellow-950 font-bold">Rata Tugas</th>
-                    <th class="py-3 px-2 border-r border-slate-200 w-28 text-center bg-amber-50 text-amber-950 font-bold">PH</th>
-                    <th class="py-3 px-2 w-28 text-center bg-emerald-100/80 text-emerald-950 font-extrabold">Total TP</th>
+                    ${tp.tugas.map(t => `<th class="py-3 px-3 border-r border-slate-200 min-w-[96px] text-center bg-blue-50/70 text-blue-950 font-bold">${t}</th>`).join('')}
+                    <th class="py-3 px-3 border-r border-slate-200 w-24 text-center bg-yellow-100/80 text-yellow-950 font-bold">Rata Tugas</th>
+                    <th class="py-3 px-3 border-r border-slate-200 w-24 text-center bg-amber-50 text-amber-950 font-bold">PH</th>
+                    <th class="py-3 px-3 w-24 text-center bg-emerald-100/80 text-emerald-950 font-extrabold">Total TP</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -1536,7 +1541,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 4: REKAP NILAI LEGER (PER KELAS + KKTP MERAH)
+    // HALAMAN 4: REKAP NILAI LEGER (SCROLL HORIZONTAL + KOLOM IDENTITAS STICKY)
     // =========================================================================
     function renderHalamanLeger() {
       const mAktif = getMapelAktif();
@@ -1564,42 +1569,43 @@
         { top: "bg-amber-500 text-white", sub: "bg-amber-50 text-amber-950", total: "bg-amber-100 text-amber-950" }
       ];
 
+      // Kolom Identitas Sticky di Kiri (Lebar Presisi agar tidak tumpang tindih saat di-scroll)
       let row1 = `
-        <tr class="border-b border-slate-300 font-bold text-center text-[11px] uppercase tracking-wider">
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-10">No</th>
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-32">NISN / NIS</th>
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 min-w-[190px]">Nama Lengkap</th>
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-12">L / P</th>
+        <tr class="border-b border-slate-300 font-bold text-center text-[11px] uppercase tracking-wider whitespace-nowrap">
+          <th rowspan="3" class="sticky left-0 z-20 px-2 py-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-[44px] min-w-[44px]">No</th>
+          <th rowspan="3" class="sticky left-[44px] z-20 px-3 py-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-[125px] min-w-[125px]">NISN / NIS</th>
+          <th rowspan="3" class="sticky left-[169px] z-20 px-3 py-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-[210px] min-w-[210px] text-left">Nama Lengkap</th>
+          <th rowspan="3" class="sticky left-[379px] z-20 px-2 py-2.5 border-r-2 border-slate-400 bg-slate-200 text-slate-800 w-[48px] min-w-[48px]">L/P</th>
       `;
       daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         const colspanTP = tp.tugas.length + 3;
-        row1 += `<th colspan="${colspanTP}" class="p-2.5 border-r border-slate-300 ${w.top}">${tp.nama}</th>`;
+        row1 += `<th colspan="${colspanTP}" class="px-4 py-2.5 border-r-2 border-slate-400 ${w.top}">${tp.nama}</th>`;
       });
       row1 += `
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-blue-100 text-blue-950 w-24">Rata Seluruh TP</th>
-          <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-amber-100 text-amber-950 w-20">PSAS</th>
-          <th rowspan="3" class="p-2.5 bg-emerald-700 text-white w-24">Nilai Rapor</th>
+          <th rowspan="3" class="px-3 py-2.5 border-r border-slate-300 bg-blue-100 text-blue-950 min-w-[100px]">Rata Seluruh TP</th>
+          <th rowspan="3" class="px-3 py-2.5 border-r border-slate-300 bg-amber-100 text-amber-950 min-w-[75px]">PSAS</th>
+          <th rowspan="3" class="px-3 py-2.5 bg-emerald-700 text-white min-w-[95px]">Nilai Rapor</th>
         </tr>
       `;
 
-      let row2 = `<tr class="border-b border-slate-300 font-bold text-center text-[11px]">`;
+      let row2 = `<tr class="border-b border-slate-300 font-bold text-center text-[11px] whitespace-nowrap">`;
       daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         row2 += `
-          <th colspan="${tp.tugas.length}" class="p-2 border-r border-slate-300 ${w.sub}">Nilai Tugas</th>
-          <th rowspan="2" class="p-2 border-r border-slate-300 bg-yellow-100 text-yellow-950 w-20">Rata-Rata</th>
-          <th rowspan="2" class="p-2 border-r border-slate-300 ${w.sub} w-16">PH</th>
-          <th rowspan="2" class="p-2 border-r border-slate-300 ${w.total} w-20">Total TP</th>
+          <th colspan="${tp.tugas.length}" class="px-3 py-2 border-r border-slate-300 ${w.sub}">Rincian Nilai Tugas</th>
+          <th rowspan="2" class="px-3 py-2 border-r border-slate-300 bg-yellow-100 text-yellow-950 min-w-[82px]">Rata Tugas</th>
+          <th rowspan="2" class="px-3 py-2 border-r border-slate-300 ${w.sub} min-w-[68px]">PH</th>
+          <th rowspan="2" class="px-3 py-2 border-r-2 border-slate-400 ${w.total} min-w-[78px]">Total TP</th>
         `;
       });
       row2 += `</tr>`;
 
-      let row3 = `<tr class="border-b-2 border-slate-400 font-semibold text-center text-[11px]">`;
+      let row3 = `<tr class="border-b-2 border-slate-400 font-semibold text-center text-[11px] whitespace-nowrap">`;
       daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         tp.tugas.forEach(t => {
-          row3 += `<th class="p-2 border-r border-slate-300 ${w.sub} min-w-[78px]">${t}</th>`;
+          row3 += `<th class="px-3 py-2 border-r border-slate-300 ${w.sub} min-w-[88px]">${t}</th>`;
         });
       });
       row3 += `</tr>`;
@@ -1624,7 +1630,7 @@
           tp.tugas.forEach(t => {
             const val = (rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-";
             const merah = isDiBawahKKTP(val) ? "text-rose-600 font-bold" : "text-slate-700";
-            cellsTP += `<td class="py-2 px-2 border-r border-slate-200 text-center ${merah}">${val}</td>`;
+            cellsTP += `<td class="h-9 px-3 border-r border-slate-200 text-center ${merah}">${val}</td>`;
           });
 
           const phShow = (h.nilaiPH !== "" && h.nilaiPH !== undefined) ? h.nilaiPH : "-";
@@ -1633,9 +1639,9 @@
           const warnaTotal = isDiBawahKKTP(h.nilaiAkhirTP) ? "text-rose-600 bg-rose-50" : w.total;
 
           cellsTP += `
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-yellow-50/70 ${warnaRata}">${h.rataTugasStr}</td>
-            <td class="py-2 px-2 border-r border-slate-200 text-center ${warnaPH}">${phShow}</td>
-            <td class="py-2 px-2 border-r border-slate-300 text-center font-extrabold ${warnaTotal}">${h.nilaiAkhirTP}</td>
+            <td class="h-9 px-3 border-r border-slate-200 text-center font-bold bg-yellow-50/70 ${warnaRata}">${h.rataTugasStr}</td>
+            <td class="h-9 px-3 border-r border-slate-200 text-center ${warnaPH}">${phShow}</td>
+            <td class="h-9 px-3 border-r-2 border-slate-400 text-center font-extrabold ${warnaTotal}">${h.nilaiAkhirTP}</td>
           `;
         });
 
@@ -1645,15 +1651,15 @@
         const warnaRapor = isDiBawahKKTP(rekap.nilaiRapor) ? "text-rose-600 bg-rose-100/80" : "text-emerald-950 bg-emerald-100/80";
 
         return `
-          <tr class="border-b border-slate-200 hover:bg-slate-50 transition">
-            <td class="py-2 px-2 border-r border-slate-200 text-center text-slate-400 font-semibold">${sIdx + 1}</td>
-            <td class="py-2 px-2 border-r border-slate-200 text-slate-600">${s.NISN}</td>
-            <td class="py-2 px-3 border-r border-slate-200 font-semibold text-slate-900">${s.Nama_Lengkap}</td>
-            <td class="py-2 px-2 border-r border-slate-300 text-center font-semibold text-slate-600">${s["L/P"]}</td>
+          <tr class="group border-b border-slate-200 hover:bg-slate-50 transition whitespace-nowrap">
+            <td class="sticky left-0 z-10 h-9 px-2 border-r border-slate-200 bg-white group-hover:bg-slate-50 text-center text-slate-400 font-semibold w-[44px] min-w-[44px]">${sIdx + 1}</td>
+            <td class="sticky left-[44px] z-10 h-9 px-3 border-r border-slate-200 bg-white group-hover:bg-slate-50 text-slate-600 w-[125px] min-w-[125px]">${s.NISN}</td>
+            <td class="sticky left-[169px] z-10 h-9 px-3 border-r border-slate-200 bg-white group-hover:bg-slate-50 font-semibold text-slate-900 w-[210px] min-w-[210px]">${s.Nama_Lengkap}</td>
+            <td class="sticky left-[379px] z-10 h-9 px-2 border-r-2 border-slate-400 bg-white group-hover:bg-slate-50 text-center font-semibold text-slate-600 w-[48px] min-w-[48px]">${s["L/P"]}</td>
             ${cellsTP}
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-blue-50/70 ${warnaRataSeluruhTP}">${rekap.rataSeluruhTPStr}</td>
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-amber-50/70 ${warnaPSAS}">${psasShow}</td>
-            <td class="py-2 px-2 text-center font-extrabold ${warnaRapor}">${rekap.nilaiRapor}</td>
+            <td class="h-9 px-3 border-r border-slate-200 text-center font-bold bg-blue-50/70 ${warnaRataSeluruhTP}">${rekap.rataSeluruhTPStr}</td>
+            <td class="h-9 px-3 border-r border-slate-200 text-center font-bold bg-amber-50/70 ${warnaPSAS}">${psasShow}</td>
+            <td class="h-9 px-3 text-center font-extrabold ${warnaRapor}">${rekap.nilaiRapor}</td>
           </tr>
         `;
       }).join('');
