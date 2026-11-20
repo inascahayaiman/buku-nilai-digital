@@ -176,23 +176,70 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS)                      -->
+      <!-- HALAMAN 2: INPUT NILAI TP (PILIH KELAS, TAMBAH TP/MATERI & TUGAS)   -->
       <!-- =================================================================== -->
       <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-4">
-        <div id="container-kartu-tp" class="space-y-4"></div>
+        
+        <!-- Bilah Aksi Manajemen Kelas, TP/Materi & Tugas -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/90 flex flex-wrap justify-between items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+              <span class="text-xs font-extrabold text-slate-700">🏫 Kelas:</span>
+              <select id="tp-pilih-kelas" onchange="gantiFilterKelas(this.value)" class="bg-transparent text-xs font-extrabold text-emerald-700 focus:outline-none cursor-pointer">
+                <option value="ALL">-- Pilih Kelas --</option>
+              </select>
+            </div>
+            <div class="hidden sm:block text-xs text-slate-500">
+              Mapel: <strong id="tp-info-mapel" class="text-slate-800">-</strong> • KKTP: <strong id="tp-info-kktp" class="text-rose-600">75</strong>
+            </div>
+          </div>
 
-        <div id="area-tambah-tp-lanjut" class="hidden bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center">
-          <p id="teks-status-tp" class="text-sm font-medium text-slate-600 mb-3">Seluruh Tujuan Pembelajaran (TP) yang terdaftar telah ditampilkan.</p>
-          <button onclick="tampilkanFormTambahTP()" class="h-10 bg-emerald-600 text-white px-5 rounded-xl font-bold shadow-sm hover:bg-emerald-700 text-xs transition">
-            ➕ Tambah Tujuan Pembelajaran (TP) Berikutnya
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="bukaPanelTambahTugasCepat()" id="btn-menu-tambah-tugas" class="h-9 bg-sky-50 text-sky-800 border border-sky-200 px-3.5 rounded-xl text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
+              <span>➕</span> <span>Tambah Tugas</span>
+            </button>
+            <button onclick="tampilkanFormTambahTP()" id="btn-menu-tambah-tp" class="h-9 bg-emerald-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-emerald-700 shadow-xs transition flex items-center gap-1.5">
+              <span>➕</span> <span>Tambah TP / Materi</span>
+            </button>
+          </div>
         </div>
 
+        <!-- Panel Cepat: Tambah Tugas Baru ke TP Tertentu (Tanpa Mengubah TP/Tugas Lama) -->
+        <div id="panel-tambah-tugas-cepat" class="hidden max-w-2xl mx-auto bg-white rounded-2xl shadow-md border-2 border-sky-500 p-5">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-900">➕ Tambah Tugas Baru pada TP / Materi</h3>
+              <p id="subjudul-tambah-tugas" class="text-xs text-slate-500 mt-0.5">Kolom tugas baru akan ditambahkan tanpa mengubah nilai tugas yang sudah ada.</p>
+            </div>
+            <button type="button" onclick="tutupPanelTambahTugasCepat()" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih TP / Materi Tujuan (Kelas <span id="label-kelas-tugas-cepat">-</span>)</label>
+              <select id="select-tp-untuk-tugas" class="w-full h-10 border border-slate-300 px-3 rounded-xl text-xs font-bold bg-slate-50 focus:bg-white focus:border-sky-500 focus:outline-none"></select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Tugas Baru</label>
+              <input type="text" id="input-nama-tugas-baru" class="w-full h-10 border border-slate-300 px-3.5 rounded-xl text-xs font-semibold bg-slate-50 focus:bg-white focus:border-sky-500 focus:outline-none" placeholder="Contoh: Tugas 3 - Praktik Hafalan / Kuis">
+            </div>
+
+            <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <button type="button" onclick="tutupPanelTambahTugasCepat()" class="h-9 bg-slate-100 text-slate-700 px-4 rounded-xl text-xs font-semibold hover:bg-slate-200">Batal</button>
+              <button type="button" onclick="simpanTugasBaruKeTP()" id="btn-simpan-tugas-cepat" class="h-9 bg-sky-600 text-white px-5 rounded-xl text-xs font-bold shadow-xs hover:bg-sky-700 transition">
+                💾 Tambahkan Tugas
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Tambah TP / Materi Baru atau Edit Struktur -->
         <div id="kartu-form-tp" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-md border-2 border-emerald-500 p-6">
           <div class="flex justify-between items-center border-b border-slate-100 pb-3.5 mb-5">
             <div>
-              <h3 id="judul-form-tp" class="text-base font-extrabold text-slate-900">✨ Buat Kartu Tujuan Pembelajaran (TP) Baru</h3>
-              <p id="subjudul-form-tp" class="text-xs text-slate-500 mt-0.5">Tentukan nama TP/Materi beserta rincian jenis penilaian formatif khusus untuk kelas ini.</p>
+              <h3 id="judul-form-tp" class="text-base font-extrabold text-slate-900">✨ Tambah TP / Materi Baru</h3>
+              <p id="subjudul-form-tp" class="text-xs text-slate-500 mt-0.5">Khusus untuk kelas yang sedang dipilih. Tidak memengaruhi kelas lain.</p>
             </div>
             <button id="btn-batal-form-tp" onclick="tutupFormTP()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
           </div>
@@ -200,29 +247,32 @@
 
           <div class="mb-5">
             <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Tujuan Pembelajaran (TP) / Materi</label>
-            <input type="text" id="input-nama-tp" class="w-full h-10 border border-slate-300 px-3.5 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none" placeholder="Contoh: TP 1 (Al-Qur'an) QS. Al-Maidah/5: 48">
+            <input type="text" id="input-nama-tp" class="w-full h-10 border border-slate-300 px-3.5 rounded-xl text-sm font-semibold bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none" placeholder="Contoh: TP 1 - Memahami Q.S. Al-Maidah/5: 48">
           </div>
 
           <div class="mb-6">
             <div class="flex justify-between items-center mb-2.5">
-              <label class="block text-xs font-bold text-slate-700">Jenis Tugas / Asesmen Formatif (Dapat Ditambah & Dikurangi)</label>
+              <label class="block text-xs font-bold text-slate-700">Daftar Tugas / Asesmen Formatif</label>
               <button type="button" onclick="tambahBarisInputTugas()" class="h-7 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 rounded-lg text-xs font-bold hover:bg-emerald-100 transition">
                 + Tambah Kolom Tugas
               </button>
             </div>
             <div id="list-input-tugas-form" class="space-y-2.5"></div>
             <p class="text-[11px] text-slate-500 mt-2.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
-              ℹ️ Di bagian akhir setiap kartu TP otomatis tersedia kolom <strong>Penilaian Harian (PH)</strong> dan perhitungan <strong>Total Nilai TP (Bulat)</strong>.
+              ℹ️ Kolom <strong>Penilaian Harian (PH)</strong> dan perhitungan <strong>Total Nilai TP (Bulat)</strong> otomatis tersedia di akhir tabel.
             </p>
           </div>
 
           <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
             <button type="button" id="btn-batal-form-tp-bawah" onclick="tutupFormTP()" class="h-10 bg-slate-100 text-slate-700 px-4 rounded-xl text-xs font-semibold hover:bg-slate-200">Batal</button>
             <button type="button" onclick="simpanStrukturTP()" id="btn-simpan-struktur-tp" class="h-10 bg-emerald-600 text-white px-6 rounded-xl text-xs font-bold shadow-sm hover:bg-emerald-700 transition">
-              💾 Simpan & Tampilkan Kartu Nilai TP
+              💾 Simpan TP / Materi
             </button>
           </div>
         </div>
+
+        <!-- Daftar Kartu TP per Kelas -->
+        <div id="container-kartu-tp" class="space-y-4"></div>
       </div>
 
       <!-- =================================================================== -->
@@ -468,7 +518,7 @@
 
     const SUBJUDUL_MENU = {
       "Data Siswa": "Manajemen peserta didik dan rombongan belajar",
-      "Input Nilai TP": "Materi, TP & rincian tugas dinamis yang disesuaikan untuk masing-masing kelas",
+      "Input Nilai TP": "Kelola TP / Materi dan tambah tugas secara mandiri per kelas",
       "Input Nilai PSAS": "Penilaian Sumatif Akhir Semester untuk kalkulasi nilai rapor",
       "Rekap Nilai Leger": "Leger nilai lengkap bertingkat seluruh TP, PH, PSAS, dan Nilai Rapor per kelas",
       "Cetak & Kirim Nilai": "Ekspor dokumen resmi XLSX / PDF dan pelaporan ke Wali Kelas"
@@ -483,13 +533,11 @@
       return m;
     }
 
-    // Mengambil daftar TP khusus untuk kelas tertentu (otomatis migrasi jika ada format lama)
     function getDaftarTPKelas(kelasId) {
       if (!kelasId || kelasId === "ALL") return [];
       const m = getMapelAktif();
       if (!m.babsByKelas) m.babsByKelas = {};
 
-      // Migrasi data TP versi lama (m.babs) ke kelas pertama yang diakses agar tidak hilang
       if (Array.isArray(m.babs) && m.babs.length > 0) {
         if (!m.babsByKelas[kelasId]) {
           m.babsByKelas[kelasId] = JSON.parse(JSON.stringify(m.babs));
@@ -538,7 +586,6 @@
       document.getElementById('topbar-judul').innerText = namaMenu;
       document.getElementById('topbar-subjudul').innerText = SUBJUDUL_MENU[namaMenu] || "";
 
-      // Jika masuk menu nilai/rekap/cetak dan filter masih "ALL", otomatis arahkan ke kelas pertama jika tersedia
       const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
       if (namaMenu !== 'Data Siswa' && kelasAktifFilter === 'ALL' && kelasUnik.length > 0) {
         kelasAktifFilter = String(kelasUnik[0]);
@@ -613,6 +660,18 @@
       document.getElementById('global-filter-kelas').innerHTML = 
         `<option value="ALL" ${kelasAktifFilter === 'ALL' ? 'selected' : ''}>Semua Kelas (${dataSiswaGlobal.length})</option>` +
         kelasUnik.map(k => `<option value="${k}" ${String(kelasAktifFilter) === String(k) ? 'selected' : ''}>Kelas ${k}</option>`).join('');
+
+      // Sinkronkan juga dropdown pilih kelas di halaman Input Nilai TP
+      const tpKelasSelect = document.getElementById('tp-pilih-kelas');
+      if (tpKelasSelect) {
+        tpKelasSelect.innerHTML = 
+          `<option value="ALL" ${kelasAktifFilter === 'ALL' ? 'selected' : ''}>-- Pilih Kelas --</option>` +
+          kelasUnik.map(k => `<option value="${k}" ${String(kelasAktifFilter) === String(k) ? 'selected' : ''}>Kelas ${k}</option>`).join('');
+      }
+      if (document.getElementById('tp-info-mapel')) {
+        document.getElementById('tp-info-mapel').innerText = mAktif.nama;
+        document.getElementById('tp-info-kktp').innerText = getKKTPAktif();
+      }
     }
 
     function gantiMapelAktif(newId) {
@@ -626,6 +685,7 @@
 
     function gantiFilterKelas(val) {
       kelasAktifFilter = val;
+      sinkronTopbar();
       if (menuAktif === 'Data Siswa') renderTabelSiswa();
       if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
       if (menuAktif === 'Input Nilai PSAS') renderHalamanPSAS();
@@ -645,7 +705,7 @@
           <div>
             <h3 class="text-base font-extrabold text-slate-900">Pilih Rombel / Kelas Terlebih Dahulu</h3>
             <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-              Karena setiap kelas memiliki <strong>Materi, Tujuan Pembelajaran (TP), dan Tugas</strong> yang berbeda, silakan pilih salah satu kelas di bawah ini atau melalui dropdown di pojok kanan atas untuk membuka <strong>${judulMenu}</strong>.
+              Setiap kelas memiliki <strong>Materi, Tujuan Pembelajaran (TP), dan Tugas</strong> yang terpisah. Pilih salah satu kelas di bawah ini untuk membuka <strong>${judulMenu}</strong>.
             </p>
           </div>
           ${kelasUnik.length === 0 ? `
@@ -665,7 +725,6 @@
 
     function pilihKelasCepat(kelasId) {
       kelasAktifFilter = String(kelasId);
-      sinkronTopbar();
       gantiFilterKelas(kelasAktifFilter);
     }
 
@@ -856,7 +915,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS + AUTO-COLLAPSE)
+    // HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS + TAMBAH TP + TAMBAH TUGAS)
     // =========================================================================
     function toggleKartuTP(tpId) {
       const bodyEl = document.getElementById(`body-tp-${tpId}`);
@@ -879,39 +938,48 @@
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
       const container = document.getElementById('container-kartu-tp');
-      const areaLanjut = document.getElementById('area-tambah-tp-lanjut');
       const formTP = document.getElementById('kartu-form-tp');
+      const panelTugas = document.getElementById('panel-tambah-tugas-cepat');
+      const btnTambahTP = document.getElementById('btn-menu-tambah-tp');
+      const btnTambahTugas = document.getElementById('btn-menu-tambah-tugas');
+
+      sinkronTopbar();
 
       if (kelasAktifFilter === "ALL") {
         formTP.classList.add('hidden');
-        areaLanjut.classList.add('hidden');
+        panelTugas.classList.add('hidden');
+        btnTambahTP.disabled = true;
+        btnTambahTP.classList.add('opacity-50', 'cursor-not-allowed');
+        btnTambahTugas.disabled = true;
+        btnTambahTugas.classList.add('opacity-50', 'cursor-not-allowed');
         container.innerHTML = renderPeringatanPilihKelas("Input Nilai TP");
         return;
       }
 
+      btnTambahTP.disabled = false;
+      btnTambahTP.classList.remove('opacity-50', 'cursor-not-allowed');
+
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      btnTambahTugas.disabled = daftarTP.length === 0;
+      btnTambahTugas.classList.toggle('opacity-50', daftarTP.length === 0);
+      btnTambahTugas.classList.toggle('cursor-not-allowed', daftarTP.length === 0);
 
       if (daftarTP.length === 0) {
-        container.innerHTML = "";
-        areaLanjut.classList.add('hidden');
-        bukaFormTPBaru(1, true);
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-8 text-center max-w-2xl mx-auto">
+            <p class="text-sm font-bold text-slate-800">Belum ada Tujuan Pembelajaran (TP) / Materi pada Kelas ${kelasAktifFilter}</p>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Klik tombol di bawah atau tombol <strong>+ Tambah TP / Materi</strong> di kanan atas untuk membuat TP pertama khusus Kelas ${kelasAktifFilter}.</p>
+            <button onclick="tampilkanFormTambahTP()" class="h-10 bg-emerald-600 text-white px-5 rounded-xl text-xs font-bold hover:bg-emerald-700 shadow-xs transition">
+              ➕ Buat TP / Materi Pertama (Kelas ${kelasAktifFilter})
+            </button>
+          </div>
+        `;
         return;
       }
 
-      formTP.classList.add('hidden');
       const siswaList = getSiswaTerfilter();
 
-      const headerKelasBanner = `
-        <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl flex flex-wrap justify-between items-center gap-2 shadow-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-xs font-extrabold">Kelas ${kelasAktifFilter}</span>
-            <span class="text-xs md:text-sm font-bold">${mAktif.nama}</span>
-          </div>
-          <span class="text-[11px] text-slate-300">Materi, TP & Tugas khusus rombel ${kelasAktifFilter} • KKTP: <strong class="text-amber-300">${kktp}</strong></span>
-        </div>
-      `;
-
-      container.innerHTML = headerKelasBanner + daftarTP.map((tp) => {
+      container.innerHTML = daftarTP.map((tp) => {
         const isSelesai = tp.selesai === true;
         const isTerbuka = !isSelesai || kartuTerbukaManual[tp.id] === true;
 
@@ -925,7 +993,7 @@
                 <div class="min-w-0">
                   <h3 class="text-sm md:text-base font-extrabold text-slate-900 truncate">${tp.nama}</h3>
                   <p class="text-[11px] text-slate-500 truncate">
-                    ${tp.tugas.length} Jenis Tugas (${tp.tugas.join(', ')}) • Bobot Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}% • <strong class="text-rose-700">KKTP: ${kktp}</strong>
+                    Kelas ${kelasAktifFilter} • ${tp.tugas.length} Tugas (${tp.tugas.join(', ')}) • Bobot Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}% • <strong class="text-rose-700">KKTP: ${kktp}</strong>
                   </p>
                 </div>
               </div>
@@ -937,16 +1005,17 @@
                   </button>
                   <button onclick="exportTPExcelById('${tp.id}')" class="h-8 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">📤 Ekspor</button>
                   <button onclick="toggleStatusSelesaiTP('${tp.id}', false)" class="h-8 bg-slate-200 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-300 transition">
-                    🔓 Edit Kembali
+                    🔓 Buka Kunci
                   </button>
                 ` : `
-                  <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit Tugas</button>
+                  <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold hover:bg-sky-100 transition">+ Tugas</button>
+                  <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit</button>
                   <button onclick="downloadTemplateTPById('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100 transition">📄 Template</button>
                   <button onclick="triggerImportTP('${tp.id}')" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100 transition">📥 Impor</button>
                   <button onclick="exportTPExcelById('${tp.id}')" class="h-8 bg-indigo-50 border border-indigo-200 text-indigo-800 px-3 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">📤 Ekspor</button>
-                  <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-slate-800 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition">💾 Simpan Nilai</button>
+                  <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-slate-800 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-slate-900 transition">💾 Simpan</button>
                   <button onclick="simpanNilaiSatuTP('${tp.id}', true)" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-xs">
-                    ✅ Selesai & Tutup Kartu
+                    ✅ Selesai & Tutup
                   </button>
                 `}
               </div>
@@ -1009,47 +1078,95 @@
           </div>
         `;
       }).join('');
-
-      const semuaSelesai = daftarTP.every(b => b.selesai === true);
-      areaLanjut.classList.remove('hidden');
-      document.getElementById('teks-status-tp').innerText = semuaSelesai 
-        ? `🎉 Seluruh (${daftarTP.length}) Tujuan Pembelajaran pada Kelas ${kelasAktifFilter} telah selesai dan ditutup rapi. Klik tombol di bawah untuk membuat TP ke-${daftarTP.length + 1}.`
-        : `Ingin menambahkan kartu Tujuan Pembelajaran (TP) ke-${daftarTP.length + 1} khusus Kelas ${kelasAktifFilter}?`;
     }
 
-    function bukaFormTPBaru(nomorUrut, isInitialEmpty = false) {
+    // =========================================================================
+    // PANEL CEPAT: TAMBAH TUGAS KE TP YANG SUDAH ADA
+    // =========================================================================
+    function bukaPanelTambahTugasCepat(tpIdPreselect = null) {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      if (daftarTP.length === 0) return alert("Belum ada TP pada kelas ini. Buat TP / Materi terlebih dahulu.");
+
+      document.getElementById('kartu-form-tp').classList.add('hidden');
+      const panel = document.getElementById('panel-tambah-tugas-cepat');
+      panel.classList.remove('hidden');
+
+      document.getElementById('label-kelas-tugas-cepat').innerText = kelasAktifFilter;
+      const selectTP = document.getElementById('select-tp-untuk-tugas');
+      selectTP.innerHTML = daftarTP.map(tp => 
+        `<option value="${tp.id}" ${tp.id === tpIdPreselect ? 'selected' : ''}>${tp.nama} (Saat ini: ${tp.tugas.length} Tugas)</option>`
+      ).join('');
+
+      const targetTP = daftarTP.find(tp => tp.id === (tpIdPreselect || daftarTP[0].id)) || daftarTP[0];
+      document.getElementById('input-nama-tugas-baru').value = `Tugas ${targetTP.tugas.length + 1}`;
+      document.getElementById('input-nama-tugas-baru').focus();
+      panel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function tutupPanelTambahTugasCepat() {
+      document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden');
+    }
+
+    async function simpanTugasBaruKeTP() {
+      if (kelasAktifFilter === "ALL") return;
+      const tpId = document.getElementById('select-tp-untuk-tugas').value;
+      const namaTugasBaru = document.getElementById('input-nama-tugas-baru').value.trim();
+      if (!namaTugasBaru) return alert("Nama tugas baru tidak boleh kosong!");
+
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tpObj = daftarTP.find(b => b.id === tpId);
+      if (!tpObj) return;
+
+      if (tpObj.tugas.some(t => t.toLowerCase() === namaTugasBaru.toLowerCase())) {
+        return alert(`Nama tugas "${namaTugasBaru}" sudah ada pada ${tpObj.nama}. Gunakan nama lain.`);
+      }
+
+      tpObj.tugas.push(namaTugasBaru);
+      tpObj.selesai = false;
+      kartuTerbukaManual[tpObj.id] = true;
+
+      const btn = document.getElementById('btn-simpan-tugas-cepat');
+      btn.innerText = "⏳ Menambahkan..."; btn.disabled = true;
+      await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+      btn.innerText = "💾 Tambahkan Tugas"; btn.disabled = false;
+
+      tutupPanelTambahTugasCepat();
+      renderHalamanInputTP();
+    }
+
+    // =========================================================================
+    // FORM TAMBAH TP / MATERI BARU & EDIT STRUKTUR
+    // =========================================================================
+    function tampilkanFormTambahTP() {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
+      document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden');
+
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const nomorUrut = daftarTP.length + 1;
+
       document.getElementById('kartu-form-tp').classList.remove('hidden');
-      document.getElementById('area-tambah-tp-lanjut').classList.add('hidden');
-      document.getElementById('judul-form-tp').innerText = `✨ Buat Kartu TP ke-${nomorUrut} (Khusus Kelas ${kelasAktifFilter})`;
-      document.getElementById('subjudul-form-tp').innerText = `Tentukan nama TP/Materi beserta rincian jenis penilaian formatif khusus untuk Kelas ${kelasAktifFilter}.`;
+      document.getElementById('judul-form-tp').innerText = `➕ Tambah TP / Materi ke-${nomorUrut} (Kelas ${kelasAktifFilter})`;
+      document.getElementById('subjudul-form-tp').innerText = `TP baru ini hanya berlaku untuk Kelas ${kelasAktifFilter} dan tidak mengubah kelas maupun TP lainnya.`;
       document.getElementById('edit-tp-id').value = "";
       document.getElementById('input-nama-tp').value = `TP ${nomorUrut} - `;
-      
-      document.getElementById('btn-batal-form-tp').classList.toggle('hidden', isInitialEmpty);
-      document.getElementById('btn-batal-form-tp-bawah').classList.toggle('hidden', isInitialEmpty);
 
       renderInputTugasForm(["Tugas 1", "Tugas 2"]);
       document.getElementById('input-nama-tp').focus();
-    }
-
-    function tampilkanFormTambahTP() {
-      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
-      bukaFormTPBaru(daftarTP.length + 1, false);
       document.getElementById('kartu-form-tp').scrollIntoView({ behavior: 'smooth' });
     }
 
     function bukaFormEditTP(tpId) {
+      document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden');
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const tp = daftarTP.find(b => b.id === tpId);
       if (!tp) return;
 
       document.getElementById('kartu-form-tp').classList.remove('hidden');
-      document.getElementById('area-tambah-tp-lanjut').classList.add('hidden');
-      document.getElementById('judul-form-tp').innerText = `⚙️ Edit Struktur Tugas (Kelas ${kelasAktifFilter}): ${tp.nama}`;
+      document.getElementById('judul-form-tp').innerText = `⚙️ Edit Nama TP / Hapus Tugas (Kelas ${kelasAktifFilter})`;
+      document.getElementById('subjudul-form-tp').innerText = `Perubahan ini hanya berlaku untuk kartu "${tp.nama}" pada Kelas ${kelasAktifFilter}.`;
       document.getElementById('edit-tp-id').value = tp.id;
       document.getElementById('input-nama-tp').value = tp.nama;
-      document.getElementById('btn-batal-form-tp').classList.remove('hidden');
-      document.getElementById('btn-batal-form-tp-bawah').classList.remove('hidden');
 
       renderInputTugasForm([...tp.tugas]);
       document.getElementById('kartu-form-tp').scrollIntoView({ behavior: 'smooth' });
@@ -1057,7 +1174,6 @@
 
     function tutupFormTP() {
       document.getElementById('kartu-form-tp').classList.add('hidden');
-      document.getElementById('area-tambah-tp-lanjut').classList.remove('hidden');
     }
 
     let tempTugasList = [];
@@ -1067,7 +1183,7 @@
       container.innerHTML = tempTugasList.map((t, idx) => `
         <div class="flex gap-2.5 items-center">
           <span class="text-xs font-extrabold text-slate-400 w-6 text-right tabular-nums">${idx + 1}.</span>
-          <input type="text" value="${t}" oninput="tempTugasList[${idx}] = this.value" class="flex-1 h-9 border border-slate-300 px-3 rounded-xl text-xs font-medium bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none" placeholder="Misal: Menulis Ayat / Membaca / Menghafal / Video / Poster">
+          <input type="text" value="${t}" oninput="tempTugasList[${idx}] = this.value" class="flex-1 h-9 border border-slate-300 px-3 rounded-xl text-xs font-medium bg-slate-50 focus:bg-white focus:border-emerald-500 focus:outline-none" placeholder="Misal: Tugas 1 / Praktik / Kuis">
           ${tempTugasList.length > 1 ? `<button type="button" onclick="hapusBarisInputTugas(${idx})" class="h-9 bg-rose-50 text-rose-600 border border-rose-200 px-3 rounded-xl text-xs font-bold hover:bg-rose-100">Hapus</button>` : ''}
         </div>
       `).join('');
@@ -1112,8 +1228,9 @@
       const btn = document.getElementById('btn-simpan-struktur-tp');
       btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
-      btn.innerText = "💾 Simpan & Tampilkan Kartu Nilai TP"; btn.disabled = false;
+      btn.innerText = "💾 Simpan TP / Materi"; btn.disabled = false;
 
+      tutupFormTP();
       renderHalamanInputTP();
     }
 
@@ -1207,7 +1324,7 @@
         renderHalamanInputTP();
         alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) tersimpan & kartu ditutup rapi!`);
       } else {
-        if (btn) { btn.innerText = "💾 Simpan Nilai"; btn.disabled = false; }
+        if (btn) { btn.innerText = "💾 Simpan"; btn.disabled = false; }
         alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) berhasil disimpan ke Google Cloud!`);
       }
     }
@@ -1254,7 +1371,7 @@
             count++;
           });
           renderHalamanInputTP();
-          alert(`✅ Berhasil mengimpor nilai ${tp.nama} untuk ${count} siswa! Klik "💾 Simpan Nilai" pada kartu TP.`);
+          alert(`✅ Berhasil mengimpor nilai ${tp.nama} untuk ${count} siswa! Klik "💾 Simpan" pada kartu TP.`);
         };
         reader.readAsBinaryString(file);
       };
@@ -1547,7 +1664,6 @@
       const btn = document.getElementById('btn-simpan-leger');
       if (!silent && btn) { btn.innerText = "⏳ Menyimpan..."; btn.disabled = true; }
 
-      // Sinkronkan siswa pada kelas aktif atau seluruh kelas dengan struktur TP masing-masing
       const daftarTPContoh = kelasAktifFilter !== "ALL" ? getDaftarTPKelas(kelasAktifFilter) : [];
       const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "L/P", "ID_Kelas", ...daftarTPContoh.map(b => b.nama), "Rata_Seluruh_TP", "Nilai_PSAS", "Nilai_Rapor"];
       const siswaTarget = getSiswaTerfilter();
@@ -1571,7 +1687,7 @@
     }
 
     function exportLegerExcel() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
@@ -1603,7 +1719,7 @@
     }
 
     function exportRaporRingkasExcel() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
@@ -1649,7 +1765,7 @@
     }
 
     function cetakPDF(tipe, tpId = null) {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const kktp = getKKTPAktif();
@@ -1758,7 +1874,7 @@
     }
 
     function kirimKeWaliKelasWA() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
       let nomor = document.getElementById('wa-nomor-walas').value.replace(/[^0-9]/g, "");
       if (!nomor) return alert("Masukkan nomor WhatsApp Wali Kelas terlebih dahulu!");
       if (nomor.startsWith("0")) nomor = "62" + nomor.slice(1);
