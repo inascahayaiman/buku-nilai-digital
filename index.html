@@ -36,7 +36,10 @@
     </div>
 
     <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800">
-      <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Mata Pelajaran Aktif</div>
+      <div class="flex justify-between items-center">
+        <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Mapel Aktif</span>
+        <span id="sidebar-kktp-badge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">KKTP: 75</span>
+      </div>
       <div id="sidebar-mapel-aktif" class="text-xs font-semibold text-white mt-0.5 truncate">PAI & Budi Pekerti</div>
     </div>
 
@@ -93,7 +96,7 @@
           <option value="ALL">Semua Kelas</option>
         </select>
         <button onclick="bukaModalMapelBobot()" class="h-9 bg-slate-900 text-white px-3.5 rounded-xl hover:bg-slate-800 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-          <span>⚙️</span> <span class="hidden md:inline">Mapel & Bobot</span>
+          <span>⚙️</span> <span class="hidden md:inline">Mapel, KKTP & Bobot</span>
         </button>
       </div>
     </header>
@@ -209,7 +212,7 @@
             </div>
             <div id="list-input-tugas-form" class="space-y-2.5"></div>
             <p class="text-[11px] text-slate-500 mt-2.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70">
-              ℹ️ Di bagian akhir setiap kartu TP otomatis tersedia kolom <strong>Penilaian Harian (PH)</strong> dan perhitungan <strong>Total Nilai TP</strong>.
+              ℹ️ Di bagian akhir setiap kartu TP otomatis tersedia kolom <strong>Penilaian Harian (PH)</strong> dan perhitungan <strong>Total Nilai TP (Bulat)</strong>.
             </p>
           </div>
 
@@ -230,7 +233,7 @@
           <div class="p-5 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
             <div>
               <h2 id="judul-psas" class="text-base font-extrabold text-slate-900">🎯 Penilaian Sumatif Akhir Semester (PSAS)</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP menjadi Nilai Rapor.</p>
+              <p id="subjudul-psas" class="text-xs text-slate-500 mt-0.5">Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP menjadi Nilai Rapor.</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button onclick="downloadTemplatePSAS()" class="h-9 bg-teal-50 text-teal-800 border border-teal-200 px-3.5 rounded-xl text-xs font-semibold hover:bg-teal-100 transition">📄 Template PSAS</button>
@@ -371,16 +374,16 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL PENGATURAN MAPEL & BOBOT PENILAIAN                              -->
+  <!-- MODAL PENGATURAN MAPEL, KKTP & BOBOT PENILAIAN                        -->
   <!-- ===================================================================== -->
   <div id="modal-mapel-bobot" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
       <div class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center">
-        <h3 class="text-sm font-extrabold">⚙️ Pengaturan Mata Pelajaran & Bobot Penilaian</h3>
+        <h3 class="text-sm font-extrabold">⚙️ Pengaturan Mata Pelajaran, KKTP & Bobot</h3>
         <button onclick="tutupModalMapelBobot()" class="text-slate-400 hover:text-white text-xl font-bold leading-none">&times;</button>
       </div>
       
-      <div class="p-5 space-y-5">
+      <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
           <div class="flex justify-between items-center">
             <span class="font-bold text-slate-800 text-xs uppercase tracking-wider">Mata Pelajaran</span>
@@ -390,10 +393,17 @@
             </div>
           </div>
           <select id="modal-pilih-mapel" onchange="gantiMapelModal(this.value)" class="w-full h-9 border border-slate-300 px-3 rounded-xl text-xs bg-white font-bold"></select>
-          <div>
-            <label class="block text-xs font-bold text-slate-600 mb-1">Ubah Nama Mata Pelajaran:</label>
-            <input type="text" id="modal-nama-mapel" oninput="ubahNamaMapelModal(this.value)" class="w-full h-9 border border-slate-300 px-3 rounded-xl text-xs bg-white font-bold">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-600 mb-1">Nama Mata Pelajaran:</label>
+              <input type="text" id="modal-nama-mapel" oninput="ubahNamaMapelModal(this.value)" class="w-full h-9 border border-slate-300 px-3 rounded-xl text-xs bg-white font-bold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-rose-700 mb-1">Standar KKTP:</label>
+              <input type="number" min="0" max="100" id="modal-kktp-mapel" class="w-full h-9 border border-rose-300 px-3 rounded-xl text-xs bg-rose-50/50 font-extrabold text-center text-rose-900 focus:bg-white focus:border-rose-500 focus:outline-none">
+            </div>
           </div>
+          <p class="text-[11px] text-slate-500">*Nilai di bawah standar <strong>KKTP</strong> otomatis ditandai warna <span class="text-rose-600 font-bold">merah</span> di seluruh tabel penilaian.</p>
         </div>
 
         <div class="bg-amber-50/70 p-4 rounded-xl border border-amber-200 space-y-3">
@@ -431,7 +441,7 @@
     // =========================================================================
     // WAJIB GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
+    const API_URL = "MASUKKAN_https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
 
     let dataSiswaGlobal = [];
     let configGlobal = {
@@ -439,6 +449,7 @@
         {
           id: "MAPEL_DEFAULT",
           nama: "Pendidikan Agama Islam dan Budi Pekerti",
+          kktp: 75,
           bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30,
           babs: []
         }
@@ -450,7 +461,7 @@
     let nilaiDetailGlobal = {};
     let nilaiPSASGlobal = {};
     let menuAktif = "Data Siswa";
-    let kartuTerbukaManual = {}; // Menyimpan status buka/tutup manual kartu TP yang sudah selesai
+    let kartuTerbukaManual = {};
 
     let tempConfig = null;
     let tempMapelModalId = null;
@@ -464,7 +475,20 @@
     };
 
     function getMapelAktif() {
-      return configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
+      const m = configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
+      if (m && (m.kktp === undefined || m.kktp === null || isNaN(m.kktp))) {
+        m.kktp = 75;
+      }
+      return m;
+    }
+
+    function getKKTPAktif() {
+      return Number(getMapelAktif().kktp ?? 75);
+    }
+
+    function isDiBawahKKTP(nilai) {
+      if (nilai === "" || nilai === null || nilai === undefined || nilai === "-" || isNaN(nilai)) return false;
+      return Number(nilai) < getKKTPAktif();
     }
 
     function ambilIdSiswaExcel(row) {
@@ -524,6 +548,7 @@
         dataSiswaGlobal = resSiswa.data || [];
         if (resNilai.config && Array.isArray(resNilai.config.mapels) && resNilai.config.mapels.length > 0) {
           configGlobal = resNilai.config;
+          configGlobal.mapels.forEach(m => { if (m.kktp === undefined) m.kktp = 75; });
         }
         if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
         if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
@@ -548,9 +573,10 @@
     function sinkronTopbar() {
       const mAktif = getMapelAktif();
       document.getElementById('sidebar-mapel-aktif').innerText = mAktif.nama;
+      document.getElementById('sidebar-kktp-badge').innerText = `KKTP: ${getKKTPAktif()}`;
 
       document.getElementById('global-pilih-mapel').innerHTML = configGlobal.mapels.map(m => 
-        `<option value="${m.id}" ${m.id === mapelAktifId ? 'selected' : ''}>📚 ${m.nama}</option>`
+        `<option value="${m.id}" ${m.id === mapelAktifId ? 'selected' : ''}>📚 ${m.nama} (KKTP ${m.kktp ?? 75})</option>`
       ).join('');
 
       const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
@@ -715,6 +741,8 @@
 
     // =========================================================================
     // RUMUS PERHITUNGAN NILAI TP & RAPOR
+    // - Rata-rata: 2 angka di belakang koma (String: .toFixed(2))
+    // - Total TP & Nilai Rapor: Bilangan bulat tanpa koma (Math.round)
     // =========================================================================
     function hitungNilaiTPSiswa(nisn, tpObj) {
       const mAktif = getMapelAktif();
@@ -731,14 +759,15 @@
         }
       });
 
-      const rataTugas = countTugas > 0 ? (totalTugas / countTugas) : 0;
-      const nilaiPH = (record.psh !== "" && record.psh !== undefined && !isNaN(record.psh)) ? Number(record.psh) : 0;
-      const nilaiAkhirTP = (rataTugas * (mAktif.bobotTugas / 100)) + (nilaiPH * (mAktif.bobotPSH / 100));
+      const rataTugasNum = countTugas > 0 ? (totalTugas / countTugas) : 0;
+      const nilaiPHNum = (record.psh !== "" && record.psh !== undefined && !isNaN(record.psh)) ? Number(record.psh) : 0;
+      const totalTPBulat = Math.round((rataTugasNum * (mAktif.bobotTugas / 100)) + (nilaiPHNum * (mAktif.bobotPSH / 100)));
 
       return {
-        rataTugas: Number(rataTugas.toFixed(2)),
+        rataTugasNum: rataTugasNum,
+        rataTugasStr: rataTugasNum.toFixed(2), // Selalu 2 angka di belakang koma
         nilaiPH: record.psh ?? "",
-        nilaiAkhirTP: Number(nilaiAkhirTP.toFixed(2))
+        nilaiAkhirTP: totalTPBulat              // Bilangan bulat tanpa koma
       };
     }
 
@@ -748,21 +777,22 @@
       mAktif.babs.forEach(tp => {
         sumTP += hitungNilaiTPSiswa(nisn, tp).nilaiAkhirTP;
       });
-      const rataSeluruhTP = mAktif.babs.length > 0 ? (sumTP / mAktif.babs.length) : 0;
+      const rataSeluruhTPNum = mAktif.babs.length > 0 ? (sumTP / mAktif.babs.length) : 0;
       const psasKey = `${mAktif.id}_${nisn}`;
       const psasRaw = nilaiPSASGlobal[psasKey];
       const psasNum = (psasRaw !== "" && psasRaw !== undefined && !isNaN(psasRaw)) ? Number(psasRaw) : 0;
-      const nilaiRapor = (rataSeluruhTP * (mAktif.bobotBAB / 100)) + (psasNum * (mAktif.bobotPSAS / 100));
+      const nilaiRaporBulat = Math.round((rataSeluruhTPNum * (mAktif.bobotBAB / 100)) + (psasNum * (mAktif.bobotPSAS / 100)));
 
       return {
-        rataSeluruhTP: Number(rataSeluruhTP.toFixed(2)),
+        rataSeluruhTPNum: rataSeluruhTPNum,
+        rataSeluruhTPStr: rataSeluruhTPNum.toFixed(2), // Selalu 2 angka di belakang koma
         psasRaw: psasRaw !== undefined ? psasRaw : "",
-        nilaiRapor: Number(nilaiRapor.toFixed(2))
+        nilaiRapor: nilaiRaporBulat                     // Bilangan bulat tanpa koma
       };
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP (KARTU TERTUTUP OTOMATIS SETELAH SELESAI)
+    // HALAMAN 2: INPUT NILAI TP (AUTO-COLLAPSE + PEWARNAAN KKTP)
     // =========================================================================
     function toggleKartuTP(tpId) {
       const bodyEl = document.getElementById(`body-tp-${tpId}`);
@@ -783,6 +813,7 @@
 
     function renderHalamanInputTP() {
       const mAktif = getMapelAktif();
+      const kktp = getKKTPAktif();
       const container = document.getElementById('container-kartu-tp');
       const areaLanjut = document.getElementById('area-tambah-tp-lanjut');
       const formTP = document.getElementById('kartu-form-tp');
@@ -799,12 +830,10 @@
 
       container.innerHTML = mAktif.babs.map((tp) => {
         const isSelesai = tp.selesai === true;
-        // Jika sudah selesai, default tertutup kecuali dibuka manual oleh guru
         const isTerbuka = !isSelesai || kartuTerbukaManual[tp.id] === true;
 
         return `
           <div class="bg-white rounded-2xl shadow-sm border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden transition-all">
-            <!-- Header Kartu TP (Bisa diklik atau via tombol untuk buka/tutup) -->
             <div class="px-5 py-3.5 ${isSelesai ? 'bg-emerald-50/80' : 'bg-slate-50'} ${isTerbuka ? 'border-b border-slate-200' : ''} flex flex-wrap justify-between items-center gap-3">
               <div class="flex items-center gap-3 min-w-0">
                 <span class="px-3 py-1 rounded-lg text-[11px] font-extrabold tracking-wide uppercase shrink-0 ${isSelesai ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
@@ -813,12 +842,11 @@
                 <div class="min-w-0">
                   <h3 class="text-sm md:text-base font-extrabold text-slate-900 truncate">${tp.nama}</h3>
                   <p class="text-[11px] text-slate-500 truncate">
-                    ${tp.tugas.length} Jenis Tugas (${tp.tugas.join(', ')}) • Bobot Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}%
+                    ${tp.tugas.length} Jenis Tugas (${tp.tugas.join(', ')}) • Bobot Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}% • <strong class="text-rose-700">KKTP: ${kktp}</strong>
                   </p>
                 </div>
               </div>
 
-              <!-- Toolbar Kartu TP -->
               <div class="flex flex-wrap items-center gap-1.5 shrink-0">
                 ${isSelesai ? `
                   <button onclick="toggleKartuTP('${tp.id}')" id="btn-toggle-${tp.id}" class="h-8 bg-white border border-emerald-300 text-emerald-800 px-3 rounded-lg text-xs font-bold hover:bg-emerald-100 transition">
@@ -841,7 +869,6 @@
               </div>
             </div>
 
-            <!-- Isi Tabel Penilaian TP (Otomatis hidden jika TP sudah selesai) -->
             <div id="body-tp-${tp.id}" class="${isTerbuka ? '' : 'hidden'} overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs tabular-nums">
                 <thead>
@@ -863,6 +890,10 @@
                       const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
                       const hasil = hitungNilaiTPSiswa(s.NISN, tp);
 
+                      const warnaRata = isDiBawahKKTP(hasil.rataTugasNum) ? 'text-rose-600' : 'text-yellow-900';
+                      const warnaPH = isDiBawahKKTP(hasil.nilaiPH) ? 'text-rose-600 border-rose-400 bg-rose-50/50' : 'text-slate-900 border-amber-300 bg-white';
+                      const warnaTotal = isDiBawahKKTP(hasil.nilaiAkhirTP) ? 'text-rose-600 bg-rose-50/80' : 'text-emerald-950 bg-emerald-50/70';
+
                       return `
                         <tr class="hover:bg-slate-50/80 transition">
                           <td class="py-2 px-3 border-r border-slate-200 text-center text-slate-400 font-semibold">${sIdx + 1}</td>
@@ -871,19 +902,20 @@
                           <td class="py-2 px-3 border-r border-slate-200 text-center font-semibold text-slate-600">${s["L/P"]}</td>
                           ${tp.tugas.map(t => {
                             const val = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "";
+                            const warnaTugas = isDiBawahKKTP(val) ? 'text-rose-600 border-rose-400 bg-rose-50/50' : 'text-slate-900 border-slate-300 bg-white';
                             return `<td class="py-1.5 px-2 border-r border-slate-200 text-center">
                               <input type="number" min="0" max="100" value="${val}"
-                                oninput="updateNilaiTugas('${s.NISN}', '${tp.id}', '${t}', this.value)"
-                                class="w-16 h-8 text-center border border-slate-300 rounded-lg text-xs font-semibold bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none">
+                                oninput="updateNilaiTugas('${s.NISN}', '${tp.id}', '${t}', this)"
+                                class="w-16 h-8 text-center border rounded-lg text-xs font-bold focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none ${warnaTugas}">
                             </td>`;
                           }).join('')}
-                          <td id="rata-${tp.id}-${s.NISN}" class="py-2 px-2 border-r border-slate-200 text-center font-bold text-yellow-900 bg-yellow-50/60">${hasil.rataTugas}</td>
+                          <td id="rata-${tp.id}-${s.NISN}" class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-yellow-50/60 ${warnaRata}">${hasil.rataTugasStr}</td>
                           <td class="py-1.5 px-2 border-r border-slate-200 text-center bg-amber-50/40">
                             <input type="number" min="0" max="100" value="${hasil.nilaiPH}"
-                              oninput="updateNilaiPH('${s.NISN}', '${tp.id}', this.value)"
-                              class="w-16 h-8 text-center border border-amber-300 rounded-lg text-xs font-bold bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none">
+                              oninput="updateNilaiPH('${s.NISN}', '${tp.id}', this)"
+                              class="w-16 h-8 text-center border rounded-lg text-xs font-bold focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none ${warnaPH}">
                           </td>
-                          <td id="total-${tp.id}-${s.NISN}" class="py-2 px-2 text-center font-extrabold text-emerald-950 bg-emerald-50/70 text-xs">${hasil.nilaiAkhirTP}</td>
+                          <td id="total-${tp.id}-${s.NISN}" class="py-2 px-2 text-center font-extrabold text-xs ${warnaTotal}">${hasil.nilaiAkhirTP}</td>
                         </tr>
                       `;
                     }).join('')
@@ -1000,28 +1032,59 @@
       renderHalamanInputTP();
     }
 
-    function updateNilaiTugas(nisn, tpId, namaTugas, val) {
+    function perbaruiTampilanBarisTP(nisn, tpId, hasil) {
+      const elRata = document.getElementById(`rata-${tpId}-${nisn}`);
+      if (elRata) {
+        elRata.innerText = hasil.rataTugasStr;
+        elRata.className = `py-2 px-2 border-r border-slate-200 text-center font-bold bg-yellow-50/60 ${isDiBawahKKTP(hasil.rataTugasNum) ? 'text-rose-600' : 'text-yellow-900'}`;
+      }
+
+      const elTotal = document.getElementById(`total-${tpId}-${nisn}`);
+      if (elTotal) {
+        elTotal.innerText = hasil.nilaiAkhirTP;
+        elTotal.className = `py-2 px-2 text-center font-extrabold text-xs ${isDiBawahKKTP(hasil.nilaiAkhirTP) ? 'text-rose-600 bg-rose-50/80' : 'text-emerald-950 bg-emerald-50/70'}`;
+      }
+    }
+
+    function updateNilaiTugas(nisn, tpId, namaTugas, inputEl) {
+      const val = inputEl.value;
       const mAktif = getMapelAktif();
       const key = `${mAktif.id}_${nisn}_${tpId}`;
       if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
       if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
       nilaiDetailGlobal[key].tugas[namaTugas] = val === "" ? "" : Number(val);
 
+      if (isDiBawahKKTP(val)) {
+        inputEl.classList.remove('text-slate-900', 'border-slate-300', 'bg-white');
+        inputEl.classList.add('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+      } else {
+        inputEl.classList.remove('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+        inputEl.classList.add('text-slate-900', 'border-slate-300', 'bg-white');
+      }
+
       const tpObj = mAktif.babs.find(b => b.id === tpId);
       const hasil = hitungNilaiTPSiswa(nisn, tpObj);
-      document.getElementById(`rata-${tpId}-${nisn}`).innerText = hasil.rataTugas;
-      document.getElementById(`total-${tpId}-${nisn}`).innerText = hasil.nilaiAkhirTP;
+      perbaruiTampilanBarisTP(nisn, tpId, hasil);
     }
 
-    function updateNilaiPH(nisn, tpId, val) {
+    function updateNilaiPH(nisn, tpId, inputEl) {
+      const val = inputEl.value;
       const mAktif = getMapelAktif();
       const key = `${mAktif.id}_${nisn}_${tpId}`;
       if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
       nilaiDetailGlobal[key].psh = val === "" ? "" : Number(val);
 
+      if (isDiBawahKKTP(val)) {
+        inputEl.classList.remove('text-slate-900', 'border-amber-300', 'bg-white');
+        inputEl.classList.add('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+      } else {
+        inputEl.classList.remove('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+        inputEl.classList.add('text-slate-900', 'border-amber-300', 'bg-white');
+      }
+
       const tpObj = mAktif.babs.find(b => b.id === tpId);
       const hasil = hitungNilaiTPSiswa(nisn, tpObj);
-      document.getElementById(`total-${tpId}-${nisn}`).innerText = hasil.nilaiAkhirTP;
+      perbaruiTampilanBarisTP(nisn, tpId, hasil);
     }
 
     async function simpanNilaiSatuTP(tpId, tandaiSelesai) {
@@ -1051,7 +1114,7 @@
 
       if (tandaiSelesai) {
         tp.selesai = true;
-        kartuTerbukaManual[tp.id] = false; // Otomatis tertutup rapi
+        kartuTerbukaManual[tp.id] = false;
         await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
         renderHalamanInputTP();
         alert(`✅ Nilai ${tp.nama} tersimpan & kartu ditutup rapi! Silakan tambah TP berikutnya jika diperlukan.`);
@@ -1142,7 +1205,7 @@
         const h = hitungNilaiTPSiswa(s.NISN, tp);
         let r = { No: idx + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], Kelas: s.ID_Kelas };
         tp.tugas.forEach(t => r[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
-        r["Rata_Rata_Tugas"] = h.rataTugas;
+        r["Rata_Rata_Tugas"] = h.rataTugasStr;
         r["Penilaian_Harian_PH"] = h.nilaiPH;
         r["Total_Nilai_TP"] = h.nilaiAkhirTP;
         return r;
@@ -1159,7 +1222,9 @@
     // =========================================================================
     function renderHalamanPSAS() {
       const mAktif = getMapelAktif();
+      const kktp = getKKTPAktif();
       document.getElementById('judul-psas').innerText = `🎯 Input Nilai PSAS — ${mAktif.nama}`;
+      document.getElementById('subjudul-psas').innerText = `Standar KKTP: ${kktp} • Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP menjadi Nilai Rapor.`;
       const tbody = document.getElementById('tbody-psas');
       const siswaList = getSiswaTerfilter();
 
@@ -1170,6 +1235,10 @@
 
       tbody.innerHTML = siswaList.map((s, idx) => {
         const rekap = hitungRekapSiswa(s.NISN);
+        const warnaRataTP = isDiBawahKKTP(rekap.rataSeluruhTPNum) ? 'text-rose-600' : 'text-blue-900';
+        const warnaPSAS = isDiBawahKKTP(rekap.psasRaw) ? 'text-rose-600 border-rose-400 bg-rose-50/50' : 'text-slate-900 border-amber-300 bg-white';
+        const warnaRapor = isDiBawahKKTP(rekap.nilaiRapor) ? 'text-rose-600 bg-rose-50/80' : 'text-emerald-950 bg-emerald-50/60';
+
         return `
           <tr class="hover:bg-slate-50/80 transition">
             <td class="py-2.5 px-3 border-r border-slate-200 text-center text-slate-400 font-semibold">${idx + 1}</td>
@@ -1179,23 +1248,37 @@
             <td class="py-2.5 px-3 border-r border-slate-200 text-center">
               <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-bold">${s.ID_Kelas}</span>
             </td>
-            <td class="py-2.5 px-3 border-r border-slate-200 text-center font-bold text-blue-900 bg-blue-50/40">${rekap.rataSeluruhTP}</td>
+            <td class="py-2.5 px-3 border-r border-slate-200 text-center font-bold bg-blue-50/40 ${warnaRataTP}">${rekap.rataSeluruhTPStr}</td>
             <td class="py-1.5 px-3 border-r border-slate-200 text-center bg-amber-50/40">
               <input type="number" min="0" max="100" value="${rekap.psasRaw}"
-                oninput="updateInputPSAS('${s.NISN}', this.value)"
-                class="w-20 h-8 text-center border border-amber-300 rounded-lg text-xs font-bold bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none">
+                oninput="updateInputPSAS('${s.NISN}', this)"
+                class="w-20 h-8 text-center border rounded-lg text-xs font-bold focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 focus:outline-none ${warnaPSAS}">
             </td>
-            <td id="est-rapor-${s.NISN}" class="py-2.5 px-3 text-center font-extrabold text-emerald-950 bg-emerald-50/60">${rekap.nilaiRapor}</td>
+            <td id="est-rapor-${s.NISN}" class="py-2.5 px-3 text-center font-extrabold ${warnaRapor}">${rekap.nilaiRapor}</td>
           </tr>
         `;
       }).join('');
     }
 
-    function updateInputPSAS(nisn, val) {
+    function updateInputPSAS(nisn, inputEl) {
+      const val = inputEl.value;
       const mAktif = getMapelAktif();
       nilaiPSASGlobal[`${mAktif.id}_${nisn}`] = val === "" ? "" : Number(val);
+
+      if (isDiBawahKKTP(val)) {
+        inputEl.classList.remove('text-slate-900', 'border-amber-300', 'bg-white');
+        inputEl.classList.add('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+      } else {
+        inputEl.classList.remove('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
+        inputEl.classList.add('text-slate-900', 'border-amber-300', 'bg-white');
+      }
+
       const rekap = hitungRekapSiswa(nisn);
-      document.getElementById(`est-rapor-${nisn}`).innerText = rekap.nilaiRapor;
+      const elRapor = document.getElementById(`est-rapor-${nisn}`);
+      if (elRapor) {
+        elRapor.innerText = rekap.nilaiRapor;
+        elRapor.className = `py-2.5 px-3 text-center font-extrabold ${isDiBawahKKTP(rekap.nilaiRapor) ? 'text-rose-600 bg-rose-50/80' : 'text-emerald-950 bg-emerald-50/60'}`;
+      }
     }
 
     async function simpanNilaiPSASCloud() {
@@ -1244,12 +1327,13 @@
     }
 
     // =========================================================================
-    // HALAMAN 4: REKAP NILAI LEGER (3-LEVEL MULTI-HEADER PRESISI)
+    // HALAMAN 4: REKAP NILAI LEGER (3-LEVEL MULTI-HEADER + KKTP MERAH)
     // =========================================================================
     function renderHalamanLeger() {
       const mAktif = getMapelAktif();
+      const kktp = getKKTPAktif();
       document.getElementById('judul-rekap-leger').innerText = `📊 Rekap Nilai Leger — ${mAktif.nama}`;
-      document.getElementById('subjudul-rekap-leger').innerText = `Bobot TP: Tugas (${mAktif.bobotTugas}%) + PH (${mAktif.bobotPSH}%)  •  Bobot Rapor: Seluruh TP (${mAktif.bobotBAB}%) + PSAS (${mAktif.bobotPSAS}%)`;
+      document.getElementById('subjudul-rekap-leger').innerText = `Standar KKTP: ${kktp}  •  Bobot TP: Tugas (${mAktif.bobotTugas}%) + PH (${mAktif.bobotPSH}%)  •  Bobot Rapor: Seluruh TP (${mAktif.bobotBAB}%) + PSAS (${mAktif.bobotPSAS}%)`;
 
       const thead = document.getElementById('thead-leger');
       const tbody = document.getElementById('tbody-leger');
@@ -1320,19 +1404,27 @@
 
           tp.tugas.forEach(t => {
             const val = (rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-";
-            const merah = (val !== "-" && Number(val) < 70) ? "text-rose-600 font-bold" : "text-slate-700";
+            const merah = isDiBawahKKTP(val) ? "text-rose-600 font-bold" : "text-slate-700";
             cellsTP += `<td class="py-2 px-2 border-r border-slate-200 text-center ${merah}">${val}</td>`;
           });
 
           const phShow = (h.nilaiPH !== "" && h.nilaiPH !== undefined) ? h.nilaiPH : "-";
+          const warnaRata = isDiBawahKKTP(h.rataTugasNum) ? "text-rose-600" : "text-yellow-950";
+          const warnaPH = isDiBawahKKTP(phShow) ? "text-rose-600 font-bold" : "text-slate-800 font-semibold";
+          const warnaTotal = isDiBawahKKTP(h.nilaiAkhirTP) ? "text-rose-600 bg-rose-50" : w.total;
+
           cellsTP += `
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold text-yellow-950 bg-yellow-50/70">${h.rataTugas}</td>
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-semibold text-slate-800">${phShow}</td>
-            <td class="py-2 px-2 border-r border-slate-300 text-center font-extrabold ${w.total}">${h.nilaiAkhirTP}</td>
+            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-yellow-50/70 ${warnaRata}">${h.rataTugasStr}</td>
+            <td class="py-2 px-2 border-r border-slate-200 text-center ${warnaPH}">${phShow}</td>
+            <td class="py-2 px-2 border-r border-slate-300 text-center font-extrabold ${warnaTotal}">${h.nilaiAkhirTP}</td>
           `;
         });
 
         const psasShow = rekap.psasRaw !== "" ? rekap.psasRaw : "-";
+        const warnaRataSeluruhTP = isDiBawahKKTP(rekap.rataSeluruhTPNum) ? "text-rose-600" : "text-blue-950";
+        const warnaPSAS = isDiBawahKKTP(psasShow) ? "text-rose-600" : "text-amber-950";
+        const warnaRapor = isDiBawahKKTP(rekap.nilaiRapor) ? "text-rose-600 bg-rose-100/80" : "text-emerald-950 bg-emerald-100/80";
+
         return `
           <tr class="border-b border-slate-200 hover:bg-slate-50 transition">
             <td class="py-2 px-2 border-r border-slate-200 text-center text-slate-400 font-semibold">${sIdx + 1}</td>
@@ -1340,9 +1432,9 @@
             <td class="py-2 px-3 border-r border-slate-200 font-semibold text-slate-900">${s.Nama_Lengkap}</td>
             <td class="py-2 px-2 border-r border-slate-300 text-center font-semibold text-slate-600">${s["L/P"]}</td>
             ${cellsTP}
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-blue-50/70 text-blue-950">${rekap.rataSeluruhTP}</td>
-            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-amber-50/70 text-amber-950">${psasShow}</td>
-            <td class="py-2 px-2 text-center font-extrabold bg-emerald-100/80 text-emerald-950">${rekap.nilaiRapor}</td>
+            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-blue-50/70 ${warnaRataSeluruhTP}">${rekap.rataSeluruhTPStr}</td>
+            <td class="py-2 px-2 border-r border-slate-200 text-center font-bold bg-amber-50/70 ${warnaPSAS}">${psasShow}</td>
+            <td class="py-2 px-2 text-center font-extrabold ${warnaRapor}">${rekap.nilaiRapor}</td>
           </tr>
         `;
       }).join('');
@@ -1357,7 +1449,7 @@
       const rows = dataSiswaGlobal.map(s => {
         const nilaiTPs = mAktif.babs.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP);
         const rekap = hitungRekapSiswa(s.NISN);
-        return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s["L/P"], s.ID_Kelas, ...nilaiTPs, rekap.rataSeluruhTP, rekap.psasRaw === "" ? 0 : rekap.psasRaw, rekap.nilaiRapor];
+        return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s["L/P"], s.ID_Kelas, ...nilaiTPs, rekap.rataSeluruhTPStr, rekap.psasRaw === "" ? 0 : rekap.psasRaw, rekap.nilaiRapor];
       });
 
       await fetch(API_URL, {
@@ -1385,11 +1477,11 @@
           const h = hitungNilaiTPSiswa(s.NISN, tp);
           const prefix = tp.nama.split('-')[0].trim();
           tp.tugas.forEach(t => obj[`${prefix} - ${t}`] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
-          obj[`${prefix} - Rata_Tugas`] = h.rataTugas;
+          obj[`${prefix} - Rata_Tugas`] = h.rataTugasStr;
           obj[`${prefix} - PH`] = h.nilaiPH;
           obj[`${prefix} - Total_TP`] = h.nilaiAkhirTP;
         });
-        obj["Rata_Seluruh_TP"] = rekap.rataSeluruhTP;
+        obj["Rata_Seluruh_TP"] = rekap.rataSeluruhTPStr;
         obj["Nilai_PSAS"] = rekap.psasRaw;
         obj["Nilai_Rapor"] = rekap.nilaiRapor;
         return obj;
@@ -1410,7 +1502,7 @@
         const rekap = hitungRekapSiswa(s.NISN);
         let obj = { No: idx + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], Kelas: s.ID_Kelas };
         mAktif.babs.forEach(tp => obj[tp.nama] = hitungNilaiTPSiswa(s.NISN, tp).nilaiAkhirTP);
-        obj["Rata_Seluruh_TP"] = rekap.rataSeluruhTP;
+        obj["Rata_Seluruh_TP"] = rekap.rataSeluruhTPStr;
         obj["Nilai_PSAS"] = rekap.psasRaw;
         obj["Nilai_Rapor"] = rekap.nilaiRapor;
         return obj;
@@ -1423,7 +1515,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 5: CETAK & KIRIM NILAI (PDF & WHATSAPP WALI KELAS)
+    // HALAMAN 5: CETAK & KIRIM NILAI (PDF DENGAN PEWARNAAN KKTP & WHATSAPP)
     // =========================================================================
     function renderHalamanCetakKirim() {
       const mAktif = getMapelAktif();
@@ -1439,6 +1531,7 @@
 
     function cetakPDF(tipe, tpId = null) {
       const mAktif = getMapelAktif();
+      const kktp = getKKTPAktif();
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
 
@@ -1459,7 +1552,7 @@
         doc.text(`DAFTAR NILAI TUJUAN PEMBELAJARAN — ${mAktif.nama.toUpperCase()}`, 14, 14);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text(`Tujuan Pembelajaran: ${tp.nama}  |  ${labelKelas}`, 14, 20);
+        doc.text(`Tujuan Pembelajaran: ${tp.nama}  |  ${labelKelas}  |  KKTP: ${kktp}`, 14, 20);
 
         head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...tp.tugas, "Rata Tugas", "PH", "Total TP"]];
         body = siswaList.map((s, i) => {
@@ -1469,7 +1562,7 @@
           return [
             i + 1, s.NISN, s.Nama_Lengkap, s["L/P"],
             ...tp.tugas.map(t => (rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-"),
-            h.rataTugas, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP
+            h.rataTugasStr, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP
           ];
         });
         namaFile = `Nilai_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
@@ -1478,7 +1571,7 @@
         doc.text(`REKAP NILAI LEGER LENGKAP — ${mAktif.nama.toUpperCase()}`, 14, 14);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text(`${labelKelas}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
+        doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
 
         let kolomDinamis = [];
         mAktif.babs.forEach((b, idx) => {
@@ -1496,9 +1589,9 @@
             const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
             const h = hitungNilaiTPSiswa(s.NISN, b);
             b.tugas.forEach(t => vals.push((rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-"));
-            vals.push(h.rataTugas, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP);
+            vals.push(h.rataTugasStr, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP);
           });
-          return [i + 1, s.NISN, s.Nama_Lengkap, s["L/P"], ...vals, rekap.rataSeluruhTP, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor];
+          return [i + 1, s.NISN, s.Nama_Lengkap, s["L/P"], ...vals, rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor];
         });
         namaFile = `Rekap_Nilai_Leger_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
       } 
@@ -1506,7 +1599,7 @@
         doc.text(`DAFTAR NILAI RAPOR AKHIR — ${mAktif.nama.toUpperCase()}`, 14, 14);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text(`${labelKelas}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
+        doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
 
         head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...mAktif.babs.map(b => b.nama.split('-')[0].trim()), "Rata Seluruh TP", "PSAS", "Nilai Rapor"]];
         body = siswaList.map((s, i) => {
@@ -1514,7 +1607,7 @@
           return [
             i + 1, s.NISN, s.Nama_Lengkap, s["L/P"],
             ...mAktif.babs.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP),
-            rekap.rataSeluruhTP, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor
+            rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor
           ];
         });
         namaFile = `Nilai_Rapor_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
@@ -1527,7 +1620,16 @@
         theme: "grid",
         styles: { fontSize: 7.5, cellPadding: 1.5, halign: "center" },
         columnStyles: { 2: { halign: "left" } },
-        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" }
+        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+        didParseCell: function (data) {
+          if (data.section === 'body' && data.column.index >= 4) {
+            const val = parseFloat(data.cell.raw);
+            if (!isNaN(val) && val < kktp) {
+              data.cell.styles.textColor = [220, 38, 38]; // Merah di PDF jika di bawah KKTP
+              data.cell.styles.fontStyle = 'bold';
+            }
+          }
+        }
       });
 
       doc.save(namaFile);
@@ -1549,7 +1651,7 @@
     }
 
     // =========================================================================
-    // MODAL PENGATURAN MAPEL & BOBOT
+    // MODAL PENGATURAN MAPEL, KKTP & BOBOT
     // =========================================================================
     function bukaModalMapelBobot() {
       tempConfig = JSON.parse(JSON.stringify(configGlobal));
@@ -1563,6 +1665,7 @@
     function simpanFormBobotModalKeTemp() {
       const m = tempConfig.mapels.find(x => x.id === tempMapelModalId);
       if (!m) return;
+      m.kktp = Number(document.getElementById('modal-kktp-mapel').value) || 0;
       m.bobotTugas = Number(document.getElementById('modal-bobot-tugas').value) || 0;
       m.bobotPSH = Number(document.getElementById('modal-bobot-psh').value) || 0;
       m.bobotBAB = Number(document.getElementById('modal-bobot-bab').value) || 0;
@@ -1571,12 +1674,13 @@
 
     function renderModalMapelBobot() {
       document.getElementById('modal-pilih-mapel').innerHTML = tempConfig.mapels.map(m => 
-        `<option value="${m.id}" ${m.id === tempMapelModalId ? 'selected' : ''}>${m.nama}</option>`
+        `<option value="${m.id}" ${m.id === tempMapelModalId ? 'selected' : ''}>${m.nama} (KKTP: ${m.kktp ?? 75})</option>`
       ).join('');
       document.getElementById('btn-hapus-mapel-modal').classList.toggle('hidden', tempConfig.mapels.length <= 1);
 
       const m = tempConfig.mapels.find(x => x.id === tempMapelModalId);
       document.getElementById('modal-nama-mapel').value = m.nama;
+      document.getElementById('modal-kktp-mapel').value = m.kktp ?? 75;
       document.getElementById('modal-bobot-tugas').value = m.bobotTugas;
       document.getElementById('modal-bobot-psh').value = m.bobotPSH;
       document.getElementById('modal-bobot-bab').value = m.bobotBAB;
@@ -1589,13 +1693,13 @@
       if (m) {
         m.nama = val;
         const opt = document.querySelector(`#modal-pilih-mapel option[value="${tempMapelModalId}"]`);
-        if (opt) opt.innerText = val;
+        if (opt) opt.innerText = `${val} (KKTP: ${m.kktp ?? 75})`;
       }
     }
     function tambahMapelModal() {
       simpanFormBobotModalKeTemp();
       const id = "MAPEL_" + Date.now();
-      tempConfig.mapels.push({ id: id, nama: "Mata Pelajaran Baru", bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30, babs: [] });
+      tempConfig.mapels.push({ id: id, nama: "Mata Pelajaran Baru", kktp: 75, bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30, babs: [] });
       tempMapelModalId = id;
       renderModalMapelBobot();
     }
@@ -1610,6 +1714,7 @@
       simpanFormBobotModalKeTemp();
       for (const m of tempConfig.mapels) {
         if (!m.nama.trim()) return alert("Nama mata pelajaran tidak boleh kosong!");
+        if (m.kktp < 0 || m.kktp > 100) return alert(`Nilai KKTP pada mapel "${m.nama}" harus antara 0 - 100!`);
         if (m.bobotTugas + m.bobotPSH !== 100 || m.bobotBAB + m.bobotPSAS !== 100) {
           return alert(`Total bobot pada mapel "${m.nama}" harus 100%!`);
         }
