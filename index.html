@@ -611,6 +611,7 @@
     }
 
     function gantiMenu(namaMenu) {
+      localStorage.setItem('erapor_menu_aktif', namaMenu);
       menuAktif = namaMenu;
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
       document.getElementById('halaman-' + namaMenu).classList.remove('hidden');
@@ -645,8 +646,14 @@
     }
 
     async function muatSemuaData() {
-      sinkronTopbar();
-      renderHalamanInputTP();
+      // Langsung buka tab halaman terakhir sebelum loading selesai agar tidak berkedip ke Data Siswa
+      const savedMenuAwal = localStorage.getItem('erapor_menu_aktif');
+      const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
+      if (validMenus.includes(savedMenuAwal) && savedMenuAwal !== 'Data Siswa') {
+        gantiMenu(savedMenuAwal);
+      } else {
+        sinkronTopbar();
+      }
 
       if (!API_URL || API_URL.includes("MASUKKAN_URL_GAS")) {
         alert("⚠️ URL Google Apps Script belum dimasukkan di file index.html! Silakan ganti tulisan MASUKKAN_URL_GAS_ANDA_DI_SINI dengan URL Web App GAS Anda.");
@@ -670,23 +677,30 @@
         if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
         if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
 
-        if (!configGlobal.mapels.find(m => m.id === mapelAktifId)) {
+        // Pulihkan Mapel, Kelas, dan Halaman terakhir dari localStorage
+        const savedMapel = localStorage.getItem('erapor_mapel_aktif');
+        if (savedMapel && configGlobal.mapels.find(m => m.id === savedMapel)) {
+          mapelAktifId = savedMapel;
+        } else if (!configGlobal.mapels.find(m => m.id === mapelAktifId)) {
           mapelAktifId = configGlobal.mapels[0].id;
         }
 
-        sinkronTopbar();
-        renderTabelSiswa();
-        if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
-        if (menuAktif === 'Input Nilai PSAS') renderHalamanPSAS();
-        if (menuAktif === 'Rekap Nilai Leger') renderHalamanLeger();
-        if (menuAktif === 'Cetak & Kirim Nilai') renderHalamanCetakKirim();
+        const savedKelas = localStorage.getItem('erapor_kelas_aktif');
+        const kelasUnik = [...new Set(dataSiswaGlobal.map(s => String(s.ID_Kelas)).filter(Boolean))];
+        if (savedKelas && (savedKelas === 'ALL' || kelasUnik.includes(savedKelas))) {
+          kelasAktifFilter = savedKelas;
+        }
+
+        const savedMenu = localStorage.getItem('erapor_menu_aktif');
+        const targetMenu = validMenus.includes(savedMenu) ? savedMenu : 'Data Siswa';
+
+        gantiMenu(targetMenu);
       } catch (e) {
         console.error(e);
         alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS benar dan sudah di-Deploy versi terbaru.");
       }
       setLoading(false);
     }
-
     function sinkronTopbar() {
       const mAktif = getMapelAktif();
       document.getElementById('sidebar-mapel-aktif').innerText = mAktif.nama;
@@ -714,6 +728,7 @@
     }
 
     function gantiMapelAktif(newId) {
+      localStorage.setItem('erapor_mapel_aktif', newId); // <-- TAMBAHKAN BARIS INI
       mapelAktifId = newId;
       sinkronTopbar();
       if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
@@ -723,6 +738,7 @@
     }
 
     function gantiFilterKelas(val) {
+      localStorage.setItem('erapor_kelas_aktif', val); // <-- TAMBAHKAN BARIS INI
       kelasAktifFilter = val;
       tutupPanelSalinTPKelas();
       tutupPanelTambahTugasCepat();
