@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-Rapor Digital • Buku Nilai Kurikulum Merdeka</title>
+  <title>Buku Nilai Digital • Kurikulum Merdeka</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
@@ -44,13 +44,12 @@
   <aside id="sidebar" class="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-2xl shrink-0 transition-all duration-300 overflow-hidden border-r border-slate-800">
     <div class="h-16 px-5 border-b border-slate-800 flex items-center gap-3 shrink-0">
       <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-extrabold text-white text-base shadow-inner shrink-0">
-        ER
-      </div>
-      <div class="min-w-0">
-        <div class="text-sm font-extrabold tracking-tight text-white truncate">E-RAPOR DIGITAL</div>
-        <div class="text-[11px] font-medium text-emerald-400 truncate">Kurikulum Merdeka</div>
-      </div>
-    </div>
+  BN
+</div>
+<div class="min-w-0">
+  <div class="text-sm font-extrabold tracking-tight text-white truncate">BUKU NILAI DIGITAL</div>
+  <div class="text-[11px] font-medium text-emerald-400 truncate">Kurikulum Merdeka</div>
+</div>
 
     <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800">
       <div class="flex justify-between items-center">
@@ -2636,7 +2635,7 @@
           doc.setFontSize(8);
           doc.setTextColor(148, 163, 184);
           doc.text(
-            `E-Rapor Digital Kurikulum Merdeka  •  Dicetak pada ${new Date().toLocaleDateString("id-ID")}  •  Halaman ${doc.internal.getNumberOfPages()}`,
+            `Buku Nilai Digital Kurikulum Merdeka  •  Dicetak pada ${new Date().toLocaleDateString("id-ID")}  •  Halaman ${doc.internal.getNumberOfPages()}`,
             10,
             doc.internal.pageSize.getHeight() - 5
           );
