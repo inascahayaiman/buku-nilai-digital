@@ -186,7 +186,6 @@
       <!-- =================================================================== -->
       <div id="halaman-Input Nilai TP" class="halaman hidden w-full max-w-full space-y-4">
         
-        <!-- Bilah Aksi Manajemen Kelas, TP/Materi & Tugas -->
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/90 flex flex-wrap justify-between items-center gap-3">
           <div class="flex flex-wrap items-center gap-3">
             <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
@@ -277,7 +276,6 @@
           </div>
         </div>
 
-        <!-- Daftar Kartu TP per Kelas -->
         <div id="container-kartu-tp" class="space-y-4"></div>
       </div>
 
@@ -1569,7 +1567,6 @@
         { top: "bg-amber-500 text-white", sub: "bg-amber-50 text-amber-950", total: "bg-amber-100 text-amber-950" }
       ];
 
-      // Kolom Identitas Sticky di Kiri (Lebar Presisi agar tidak tumpang tindih saat di-scroll)
       let row1 = `
         <tr class="border-b border-slate-300 font-bold text-center text-[11px] uppercase tracking-wider whitespace-nowrap">
           <th rowspan="3" class="sticky left-0 z-20 px-2 py-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-[44px] min-w-[44px]">No</th>
@@ -1748,7 +1745,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 5: CETAK & KIRIM NILAI (PER KELAS)
+    // HALAMAN 5: CETAK & KIRIM NILAI (PDF RAPI BERTINGKAT & ANTI TERPOTONG)
     // =========================================================================
     function renderHalamanCetakKirim() {
       const mAktif = getMapelAktif();
@@ -1779,51 +1776,123 @@
       if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
 
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
       const labelKelas = `Kelas ${kelasAktifFilter}`;
 
+      // Hitung jumlah total kolom jika tipe LEGER untuk memilih ukuran kertas yang lapang
+      let totalKolomLeger = 7;
+      daftarTP.forEach(b => { totalKolomLeger += (b.tugas.length + 3); });
+
+      let formatKertas = "a4";
+      if (tipe === "LEGER") {
+        if (totalKolomLeger > 24) formatKertas = "a3";        // 420mm x 297mm
+        else if (totalKolomLeger > 15) formatKertas = [330, 215]; // F4 / Folio Landscape
+      }
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: formatKertas });
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Kop Judul Dokumen yang Rapi & Profesional
+      doc.setTextColor(15, 23, 42);
       doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
 
       let head = [];
       let body = [];
       let namaFile = "Laporan_Nilai.pdf";
+      let columnStyles = {
+        0: { cellWidth: 9, halign: "center" },
+        1: { cellWidth: 24, halign: "center" },
+        2: { cellWidth: 46, halign: "left" },
+        3: { cellWidth: 9, halign: "center" }
+      };
 
       if (tipe === "TP") {
         const tp = daftarTP.find(b => b.id === tpId);
         if (!tp) return alert("Pilih Tujuan Pembelajaran (TP) terlebih dahulu!");
-        doc.text(`DAFTAR NILAI TUJUAN PEMBELAJARAN — ${mAktif.nama.toUpperCase()}`, 14, 14);
-        doc.setFontSize(10);
+        doc.text(`DAFTAR NILAI TUJUAN PEMBELAJARAN — ${mAktif.nama.toUpperCase()}`, 12, 13);
+        doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal");
-        doc.text(`Tujuan Pembelajaran: ${tp.nama}  |  ${labelKelas}  |  KKTP: ${kktp}`, 14, 20);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`Tujuan Pembelajaran: ${tp.nama}   |   ${labelKelas}   |   Standar KKTP: ${kktp}`, 12, 19);
 
-        head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...tp.tugas, "Rata Tugas", "PH", "Total TP"]];
+        head = [[
+          { content: "No", rowSpan: 2, styles: { valign: "middle" } },
+          { content: "NISN / NIS", rowSpan: 2, styles: { valign: "middle" } },
+          { content: "Nama Lengkap", rowSpan: 2, styles: { valign: "middle", halign: "left" } },
+          { content: "L/P", rowSpan: 2, styles: { valign: "middle" } },
+          { content: tp.nama, colSpan: tp.tugas.length + 3, styles: { fillColor: [5, 150, 105], textColor: 255 } }
+        ], [
+          ...tp.tugas.map(t => ({ content: t })),
+          { content: "Rata Tugas", styles: { fillColor: [254, 243, 199], textColor: [120, 53, 15] } },
+          { content: "PH", styles: { fillColor: [224, 242, 254], textColor: [12, 74, 110] } },
+          { content: "Total TP", styles: { fillColor: [209, 250, 229], textColor: [6, 78, 59] } }
+        ]];
+
         body = siswaList.map((s, i) => {
           const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
           const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
           const h = hitungNilaiTPSiswa(s.NISN, tp);
           return [
-            i + 1, s.NISN, s.Nama_Lengkap, s["L/P"],
+            i + 1,
+            String(s.NISN),
+            s.Nama_Lengkap,
+            s["L/P"],
             ...tp.tugas.map(t => (rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-"),
-            h.rataTugasStr, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP
+            h.rataTugasStr,
+            h.nilaiPH !== "" ? h.nilaiPH : "-",
+            h.nilaiAkhirTP
           ];
         });
         namaFile = `Nilai_${kelasAktifFilter}_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       } 
       else if (tipe === "LEGER") {
-        doc.text(`REKAP NILAI LEGER LENGKAP — ${mAktif.nama.toUpperCase()}`, 14, 14);
-        doc.setFontSize(10);
+        doc.text(`REKAP NILAI LEGER LENGKAP — ${mAktif.nama.toUpperCase()}`, 12, 13);
+        doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal");
-        doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`${labelKelas}   |   Standar KKTP: ${kktp}   |   Bobot TP: Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}%   |   Bobot Rapor: TP ${mAktif.bobotBAB}% + PSAS ${mAktif.bobotPSAS}%`, 12, 19);
 
-        let kolomDinamis = [];
+        const paletHeaderTP = [
+          [5, 150, 105],   // Emerald
+          [2, 132, 199],   // Sky
+          [217, 119, 6],   // Amber
+          [79, 70, 229]    // Indigo
+        ];
+
+        // Header Bertingkat 2 Baris (Induk TP di Baris 1, Sub-kolom Ringkas di Baris 2)
+        let barisHeader1 = [
+          { content: "No", rowSpan: 2, styles: { valign: "middle" } },
+          { content: "NISN / NIS", rowSpan: 2, styles: { valign: "middle" } },
+          { content: "Nama Lengkap", rowSpan: 2, styles: { valign: "middle", halign: "left" } },
+          { content: "L/P", rowSpan: 2, styles: { valign: "middle" } }
+        ];
+        let barisHeader2 = [];
+
         daftarTP.forEach((b, idx) => {
-          const kode = `TP${idx + 1}`;
-          b.tugas.forEach(t => kolomDinamis.push(`${kode}:${t}`));
-          kolomDinamis.push(`${kode}:Rata`, `${kode}:PH`, `${kode}:Total`);
+          const warna = paletHeaderTP[idx % paletHeaderTP.length];
+          const judulSingkatTP = b.nama.length > 34 ? b.nama.substring(0, 32) + "..." : b.nama;
+          barisHeader1.push({
+            content: judulSingkatTP,
+            colSpan: b.tugas.length + 3,
+            styles: { fillColor: warna, textColor: 255, halign: "center" }
+          });
+
+          b.tugas.forEach(t => {
+            barisHeader2.push({ content: t, styles: { fillColor: [241, 245, 249], textColor: [30, 41, 59] } });
+          });
+          barisHeader2.push({ content: "Rata", styles: { fillColor: [254, 249, 195], textColor: [113, 63, 18] } });
+          barisHeader2.push({ content: "PH", styles: { fillColor: [224, 242, 254], textColor: [12, 74, 110] } });
+          barisHeader2.push({ content: "Total", styles: { fillColor: [209, 250, 229], textColor: [6, 78, 59], fontStyle: "bold" } });
         });
 
-        head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...kolomDinamis, "Rata TP", "PSAS", "Rapor"]];
+        barisHeader1.push(
+          { content: "Rata TP", rowSpan: 2, styles: { valign: "middle", fillColor: [30, 64, 175], textColor: 255 } },
+          { content: "PSAS", rowSpan: 2, styles: { valign: "middle", fillColor: [180, 83, 9], textColor: 255 } },
+          { content: "Rapor", rowSpan: 2, styles: { valign: "middle", fillColor: [6, 95, 70], textColor: 255 } }
+        );
+
+        head = [barisHeader1, barisHeader2];
+
         body = siswaList.map((s, i) => {
           const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
           let vals = [];
@@ -1834,36 +1903,91 @@
             b.tugas.forEach(t => vals.push((rec.tugas && rec.tugas[t] !== undefined && rec.tugas[t] !== "") ? rec.tugas[t] : "-"));
             vals.push(h.rataTugasStr, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP);
           });
-          return [i + 1, s.NISN, s.Nama_Lengkap, s["L/P"], ...vals, rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor];
+          return [
+            i + 1,
+            String(s.NISN),
+            s.Nama_Lengkap,
+            s["L/P"],
+            ...vals,
+            rekap.rataSeluruhTPStr,
+            rekap.psasRaw !== "" ? rekap.psasRaw : "-",
+            rekap.nilaiRapor
+          ];
         });
         namaFile = `Rekap_Nilai_Leger_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       } 
       else if (tipe === "RAPOR") {
-        doc.text(`DAFTAR NILAI RAPOR AKHIR — ${mAktif.nama.toUpperCase()}`, 14, 14);
-        doc.setFontSize(10);
+        doc.text(`DAFTAR NILAI RAPOR AKHIR — ${mAktif.nama.toUpperCase()}`, 12, 13);
+        doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal");
-        doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`${labelKelas}   |   Standar KKTP: ${kktp}   |   Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 12, 19);
 
-        head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...daftarTP.map(b => b.nama.split('-')[0].trim()), "Rata Seluruh TP", "PSAS", "Nilai Rapor"]];
+        head = [[
+          { content: "No", styles: { valign: "middle" } },
+          { content: "NISN / NIS", styles: { valign: "middle" } },
+          { content: "Nama Lengkap", styles: { valign: "middle", halign: "left" } },
+          { content: "L/P", styles: { valign: "middle" } },
+          ...daftarTP.map(b => ({ content: b.nama.split('-')[0].trim() })),
+          { content: "Rata Seluruh TP", styles: { fillColor: [30, 64, 175], textColor: 255 } },
+          { content: "PSAS", styles: { fillColor: [180, 83, 9], textColor: 255 } },
+          { content: "Nilai Rapor", styles: { fillColor: [6, 95, 70], textColor: 255 } }
+        ]];
         body = siswaList.map((s, i) => {
           const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
           return [
-            i + 1, s.NISN, s.Nama_Lengkap, s["L/P"],
+            i + 1,
+            String(s.NISN),
+            s.Nama_Lengkap,
+            s["L/P"],
             ...daftarTP.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP),
-            rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor
+            rekap.rataSeluruhTPStr,
+            rekap.psasRaw !== "" ? rekap.psasRaw : "-",
+            rekap.nilaiRapor
           ];
         });
         namaFile = `Nilai_Rapor_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       }
 
+      // Hitung lebar kolom nilai dinamis agar simetris memenuhi lebar halaman
+      const lebarIdentitas = 9 + 24 + 46 + 9; // 88mm
+      const marginKiriKanan = 24; // 12mm kiri + 12mm kanan
+      const jumlahKolomNilai = (head[head.length - 1].length) - 4;
+      if (tipe === "LEGER") {
+        // Pada header 2 baris leger, total kolom = 4 + sum(tugas + 3) + 3
+        const sisaLebar = pageWidth - marginKiriKanan - lebarIdentitas;
+        const lebarPerKolomNilai = Math.max(11.5, Math.min(20, sisaLebar / Math.max(1, totalKolomLeger - 4)));
+        for (let c = 4; c < totalKolomLeger; c++) {
+          columnStyles[c] = { cellWidth: lebarPerKolomNilai, halign: "center" };
+        }
+      }
+
       doc.autoTable({
         head: head,
         body: body,
-        startY: 25,
+        startY: 23,
+        margin: { left: 12, right: 12, bottom: 14 },
         theme: "grid",
-        styles: { fontSize: 7.5, cellPadding: 1.5, halign: "center" },
-        columnStyles: { 2: { halign: "left" } },
-        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+        styles: {
+          fontSize: tipe === "LEGER" && totalKolomLeger > 18 ? 7.2 : 8,
+          cellPadding: { top: 2, right: 1.5, bottom: 2, left: 1.5 },
+          halign: "center",
+          valign: "middle",
+          lineColor: [203, 213, 225],
+          lineWidth: 0.2,
+          overflow: "linebreak"
+        },
+        columnStyles: columnStyles,
+        headStyles: {
+          fillColor: [15, 23, 42],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+          valign: "middle"
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
         didParseCell: function (data) {
           if (data.section === 'body' && data.column.index >= 4) {
             const val = parseFloat(data.cell.raw);
@@ -1872,6 +1996,25 @@
               data.cell.styles.fontStyle = 'bold';
             }
           }
+          // Tebalkan kolom Total TP, Rata TP, PSAS, dan Rapor
+          if (data.section === 'body' && tipe === "LEGER") {
+            const totalCols = data.table.columns.length;
+            if (data.column.index >= totalCols - 3) {
+              data.cell.styles.fontStyle = 'bold';
+            }
+            if (data.column.index === totalCols - 1) {
+              data.cell.styles.fillColor = [236, 253, 245];
+            }
+          }
+        },
+        didDrawPage: function (data) {
+          doc.setFontSize(8);
+          doc.setTextColor(148, 163, 184);
+          doc.text(
+            `E-Rapor Digital Kurikulum Merdeka  •  Dicetak pada ${new Date().toLocaleDateString("id-ID")}  •  Halaman ${doc.internal.getNumberOfPages()}`,
+            12,
+            doc.internal.pageSize.getHeight() - 6
+          );
         }
       });
 
