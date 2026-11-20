@@ -1125,11 +1125,11 @@
 
     let dataSiswaGlobal = [];
     let halamanSiswaAktif = 1;
-    let mapelAktifId = "MAPEL_DEFAULT";
-    let kelasAktifFilter = "ALL";
+    let mapelAktifId = sessionStorage.getItem("bnd_mapel_aktif") || "MAPEL_DEFAULT";
+    let kelasAktifFilter = sessionStorage.getItem("bnd_kelas_aktif") || "ALL";
     let nilaiDetailGlobal = {};
     let nilaiPSASGlobal = {};
-    let menuAktif = "Dashboard";
+    let menuAktif = sessionStorage.getItem("bnd_menu_aktif") || "Dashboard";
     let kartuTerbukaManual = {};
     let adaPerubahanBelumDisimpan = false;
     let hanyaTampilkanRemedial = false;
@@ -1334,6 +1334,7 @@
 
     function gantiMenu(namaMenu) {
       menuAktif = namaMenu;
+      sessionStorage.setItem("bnd_menu_aktif", namaMenu);
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
       const hal = document.getElementById('halaman-' + namaMenu);
       if (hal) hal.classList.remove('hidden');
@@ -1443,11 +1444,13 @@
 
     function gantiMapelAktif(newId) {
       mapelAktifId = newId;
+      sessionStorage.setItem("bnd_mapel_aktif", newId);
       gantiMenu(menuAktif);
     }
 
     function gantiFilterKelas(val) {
       kelasAktifFilter = val;
+      sessionStorage.setItem("bnd_kelas_aktif", val);
       halamanSiswaAktif = 1;
       gantiMenu(menuAktif);
     }
