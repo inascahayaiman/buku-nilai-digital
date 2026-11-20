@@ -39,17 +39,18 @@
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- ===================================================================== -->
-  <!-- SIDEBAR E-RAPOR MODERN (COLLAPSIBLE)                                  -->
+  <!-- SIDEBAR BUKU NILAI MODERN (COLLAPSIBLE)                               -->
   <!-- ===================================================================== -->
   <aside id="sidebar" class="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-2xl shrink-0 transition-all duration-300 overflow-hidden border-r border-slate-800">
     <div class="h-16 px-5 border-b border-slate-800 flex items-center gap-3 shrink-0">
       <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-extrabold text-white text-base shadow-inner shrink-0">
-  BN
-</div>
-<div class="min-w-0">
-  <div class="text-sm font-extrabold tracking-tight text-white truncate">BUKU NILAI DIGITAL</div>
-  <div class="text-[11px] font-medium text-emerald-400 truncate">Kurikulum Merdeka</div>
-</div>
+        BN
+      </div>
+      <div class="min-w-0">
+        <div class="text-sm font-extrabold tracking-tight text-white truncate">BUKU NILAI DIGITAL</div>
+        <div class="text-[11px] font-medium text-emerald-400 truncate">Kurikulum Merdeka</div>
+      </div>
+    </div>
 
     <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800">
       <div class="flex justify-between items-center">
@@ -544,7 +545,7 @@
     // URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
-    const CACHE_KEY = "erapor_cloud_cache_v2";
+    const CACHE_KEY = "bukunilai_cloud_cache_v2";
 
     let dataSiswaGlobal = [];
     let configGlobal = {
@@ -694,26 +695,26 @@
     }
 
     function pulihkanStateNavigasi() {
-      const savedMapel = localStorage.getItem('erapor_mapel_aktif');
+      const savedMapel = localStorage.getItem('bukunilai_mapel_aktif');
       if (savedMapel && configGlobal.mapels.find(m => m.id === savedMapel)) {
         mapelAktifId = savedMapel;
       } else if (configGlobal.mapels.length > 0) {
         mapelAktifId = configGlobal.mapels[0].id;
       }
 
-      const savedKelas = localStorage.getItem('erapor_kelas_aktif');
+      const savedKelas = localStorage.getItem('bukunilai_kelas_aktif');
       const kelasUnik = [...new Set(dataSiswaGlobal.map(s => String(s.ID_Kelas)).filter(Boolean))];
       if (savedKelas && (savedKelas === 'ALL' || kelasUnik.includes(savedKelas))) {
         kelasAktifFilter = savedKelas;
       }
 
       const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
-      const savedMenu = localStorage.getItem('erapor_menu_aktif');
+      const savedMenu = localStorage.getItem('bukunilai_menu_aktif');
       return validMenus.includes(savedMenu) ? savedMenu : 'Data Siswa';
     }
 
     function gantiMenu(namaMenu) {
-      localStorage.setItem('erapor_menu_aktif', namaMenu);
+      localStorage.setItem('bukunilai_menu_aktif', namaMenu);
       menuAktif = namaMenu;
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
       document.getElementById('halaman-' + namaMenu).classList.remove('hidden');
@@ -723,8 +724,10 @@
         btn.classList.add('text-slate-300', 'hover:bg-slate-800', 'hover:text-white', 'font-medium');
       });
       const activeBtn = document.getElementById('btn-' + namaMenu);
-      activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800', 'hover:text-white', 'font-medium');
-      activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-sm', 'font-semibold');
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800', 'hover:text-white', 'font-medium');
+        activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-sm', 'font-semibold');
+      }
 
       document.getElementById('topbar-judul').innerText = namaMenu;
       document.getElementById('topbar-subjudul').innerText = SUBJUDUL_MENU[namaMenu] || "";
@@ -753,13 +756,12 @@
         return;
       }
 
-      // 1. Tampilkan data dari cache lokal seketika (0 ms delay)
       const adaCache = muatDariCacheLokal();
       if (adaCache) {
         const targetMenuAwal = pulihkanStateNavigasi();
         gantiMenu(targetMenuAwal);
       } else {
-        const savedMenuAwal = localStorage.getItem('erapor_menu_aktif');
+        const savedMenuAwal = localStorage.getItem('bukunilai_menu_aktif');
         const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
         if (validMenus.includes(savedMenuAwal) && savedMenuAwal !== 'Data Siswa') {
           gantiMenu(savedMenuAwal);
@@ -768,12 +770,10 @@
         }
       }
 
-      // Hanya tampilkan spinner besar jika cache kosong atau diminta paksa
       if (!adaCache || paksaSpinner) setLoading(true);
       setCloudStatus('syncing', 'Menyinkronkan...');
 
       try {
-        // 2. Cukup 1x request ke getInitialData (mengurangi cold start GAS hingga 50%)
         const res = await fetch(`${API_URL}?action=getInitialData`).then(r => r.json());
         
         if (res.status === "success") {
@@ -833,7 +833,7 @@
     }
 
     function gantiMapelAktif(newId) {
-      localStorage.setItem('erapor_mapel_aktif', newId);
+      localStorage.setItem('bukunilai_mapel_aktif', newId);
       mapelAktifId = newId;
       sinkronTopbar();
       if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
@@ -843,7 +843,7 @@
     }
 
     function gantiFilterKelas(val) {
-      localStorage.setItem('erapor_kelas_aktif', val);
+      localStorage.setItem('bukunilai_kelas_aktif', val);
       kelasAktifFilter = val;
       tutupPanelSalinTPKelas();
       tutupPanelTambahTugasCepat();
