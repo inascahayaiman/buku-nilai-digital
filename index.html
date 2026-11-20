@@ -33,6 +33,15 @@
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+  
+  <!-- GLOBAL PROCESSING INDICATOR (OTOMATIS SAAT MENYIMPAN / MENGIRIM KE CLOUD) -->
+<div id="global-loading-pill" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-[80] bg-slate-900/95 text-white px-4 py-2.5 rounded-full shadow-2xl border border-emerald-500/40 flex items-center gap-2.5 text-xs font-bold backdrop-blur-md">
+  <svg class="animate-spin h-4 w-4 text-emerald-400 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+  </svg>
+  <span id="global-loading-text">Menyimpan data ke Cloud...</span>
+</div>
 
   <!-- ===================================================================== -->
   <!-- LAYAR LOGIN KEAMANAN (USERNAME & PASSWORD)                            -->
@@ -1227,13 +1236,61 @@
       "Pengaturan": "Profil guru, konfigurasi satuan pendidikan, rubrik CP, keamanan akun & arsip"
     };
 
-    function apiPost(payloadObj) {
-      return fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({ ...payloadObj, token: SECRET_TOKEN })
-      });
-    }
+    const LABEL_AKSI_CLOUD = {
+   saveConfig: "Menyimpan pengaturan & konfigurasi...",
+   saveNilaiBab: "Menyimpan nilai TP ke Cloud...",
+   saveRekapRapor: "Menyinkronkan nilai PSAS & Leger...",
+   add: "Menambahkan data siswa baru...",
+   update: "Memperbarui data siswa...",
+   delete: "Menghapus data siswa...",
+   import: "Mengimpor data siswa ke Cloud...",
+   archiveAndReset: "Mengarsipkan semester & mereset data...",
+   cleanupUnusedSheets: "Membersihkan tab tidak terpakai..."
+ };
 
+ function setLoadingProses(aktif, pesan = "Sedang memproses...") {
+   const pill = document.getElementById('global-loading-pill');
+   const txt = document.getElementById('global-loading-text');
+   if (pill && txt) {
+     txt.innerText = pesan;
+     pill.classList.toggle('hidden', !aktif);
+   }
+   setCloudStatus(aktif ? 'syncing' : 'ok', aktif ? 'Menyimpan...' : 'Tersinkronisasi');
+ }
+
+ async function apiPost(payloadObj) {
+   const pesan = LABEL_AKSI_CLOUD[payloadObj.action] || "Sedang mengirim data ke Cloud...";
+   setLoadingProses(true, pesan);
+
+   // Deteksi otomatis tombol yang sedang diklik agar berubah menjadi "Memproses..."
+   const activeBtn = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
+   let htmlAsli = "";
+   if (activeBtn && !activeBtn.disabled) {
+     htmlAsli = activeBtn.innerHTML;
+     activeBtn.disabled = true;
+     activeBtn.classList.add('opacity-75', 'cursor-wait');
+     activeBtn.innerHTML = `<span class="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5 align-middle"></span><span>Memproses...</span>`;
+   }
+
+   try {
+     const res = await fetch(API_URL, {
+       method: "POST",
+       body: JSON.stringify({ ...payloadObj, token: SECRET_TOKEN })
+     });
+     return res;
+   } catch (err) {
+     showToast("Gagal terhubung ke server Cloud!", "error");
+     setCloudStatus('error', 'Gagal Sinkron');
+     throw err;
+   } finally {
+     setLoadingProses(false);
+     if (activeBtn) {
+       activeBtn.disabled = false;
+       activeBtn.classList.remove('opacity-75', 'cursor-wait');
+       activeBtn.innerHTML = htmlAsli;
+     }
+   }
+ }
     // =========================================================================
     // LOGIN & KEAMANAN AKUN
     // =========================================================================
