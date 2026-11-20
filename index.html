@@ -176,7 +176,7 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 2: INPUT NILAI TP (AUTO-COLLAPSE SETELAH SELESAI)           -->
+      <!-- HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS)                      -->
       <!-- =================================================================== -->
       <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-4">
         <div id="container-kartu-tp" class="space-y-4"></div>
@@ -192,7 +192,7 @@
           <div class="flex justify-between items-center border-b border-slate-100 pb-3.5 mb-5">
             <div>
               <h3 id="judul-form-tp" class="text-base font-extrabold text-slate-900">✨ Buat Kartu Tujuan Pembelajaran (TP) Baru</h3>
-              <p class="text-xs text-slate-500 mt-0.5">Tentukan nama TP/Materi beserta rincian jenis penilaian formatifnya.</p>
+              <p id="subjudul-form-tp" class="text-xs text-slate-500 mt-0.5">Tentukan nama TP/Materi beserta rincian jenis penilaian formatif khusus untuk kelas ini.</p>
             </div>
             <button id="btn-batal-form-tp" onclick="tutupFormTP()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
           </div>
@@ -298,7 +298,7 @@
             <div class="space-y-4">
               <div class="border-b border-slate-100 pb-3.5">
                 <h2 class="text-base font-extrabold text-slate-900">🖨️ Pusat Cetak Laporan Nilai</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Unduh dokumen siap cetak dalam format Excel (.xlsx) maupun PDF.</p>
+                <p id="subjudul-cetak-kelas" class="text-xs text-slate-500 mt-0.5">Unduh dokumen siap cetak dalam format Excel (.xlsx) maupun PDF.</p>
               </div>
 
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
@@ -334,7 +334,7 @@
             </div>
 
             <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100">
-              *File otomatis mengikuti filter Mata Pelajaran & Rombel Kelas yang aktif di bilah atas.
+              *Pilih kelas spesifik pada dropdown bilah atas sebelum mencetak laporan.
             </div>
           </div>
 
@@ -451,7 +451,7 @@
           nama: "Pendidikan Agama Islam dan Budi Pekerti",
           kktp: 75,
           bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30,
-          babs: []
+          babsByKelas: {}
         }
       ]
     };
@@ -468,18 +468,39 @@
 
     const SUBJUDUL_MENU = {
       "Data Siswa": "Manajemen peserta didik dan rombongan belajar",
-      "Input Nilai TP": "Asesmen formatif tugas dinamis & Penilaian Harian (PH) per Tujuan Pembelajaran",
+      "Input Nilai TP": "Materi, TP & rincian tugas dinamis yang disesuaikan untuk masing-masing kelas",
       "Input Nilai PSAS": "Penilaian Sumatif Akhir Semester untuk kalkulasi nilai rapor",
-      "Rekap Nilai Leger": "Leger nilai lengkap bertingkat seluruh TP, PH, PSAS, dan Nilai Rapor",
+      "Rekap Nilai Leger": "Leger nilai lengkap bertingkat seluruh TP, PH, PSAS, dan Nilai Rapor per kelas",
       "Cetak & Kirim Nilai": "Ekspor dokumen resmi XLSX / PDF dan pelaporan ke Wali Kelas"
     };
 
     function getMapelAktif() {
       const m = configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
-      if (m && (m.kktp === undefined || m.kktp === null || isNaN(m.kktp))) {
-        m.kktp = 75;
+      if (m) {
+        if (m.kktp === undefined || m.kktp === null || isNaN(m.kktp)) m.kktp = 75;
+        if (!m.babsByKelas || typeof m.babsByKelas !== 'object') m.babsByKelas = {};
       }
       return m;
+    }
+
+    // Mengambil daftar TP khusus untuk kelas tertentu (otomatis migrasi jika ada format lama)
+    function getDaftarTPKelas(kelasId) {
+      if (!kelasId || kelasId === "ALL") return [];
+      const m = getMapelAktif();
+      if (!m.babsByKelas) m.babsByKelas = {};
+
+      // Migrasi data TP versi lama (m.babs) ke kelas pertama yang diakses agar tidak hilang
+      if (Array.isArray(m.babs) && m.babs.length > 0) {
+        if (!m.babsByKelas[kelasId]) {
+          m.babsByKelas[kelasId] = JSON.parse(JSON.stringify(m.babs));
+        }
+        delete m.babs;
+      }
+
+      if (!Array.isArray(m.babsByKelas[kelasId])) {
+        m.babsByKelas[kelasId] = [];
+      }
+      return m.babsByKelas[kelasId];
     }
 
     function getKKTPAktif() {
@@ -517,6 +538,12 @@
       document.getElementById('topbar-judul').innerText = namaMenu;
       document.getElementById('topbar-subjudul').innerText = SUBJUDUL_MENU[namaMenu] || "";
 
+      // Jika masuk menu nilai/rekap/cetak dan filter masih "ALL", otomatis arahkan ke kelas pertama jika tersedia
+      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
+      if (namaMenu !== 'Data Siswa' && kelasAktifFilter === 'ALL' && kelasUnik.length > 0) {
+        kelasAktifFilter = String(kelasUnik[0]);
+      }
+
       sinkronTopbar();
       if (namaMenu === 'Data Siswa') renderTabelSiswa();
       if (namaMenu === 'Input Nilai TP') renderHalamanInputTP();
@@ -548,7 +575,10 @@
         dataSiswaGlobal = resSiswa.data || [];
         if (resNilai.config && Array.isArray(resNilai.config.mapels) && resNilai.config.mapels.length > 0) {
           configGlobal = resNilai.config;
-          configGlobal.mapels.forEach(m => { if (m.kktp === undefined) m.kktp = 75; });
+          configGlobal.mapels.forEach(m => {
+            if (m.kktp === undefined) m.kktp = 75;
+            if (!m.babsByKelas) m.babsByKelas = {};
+          });
         }
         if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
         if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
@@ -605,6 +635,38 @@
 
     function getSiswaTerfilter() {
       return kelasAktifFilter === "ALL" ? dataSiswaGlobal : dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kelasAktifFilter));
+    }
+
+    function renderPeringatanPilihKelas(judulMenu) {
+      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-amber-300 p-8 text-center max-w-2xl mx-auto space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl mx-auto">🏫</div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Pilih Rombel / Kelas Terlebih Dahulu</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+              Karena setiap kelas memiliki <strong>Materi, Tujuan Pembelajaran (TP), dan Tugas</strong> yang berbeda, silakan pilih salah satu kelas di bawah ini atau melalui dropdown di pojok kanan atas untuk membuka <strong>${judulMenu}</strong>.
+            </p>
+          </div>
+          ${kelasUnik.length === 0 ? `
+            <p class="text-xs font-bold text-rose-600">Belum ada data siswa/kelas. Silakan tambahkan siswa pada menu Data Siswa terlebih dahulu.</p>
+          ` : `
+            <div class="flex flex-wrap justify-center gap-2 pt-2">
+              ${kelasUnik.map(k => `
+                <button onclick="pilihKelasCepat('${k}')" class="h-9 bg-emerald-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-emerald-700 shadow-xs transition">
+                  Buka Kelas ${k}
+                </button>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function pilihKelasCepat(kelasId) {
+      kelasAktifFilter = String(kelasId);
+      sinkronTopbar();
+      gantiFilterKelas(kelasAktifFilter);
     }
 
     // =========================================================================
@@ -740,9 +802,7 @@
     }
 
     // =========================================================================
-    // RUMUS PERHITUNGAN NILAI TP & RAPOR
-    // - Rata-rata: 2 angka di belakang koma (String: .toFixed(2))
-    // - Total TP & Nilai Rapor: Bilangan bulat tanpa koma (Math.round)
+    // RUMUS PERHITUNGAN NILAI TP & RAPOR (PER KELAS)
     // =========================================================================
     function hitungNilaiTPSiswa(nisn, tpObj) {
       const mAktif = getMapelAktif();
@@ -765,19 +825,23 @@
 
       return {
         rataTugasNum: rataTugasNum,
-        rataTugasStr: rataTugasNum.toFixed(2), // Selalu 2 angka di belakang koma
+        rataTugasStr: rataTugasNum.toFixed(2),
         nilaiPH: record.psh ?? "",
-        nilaiAkhirTP: totalTPBulat              // Bilangan bulat tanpa koma
+        nilaiAkhirTP: totalTPBulat
       };
     }
 
-    function hitungRekapSiswa(nisn) {
+    function hitungRekapSiswa(nisn, kelasSiswa = null) {
       const mAktif = getMapelAktif();
+      const siswaObj = dataSiswaGlobal.find(s => String(s.NISN) === String(nisn));
+      const kelasTarget = kelasSiswa || (siswaObj ? siswaObj.ID_Kelas : kelasAktifFilter);
+      const daftarTP = getDaftarTPKelas(kelasTarget);
+
       let sumTP = 0;
-      mAktif.babs.forEach(tp => {
+      daftarTP.forEach(tp => {
         sumTP += hitungNilaiTPSiswa(nisn, tp).nilaiAkhirTP;
       });
-      const rataSeluruhTPNum = mAktif.babs.length > 0 ? (sumTP / mAktif.babs.length) : 0;
+      const rataSeluruhTPNum = daftarTP.length > 0 ? (sumTP / daftarTP.length) : 0;
       const psasKey = `${mAktif.id}_${nisn}`;
       const psasRaw = nilaiPSASGlobal[psasKey];
       const psasNum = (psasRaw !== "" && psasRaw !== undefined && !isNaN(psasRaw)) ? Number(psasRaw) : 0;
@@ -785,14 +849,14 @@
 
       return {
         rataSeluruhTPNum: rataSeluruhTPNum,
-        rataSeluruhTPStr: rataSeluruhTPNum.toFixed(2), // Selalu 2 angka di belakang koma
+        rataSeluruhTPStr: rataSeluruhTPNum.toFixed(2),
         psasRaw: psasRaw !== undefined ? psasRaw : "",
-        nilaiRapor: nilaiRaporBulat                     // Bilangan bulat tanpa koma
+        nilaiRapor: nilaiRaporBulat
       };
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP (AUTO-COLLAPSE + PEWARNAAN KKTP)
+    // HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS + AUTO-COLLAPSE)
     // =========================================================================
     function toggleKartuTP(tpId) {
       const bodyEl = document.getElementById(`body-tp-${tpId}`);
@@ -818,7 +882,16 @@
       const areaLanjut = document.getElementById('area-tambah-tp-lanjut');
       const formTP = document.getElementById('kartu-form-tp');
 
-      if (!mAktif.babs || mAktif.babs.length === 0) {
+      if (kelasAktifFilter === "ALL") {
+        formTP.classList.add('hidden');
+        areaLanjut.classList.add('hidden');
+        container.innerHTML = renderPeringatanPilihKelas("Input Nilai TP");
+        return;
+      }
+
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+
+      if (daftarTP.length === 0) {
         container.innerHTML = "";
         areaLanjut.classList.add('hidden');
         bukaFormTPBaru(1, true);
@@ -828,7 +901,17 @@
       formTP.classList.add('hidden');
       const siswaList = getSiswaTerfilter();
 
-      container.innerHTML = mAktif.babs.map((tp) => {
+      const headerKelasBanner = `
+        <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl flex flex-wrap justify-between items-center gap-2 shadow-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-xs font-extrabold">Kelas ${kelasAktifFilter}</span>
+            <span class="text-xs md:text-sm font-bold">${mAktif.nama}</span>
+          </div>
+          <span class="text-[11px] text-slate-300">Materi, TP & Tugas khusus rombel ${kelasAktifFilter} • KKTP: <strong class="text-amber-300">${kktp}</strong></span>
+        </div>
+      `;
+
+      container.innerHTML = headerKelasBanner + daftarTP.map((tp) => {
         const isSelesai = tp.selesai === true;
         const isTerbuka = !isSelesai || kartuTerbukaManual[tp.id] === true;
 
@@ -884,7 +967,7 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  ${siswaList.length === 0 ? `<tr><td colspan="${tp.tugas.length + 7}" class="p-8 text-center text-slate-500">Belum ada data siswa pada kelas ini.</td></tr>` : 
+                  ${siswaList.length === 0 ? `<tr><td colspan="${tp.tugas.length + 7}" class="p-8 text-center text-slate-500">Belum ada data siswa pada kelas ${kelasAktifFilter}.</td></tr>` : 
                     siswaList.map((s, sIdx) => {
                       const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
                       const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
@@ -927,17 +1010,18 @@
         `;
       }).join('');
 
-      const semuaSelesai = mAktif.babs.every(b => b.selesai === true);
+      const semuaSelesai = daftarTP.every(b => b.selesai === true);
       areaLanjut.classList.remove('hidden');
       document.getElementById('teks-status-tp').innerText = semuaSelesai 
-        ? `🎉 Seluruh (${mAktif.babs.length}) Tujuan Pembelajaran telah selesai dan ditutup rapi. Klik tombol di bawah untuk membuat TP ke-${mAktif.babs.length + 1}.`
-        : `Ingin menambahkan kartu Tujuan Pembelajaran (TP) ke-${mAktif.babs.length + 1}?`;
+        ? `🎉 Seluruh (${daftarTP.length}) Tujuan Pembelajaran pada Kelas ${kelasAktifFilter} telah selesai dan ditutup rapi. Klik tombol di bawah untuk membuat TP ke-${daftarTP.length + 1}.`
+        : `Ingin menambahkan kartu Tujuan Pembelajaran (TP) ke-${daftarTP.length + 1} khusus Kelas ${kelasAktifFilter}?`;
     }
 
     function bukaFormTPBaru(nomorUrut, isInitialEmpty = false) {
       document.getElementById('kartu-form-tp').classList.remove('hidden');
       document.getElementById('area-tambah-tp-lanjut').classList.add('hidden');
-      document.getElementById('judul-form-tp').innerText = `✨ Buat Kartu Tujuan Pembelajaran (TP) ke-${nomorUrut}`;
+      document.getElementById('judul-form-tp').innerText = `✨ Buat Kartu TP ke-${nomorUrut} (Khusus Kelas ${kelasAktifFilter})`;
+      document.getElementById('subjudul-form-tp').innerText = `Tentukan nama TP/Materi beserta rincian jenis penilaian formatif khusus untuk Kelas ${kelasAktifFilter}.`;
       document.getElementById('edit-tp-id').value = "";
       document.getElementById('input-nama-tp').value = `TP ${nomorUrut} - `;
       
@@ -949,19 +1033,19 @@
     }
 
     function tampilkanFormTambahTP() {
-      const mAktif = getMapelAktif();
-      bukaFormTPBaru(mAktif.babs.length + 1, false);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      bukaFormTPBaru(daftarTP.length + 1, false);
       document.getElementById('kartu-form-tp').scrollIntoView({ behavior: 'smooth' });
     }
 
     function bukaFormEditTP(tpId) {
-      const mAktif = getMapelAktif();
-      const tp = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
       if (!tp) return;
 
       document.getElementById('kartu-form-tp').classList.remove('hidden');
       document.getElementById('area-tambah-tp-lanjut').classList.add('hidden');
-      document.getElementById('judul-form-tp').innerText = `⚙️ Edit Struktur Tugas: ${tp.nama}`;
+      document.getElementById('judul-form-tp').innerText = `⚙️ Edit Struktur Tugas (Kelas ${kelasAktifFilter}): ${tp.nama}`;
       document.getElementById('edit-tp-id').value = tp.id;
       document.getElementById('input-nama-tp').value = tp.nama;
       document.getElementById('btn-batal-form-tp').classList.remove('hidden');
@@ -1000,24 +1084,25 @@
     }
 
     async function simpanStrukturTP() {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
       const namaTP = document.getElementById('input-nama-tp').value.trim();
       if (!namaTP) return alert("Nama Tujuan Pembelajaran (TP) wajib diisi!");
 
       const tugasBersih = tempTugasList.map(t => t.trim()).filter(Boolean);
       if (tugasBersih.length === 0) return alert("Minimal harus ada 1 kolom tugas!");
 
-      const mAktif = getMapelAktif();
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const editId = document.getElementById('edit-tp-id').value;
 
       if (editId) {
-        const tpObj = mAktif.babs.find(b => b.id === editId);
+        const tpObj = daftarTP.find(b => b.id === editId);
         if (tpObj) {
           tpObj.nama = namaTP;
           tpObj.tugas = tugasBersih;
         }
       } else {
-        mAktif.babs.push({
-          id: "TP_" + Date.now(),
+        daftarTP.push({
+          id: "TP_" + kelasAktifFilter.replace(/[^a-zA-Z0-9]/g, "") + "_" + Date.now(),
           nama: namaTP,
           tugas: tugasBersih,
           selesai: false
@@ -1062,7 +1147,8 @@
         inputEl.classList.add('text-slate-900', 'border-slate-300', 'bg-white');
       }
 
-      const tpObj = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tpObj = daftarTP.find(b => b.id === tpId);
       const hasil = hitungNilaiTPSiswa(nisn, tpObj);
       perbaruiTampilanBarisTP(nisn, tpId, hasil);
     }
@@ -1082,14 +1168,16 @@
         inputEl.classList.add('text-slate-900', 'border-amber-300', 'bg-white');
       }
 
-      const tpObj = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tpObj = daftarTP.find(b => b.id === tpId);
       const hasil = hitungNilaiTPSiswa(nisn, tpObj);
       perbaruiTampilanBarisTP(nisn, tpId, hasil);
     }
 
     async function simpanNilaiSatuTP(tpId, tandaiSelesai) {
       const mAktif = getMapelAktif();
-      const tp = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
       if (!tp) return;
 
       const btn = document.getElementById(`btn-save-${tpId}`);
@@ -1117,16 +1205,16 @@
         kartuTerbukaManual[tp.id] = false;
         await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
         renderHalamanInputTP();
-        alert(`✅ Nilai ${tp.nama} tersimpan & kartu ditutup rapi! Silakan tambah TP berikutnya jika diperlukan.`);
+        alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) tersimpan & kartu ditutup rapi!`);
       } else {
         if (btn) { btn.innerText = "💾 Simpan Nilai"; btn.disabled = false; }
-        alert(`✅ Nilai ${tp.nama} berhasil disimpan ke Google Cloud!`);
+        alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) berhasil disimpan ke Google Cloud!`);
       }
     }
 
     async function toggleStatusSelesaiTP(tpId, statusBaru) {
-      const mAktif = getMapelAktif();
-      const tp = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
       if (!tp) return;
       tp.selesai = statusBaru;
       kartuTerbukaManual[tp.id] = !statusBaru;
@@ -1148,7 +1236,8 @@
           const wb = XLSX.read(evt.target.result, { type: "binary" });
           const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
           const mAktif = getMapelAktif();
-          const tp = mAktif.babs.find(b => b.id === importTargetTPId);
+          const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+          const tp = daftarTP.find(b => b.id === importTargetTPId);
           let count = 0;
 
           rows.forEach(row => {
@@ -1174,7 +1263,8 @@
 
     function downloadTemplateTPById(tpId) {
       const mAktif = getMapelAktif();
-      const tp = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
       const siswaList = getSiswaTerfilter();
       if (!tp || siswaList.length === 0) return alert("Data siswa kosong!");
 
@@ -1190,12 +1280,13 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Template_TP");
-      XLSX.writeFile(wb, `Template_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
+      XLSX.writeFile(wb, `Template_${kelasAktifFilter}_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
     }
 
     function exportTPExcelById(tpId) {
       const mAktif = getMapelAktif();
-      const tp = mAktif.babs.find(b => b.id === tpId);
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
       const siswaList = getSiswaTerfilter();
       if (!tp || siswaList.length === 0) return alert("Data kosong!");
 
@@ -1214,7 +1305,7 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Nilai_TP");
-      XLSX.writeFile(wb, `Nilai_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
+      XLSX.writeFile(wb, `Nilai_${kelasAktifFilter}_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
     }
 
     // =========================================================================
@@ -1223,8 +1314,9 @@
     function renderHalamanPSAS() {
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
-      document.getElementById('judul-psas').innerText = `🎯 Input Nilai PSAS — ${mAktif.nama}`;
-      document.getElementById('subjudul-psas').innerText = `Standar KKTP: ${kktp} • Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP menjadi Nilai Rapor.`;
+      const labelKelas = kelasAktifFilter === "ALL" ? "Semua Kelas" : `Kelas ${kelasAktifFilter}`;
+      document.getElementById('judul-psas').innerText = `🎯 Input Nilai PSAS — ${mAktif.nama} (${labelKelas})`;
+      document.getElementById('subjudul-psas').innerText = `Standar KKTP: ${kktp} • Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP kelas masing-masing.`;
       const tbody = document.getElementById('tbody-psas');
       const siswaList = getSiswaTerfilter();
 
@@ -1234,7 +1326,7 @@
       }
 
       tbody.innerHTML = siswaList.map((s, idx) => {
-        const rekap = hitungRekapSiswa(s.NISN);
+        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
         const warnaRataTP = isDiBawahKKTP(rekap.rataSeluruhTPNum) ? 'text-rose-600' : 'text-blue-900';
         const warnaPSAS = isDiBawahKKTP(rekap.psasRaw) ? 'text-rose-600 border-rose-400 bg-rose-50/50' : 'text-slate-900 border-amber-300 bg-white';
         const warnaRapor = isDiBawahKKTP(rekap.nilaiRapor) ? 'text-rose-600 bg-rose-50/80' : 'text-emerald-950 bg-emerald-50/60';
@@ -1327,16 +1419,26 @@
     }
 
     // =========================================================================
-    // HALAMAN 4: REKAP NILAI LEGER (3-LEVEL MULTI-HEADER + KKTP MERAH)
+    // HALAMAN 4: REKAP NILAI LEGER (PER KELAS + KKTP MERAH)
     // =========================================================================
     function renderHalamanLeger() {
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
-      document.getElementById('judul-rekap-leger').innerText = `📊 Rekap Nilai Leger — ${mAktif.nama}`;
-      document.getElementById('subjudul-rekap-leger').innerText = `Standar KKTP: ${kktp}  •  Bobot TP: Tugas (${mAktif.bobotTugas}%) + PH (${mAktif.bobotPSH}%)  •  Bobot Rapor: Seluruh TP (${mAktif.bobotBAB}%) + PSAS (${mAktif.bobotPSAS}%)`;
-
       const thead = document.getElementById('thead-leger');
       const tbody = document.getElementById('tbody-leger');
+
+      if (kelasAktifFilter === "ALL") {
+        document.getElementById('judul-rekap-leger').innerText = `📊 Rekap Nilai Leger — ${mAktif.nama}`;
+        document.getElementById('subjudul-rekap-leger').innerText = "Pilih rombel/kelas terlebih dahulu untuk menampilkan tabel leger TP dan tugas kelas tersebut.";
+        thead.innerHTML = "";
+        tbody.innerHTML = `<tr><td class="p-6">${renderPeringatanPilihKelas("Rekap Nilai Leger")}</td></tr>`;
+        return;
+      }
+
+      document.getElementById('judul-rekap-leger').innerText = `📊 Rekap Nilai Leger — ${mAktif.nama} (Kelas ${kelasAktifFilter})`;
+      document.getElementById('subjudul-rekap-leger').innerText = `Standar KKTP: ${kktp}  •  Bobot TP: Tugas (${mAktif.bobotTugas}%) + PH (${mAktif.bobotPSH}%)  •  Bobot Rapor: Seluruh TP (${mAktif.bobotBAB}%) + PSAS (${mAktif.bobotPSAS}%)`;
+
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
 
       const warnaBlok = [
@@ -1352,7 +1454,7 @@
           <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 min-w-[190px]">Nama Lengkap</th>
           <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-12">L / P</th>
       `;
-      mAktif.babs.forEach((tp, idx) => {
+      daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         const colspanTP = tp.tugas.length + 3;
         row1 += `<th colspan="${colspanTP}" class="p-2.5 border-r border-slate-300 ${w.top}">${tp.nama}</th>`;
@@ -1365,7 +1467,7 @@
       `;
 
       let row2 = `<tr class="border-b border-slate-300 font-bold text-center text-[11px]">`;
-      mAktif.babs.forEach((tp, idx) => {
+      daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         row2 += `
           <th colspan="${tp.tugas.length}" class="p-2 border-r border-slate-300 ${w.sub}">Nilai Tugas</th>
@@ -1377,7 +1479,7 @@
       row2 += `</tr>`;
 
       let row3 = `<tr class="border-b-2 border-slate-400 font-semibold text-center text-[11px]">`;
-      mAktif.babs.forEach((tp, idx) => {
+      daftarTP.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
         tp.tugas.forEach(t => {
           row3 += `<th class="p-2 border-r border-slate-300 ${w.sub} min-w-[78px]">${t}</th>`;
@@ -1385,18 +1487,18 @@
       });
       row3 += `</tr>`;
 
-      thead.innerHTML = mAktif.babs.length === 0 ? "" : (row1 + row2 + row3);
+      thead.innerHTML = daftarTP.length === 0 ? "" : (row1 + row2 + row3);
 
-      if (siswaList.length === 0 || mAktif.babs.length === 0) {
-        tbody.innerHTML = `<tr><td class="p-10 text-center text-xs text-slate-500">Belum ada data siswa atau Tujuan Pembelajaran (TP) pada mata pelajaran ini.</td></tr>`;
+      if (siswaList.length === 0 || daftarTP.length === 0) {
+        tbody.innerHTML = `<tr><td class="p-10 text-center text-xs text-slate-500">Belum ada data siswa atau Tujuan Pembelajaran (TP) pada Kelas ${kelasAktifFilter}.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = siswaList.map((s, sIdx) => {
-        const rekap = hitungRekapSiswa(s.NISN);
+        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
         let cellsTP = "";
 
-        mAktif.babs.forEach((tp, idx) => {
+        daftarTP.forEach((tp, idx) => {
           const w = warnaBlok[idx % warnaBlok.length];
           const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
           const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
@@ -1445,10 +1547,15 @@
       const btn = document.getElementById('btn-simpan-leger');
       if (!silent && btn) { btn.innerText = "⏳ Menyimpan..."; btn.disabled = true; }
 
-      const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "L/P", "ID_Kelas", ...mAktif.babs.map(b => b.nama), "Rata_Seluruh_TP", "Nilai_PSAS", "Nilai_Rapor"];
-      const rows = dataSiswaGlobal.map(s => {
-        const nilaiTPs = mAktif.babs.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP);
-        const rekap = hitungRekapSiswa(s.NISN);
+      // Sinkronkan siswa pada kelas aktif atau seluruh kelas dengan struktur TP masing-masing
+      const daftarTPContoh = kelasAktifFilter !== "ALL" ? getDaftarTPKelas(kelasAktifFilter) : [];
+      const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "L/P", "ID_Kelas", ...daftarTPContoh.map(b => b.nama), "Rata_Seluruh_TP", "Nilai_PSAS", "Nilai_Rapor"];
+      const siswaTarget = getSiswaTerfilter();
+
+      const rows = siswaTarget.map(s => {
+        const daftarTPSiswa = getDaftarTPKelas(s.ID_Kelas);
+        const nilaiTPs = daftarTPSiswa.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP);
+        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
         return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s["L/P"], s.ID_Kelas, ...nilaiTPs, rekap.rataSeluruhTPStr, rekap.psasRaw === "" ? 0 : rekap.psasRaw, rekap.nilaiRapor];
       });
 
@@ -1464,14 +1571,16 @@
     }
 
     function exportLegerExcel() {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
       const mAktif = getMapelAktif();
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Data kosong!");
 
       const rows = siswaList.map((s, idx) => {
-        const rekap = hitungRekapSiswa(s.NISN);
+        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
         let obj = { No: idx + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], Kelas: s.ID_Kelas };
-        mAktif.babs.forEach(tp => {
+        daftarTP.forEach(tp => {
           const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
           const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
           const h = hitungNilaiTPSiswa(s.NISN, tp);
@@ -1490,18 +1599,20 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Rekap_Leger");
-      XLSX.writeFile(wb, `Rekap_Nilai_Leger_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
+      XLSX.writeFile(wb, `Rekap_Nilai_Leger_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
     }
 
     function exportRaporRingkasExcel() {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
       const mAktif = getMapelAktif();
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Data kosong!");
 
       const rows = siswaList.map((s, idx) => {
-        const rekap = hitungRekapSiswa(s.NISN);
+        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
         let obj = { No: idx + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], Kelas: s.ID_Kelas };
-        mAktif.babs.forEach(tp => obj[tp.nama] = hitungNilaiTPSiswa(s.NISN, tp).nilaiAkhirTP);
+        daftarTP.forEach(tp => obj[tp.nama] = hitungNilaiTPSiswa(s.NISN, tp).nilaiAkhirTP);
         obj["Rata_Seluruh_TP"] = rekap.rataSeluruhTPStr;
         obj["Nilai_PSAS"] = rekap.psasRaw;
         obj["Nilai_Rapor"] = rekap.nilaiRapor;
@@ -1511,18 +1622,26 @@
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Nilai_Rapor");
-      XLSX.writeFile(wb, `Nilai_Rapor_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
+      XLSX.writeFile(wb, `Nilai_Rapor_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`);
     }
 
     // =========================================================================
-    // HALAMAN 5: CETAK & KIRIM NILAI (PDF DENGAN PEWARNAAN KKTP & WHATSAPP)
+    // HALAMAN 5: CETAK & KIRIM NILAI (PER KELAS)
     // =========================================================================
     function renderHalamanCetakKirim() {
       const mAktif = getMapelAktif();
       const selectTP = document.getElementById('cetak-pilih-tp');
-      selectTP.innerHTML = mAktif.babs.length === 0 
-        ? `<option value="">Belum ada Tujuan Pembelajaran (TP)</option>` 
-        : mAktif.babs.map(b => `<option value="${b.id}">${b.nama}</option>`).join('');
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+
+      if (kelasAktifFilter === "ALL") {
+        document.getElementById('subjudul-cetak-kelas').innerText = "⚠️ Silakan pilih kelas spesifik di dropdown bilah atas terlebih dahulu.";
+        selectTP.innerHTML = `<option value="">-- Pilih Kelas di Bilah Atas --</option>`;
+      } else {
+        document.getElementById('subjudul-cetak-kelas').innerText = `Menampilkan daftar TP khusus untuk Kelas ${kelasAktifFilter} (${mAktif.nama}).`;
+        selectTP.innerHTML = daftarTP.length === 0 
+          ? `<option value="">Belum ada TP di Kelas ${kelasAktifFilter}</option>` 
+          : daftarTP.map(b => `<option value="${b.id}">${b.nama}</option>`).join('');
+      }
 
       const labelKelas = kelasAktifFilter === "ALL" ? "Semua Kelas" : `Kelas ${kelasAktifFilter}`;
       document.getElementById('wa-pesan-pengantar').value = 
@@ -1530,14 +1649,16 @@
     }
 
     function cetakPDF(tipe, tpId = null) {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
       const mAktif = getMapelAktif();
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const kktp = getKKTPAktif();
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-      const labelKelas = kelasAktifFilter === "ALL" ? "Semua Kelas" : `Kelas ${kelasAktifFilter}`;
+      const labelKelas = `Kelas ${kelasAktifFilter}`;
 
       doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
@@ -1547,7 +1668,7 @@
       let namaFile = "Laporan_Nilai.pdf";
 
       if (tipe === "TP") {
-        const tp = mAktif.babs.find(b => b.id === tpId);
+        const tp = daftarTP.find(b => b.id === tpId);
         if (!tp) return alert("Pilih Tujuan Pembelajaran (TP) terlebih dahulu!");
         doc.text(`DAFTAR NILAI TUJUAN PEMBELAJARAN — ${mAktif.nama.toUpperCase()}`, 14, 14);
         doc.setFontSize(10);
@@ -1565,7 +1686,7 @@
             h.rataTugasStr, h.nilaiPH !== "" ? h.nilaiPH : "-", h.nilaiAkhirTP
           ];
         });
-        namaFile = `Nilai_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
+        namaFile = `Nilai_${kelasAktifFilter}_${tp.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       } 
       else if (tipe === "LEGER") {
         doc.text(`REKAP NILAI LEGER LENGKAP — ${mAktif.nama.toUpperCase()}`, 14, 14);
@@ -1574,7 +1695,7 @@
         doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
 
         let kolomDinamis = [];
-        mAktif.babs.forEach((b, idx) => {
+        daftarTP.forEach((b, idx) => {
           const kode = `TP${idx + 1}`;
           b.tugas.forEach(t => kolomDinamis.push(`${kode}:${t}`));
           kolomDinamis.push(`${kode}:Rata`, `${kode}:PH`, `${kode}:Total`);
@@ -1582,9 +1703,9 @@
 
         head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...kolomDinamis, "Rata TP", "PSAS", "Rapor"]];
         body = siswaList.map((s, i) => {
-          const rekap = hitungRekapSiswa(s.NISN);
+          const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
           let vals = [];
-          mAktif.babs.forEach(b => {
+          daftarTP.forEach(b => {
             const key = `${mAktif.id}_${s.NISN}_${b.id}`;
             const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
             const h = hitungNilaiTPSiswa(s.NISN, b);
@@ -1593,7 +1714,7 @@
           });
           return [i + 1, s.NISN, s.Nama_Lengkap, s["L/P"], ...vals, rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor];
         });
-        namaFile = `Rekap_Nilai_Leger_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
+        namaFile = `Rekap_Nilai_Leger_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       } 
       else if (tipe === "RAPOR") {
         doc.text(`DAFTAR NILAI RAPOR AKHIR — ${mAktif.nama.toUpperCase()}`, 14, 14);
@@ -1601,16 +1722,16 @@
         doc.setFont("helvetica", "normal");
         doc.text(`${labelKelas}  |  Standar KKTP: ${kktp}  |  Dicetak pada: ${new Date().toLocaleDateString("id-ID")}`, 14, 20);
 
-        head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...mAktif.babs.map(b => b.nama.split('-')[0].trim()), "Rata Seluruh TP", "PSAS", "Nilai Rapor"]];
+        head = [["No", "NISN / NIS", "Nama Lengkap", "L/P", ...daftarTP.map(b => b.nama.split('-')[0].trim()), "Rata Seluruh TP", "PSAS", "Nilai Rapor"]];
         body = siswaList.map((s, i) => {
-          const rekap = hitungRekapSiswa(s.NISN);
+          const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
           return [
             i + 1, s.NISN, s.Nama_Lengkap, s["L/P"],
-            ...mAktif.babs.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP),
+            ...daftarTP.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP),
             rekap.rataSeluruhTPStr, rekap.psasRaw !== "" ? rekap.psasRaw : "-", rekap.nilaiRapor
           ];
         });
-        namaFile = `Nilai_Rapor_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas.replace(/\s+/g, "_")}.pdf`;
+        namaFile = `Nilai_Rapor_${kelasAktifFilter}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
       }
 
       doc.autoTable({
@@ -1625,7 +1746,7 @@
           if (data.section === 'body' && data.column.index >= 4) {
             const val = parseFloat(data.cell.raw);
             if (!isNaN(val) && val < kktp) {
-              data.cell.styles.textColor = [220, 38, 38]; // Merah di PDF jika di bawah KKTP
+              data.cell.styles.textColor = [220, 38, 38];
               data.cell.styles.fontStyle = 'bold';
             }
           }
@@ -1637,6 +1758,7 @@
     }
 
     function kirimKeWaliKelasWA() {
+      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik pada dropdown bilah atas terlebih dahulu!");
       let nomor = document.getElementById('wa-nomor-walas').value.replace(/[^0-9]/g, "");
       if (!nomor) return alert("Masukkan nomor WhatsApp Wali Kelas terlebih dahulu!");
       if (nomor.startsWith("0")) nomor = "62" + nomor.slice(1);
@@ -1699,7 +1821,7 @@
     function tambahMapelModal() {
       simpanFormBobotModalKeTemp();
       const id = "MAPEL_" + Date.now();
-      tempConfig.mapels.push({ id: id, nama: "Mata Pelajaran Baru", kktp: 75, bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30, babs: [] });
+      tempConfig.mapels.push({ id: id, nama: "Mata Pelajaran Baru", kktp: 75, bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30, babsByKelas: {} });
       tempMapelModalId = id;
       renderModalMapelBobot();
     }
