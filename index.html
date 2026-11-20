@@ -37,7 +37,7 @@
   <!-- ===================================================================== -->
   <!-- LAYAR LOGIN KEAMANAN (USERNAME & PASSWORD)                            -->
   <!-- ===================================================================== -->
-  <div id="login-screen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+  <div id="login-screen" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-7 border border-slate-200 space-y-5">
       <div class="text-center space-y-2">
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
@@ -1122,6 +1122,10 @@
     const CACHE_KEY = "bukunilai_cloud_cache_v4";
     const SESSION_AUTH_KEY = "bukunilai_authenticated_v2";
     const SISWA_PER_HALAMAN = 36;
+    // Cek status login seketika agar tidak berkedip saat refresh
+    if (sessionStorage.getItem(SESSION_AUTH_KEY) !== "true") {
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
 
     let dataSiswaGlobal = [];
     let halamanSiswaAktif = 1;
