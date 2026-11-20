@@ -640,14 +640,18 @@
 
           <div class="bg-rose-50/70 p-4 rounded-xl border border-rose-200 space-y-2 flex flex-col justify-between">
             <div>
-              <div class="font-bold text-rose-900 text-xs uppercase tracking-wider">📦 Arsip & Mulai Semester Baru</div>
-              <p class="text-[11px] text-rose-700 mt-1">Pindahkan nilai saat ini ke sheet Arsip Google Sheets & kosongkan nilai aktif.</p>
+              <div class="font-bold text-rose-900 text-xs uppercase tracking-wider">📦 Arsip & Pemeliharaan Cloud</div>
+              <p class="text-[11px] text-rose-700 mt-1">Arsipkan nilai semester lama atau hapus tab kosong/sisa di Google Sheets.</p>
             </div>
-            <button type="button" onclick="arsipkanDanResetSemester()" id="btn-arsip-semester" class="w-full h-9 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">
-              📦 Arsipkan & Reset Nilai
-            </button>
+            <div class="space-y-1.5">
+              <button type="button" onclick="arsipkanDanResetSemester()" id="btn-arsip-semester" class="w-full h-9 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">
+                📦 Arsipkan & Reset Nilai
+              </button>
+              <button type="button" onclick="bersihkanSheetCloud()" id="btn-cleanup-sheets" class="w-full h-8 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition">
+                🧹 Hapus Sheet Tidak Terpakai
+              </button>
+            </div>
           </div>
-        </div>
 
       </div>
 
@@ -3161,6 +3165,37 @@
       showToast(`Data ${labelLama} berhasil diarsipkan & aplikasi siap untuk semester baru!`);
     }
 
+    window.onload = () => muatSemuaData(false);
+  
+  async function bersihkanSheetCloud() {
+      const konfirmasi = confirm(
+        "Hapus semua tab (sheet) yang tidak terpakai di Google Sheets?\n\n" +
+        "• Tab utama aplikasi & tab Arsip_ TIDAK akan dihapus.\n" +
+        "• Tab sisa seperti Sheet1 atau tab lama akan dihapus permanen."
+      );
+      if (!konfirmasi) return;
+
+      const btn = document.getElementById('btn-cleanup-sheets');
+      btn.innerText = "⏳ Membersihkan..."; btn.disabled = true;
+
+      try {
+        const res = await apiPost({ action: "cleanupUnusedSheets" }).then(r => r.json());
+        if (res.status === "success") {
+          const jml = res.deleted ? res.deleted.length : 0;
+          if (jml > 0) {
+            showToast(`Berhasil menghapus ${jml} sheet tak terpakai: ${res.deleted.join(", ")}`);
+          } else {
+            showToast("Spreadsheet sudah bersih, tidak ada sheet tak terpakai.", "info");
+          }
+        } else {
+          showToast(res.message || "Gagal membersihkan sheet", "error");
+        }
+      } catch (e) {
+        showToast("Gagal terhubung ke Google Sheets", "error");
+      }
+
+      btn.innerText = "🧹 Hapus Sheet Tidak Terpakai"; btn.disabled = false;
+    }
     window.onload = () => muatSemuaData(false);
   </script>
 </body>
