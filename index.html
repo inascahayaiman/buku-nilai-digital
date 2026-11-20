@@ -19,14 +19,24 @@
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
 
-    /* Custom Scrollbar Halus untuk Tabel Leger Lebar */
+    /* Custom Scrollbar Halus */
     .table-scroll-x::-webkit-scrollbar { height: 10px; }
     .table-scroll-x::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 0 0 12px 12px; }
     .table-scroll-x::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 9999px; border: 2px solid #f1f5f9; }
     .table-scroll-x::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+    /* Toast Animation */
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .toast-enter { animation: slideUp 0.25s ease-out forwards; }
   </style>
 </head>
 <body class="bg-slate-100 flex h-screen text-slate-800 overflow-hidden antialiased">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- ===================================================================== -->
   <!-- SIDEBAR E-RAPOR MODERN (COLLAPSIBLE)                                  -->
@@ -73,9 +83,12 @@
       </button>
     </nav>
 
-    <div class="p-4 border-t border-slate-800 flex items-center gap-2 text-[11px] text-slate-400">
-      <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-      <span class="truncate">Terhubung Google Cloud</span>
+    <div class="p-4 border-t border-slate-800 flex items-center justify-between gap-2 text-[11px] text-slate-400">
+      <div class="flex items-center gap-2 min-w-0">
+        <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+        <span id="cloud-status-text" class="truncate">Tersinkronisasi</span>
+      </div>
+      <button onclick="muatSemuaData(true)" title="Sinkronkan ulang dengan Google Sheets" class="text-slate-300 hover:text-white font-bold">🔄</button>
     </div>
   </aside>
 
@@ -91,7 +104,10 @@
           ☰
         </button>
         <div class="min-w-0">
-          <h1 id="topbar-judul" class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight truncate">Data Siswa</h1>
+          <div class="flex items-center gap-2">
+            <h1 id="topbar-judul" class="font-extrabold text-slate-900 text-base md:text-lg tracking-tight truncate">Data Siswa</h1>
+            <span id="badge-unsaved" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Belum Disimpan</span>
+          </div>
           <p id="topbar-subjudul" class="text-[11px] text-slate-500 hidden sm:block truncate">Manajemen peserta didik dan rombongan belajar</p>
         </div>
       </div>
@@ -117,7 +133,7 @@
       <div id="halaman-Data Siswa" class="halaman max-w-7xl mx-auto space-y-5">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex flex-wrap gap-3 justify-between items-center">
           <div class="flex flex-wrap gap-2">
-            <button onclick="muatSemuaData()" class="h-9 bg-slate-100 text-slate-700 px-3.5 text-xs font-semibold rounded-xl hover:bg-slate-200 transition">🔄 Muat Ulang</button>
+            <button onclick="muatSemuaData(true)" class="h-9 bg-slate-100 text-slate-700 px-3.5 text-xs font-semibold rounded-xl hover:bg-slate-200 transition">🔄 Sinkron Cloud</button>
             <button onclick="downloadTemplateSiswa()" class="h-9 bg-teal-50 text-teal-800 border border-teal-200 px-3.5 text-xs font-semibold rounded-xl hover:bg-teal-100 transition">📄 Unduh Template</button>
             <button onclick="document.getElementById('file-excel-siswa').click()" class="h-9 bg-amber-50 text-amber-800 border border-amber-200 px-3.5 text-xs font-semibold rounded-xl hover:bg-amber-100 transition">📥 Impor Excel</button>
             <input type="file" id="file-excel-siswa" onchange="handleImportSiswa(event)" accept=".xlsx, .xls" class="hidden" />
@@ -183,7 +199,7 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 2: INPUT NILAI TP (SALIN DARI KELAS LAIN, TAMBAH TP & TUGAS)-->
+      <!-- HALAMAN 2: INPUT NILAI TP                                           -->
       <!-- =================================================================== -->
       <div id="halaman-Input Nilai TP" class="halaman hidden w-full max-w-full space-y-4">
         
@@ -228,9 +244,7 @@
               <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Kelas Sumber (Yang Sudah Memiliki Materi/TP):</label>
               <select id="select-kelas-sumber-salin" onchange="renderDaftarChecklistSalinTP(this.value)" class="w-full h-10 border border-slate-300 px-3 rounded-xl text-xs font-bold bg-slate-50 focus:bg-white focus:border-indigo-500 focus:outline-none"></select>
             </div>
-
             <div id="box-checklist-salin-tp" class="space-y-2"></div>
-
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
               <button type="button" onclick="tutupPanelSalinTPKelas()" class="h-9 bg-slate-100 text-slate-700 px-4 rounded-xl text-xs font-semibold hover:bg-slate-200">Batal</button>
               <button type="button" onclick="eksekusiSalinTPDariKelas()" id="btn-eksekusi-salin-tp" class="h-9 bg-indigo-600 text-white px-5 rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 transition">
@@ -255,12 +269,10 @@
               <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih TP / Materi Tujuan (Kelas <span id="label-kelas-tugas-cepat">-</span>)</label>
               <select id="select-tp-untuk-tugas" class="w-full h-10 border border-slate-300 px-3 rounded-xl text-xs font-bold bg-slate-50 focus:bg-white focus:border-sky-500 focus:outline-none"></select>
             </div>
-
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Tugas Baru</label>
               <input type="text" id="input-nama-tugas-baru" class="w-full h-10 border border-slate-300 px-3.5 rounded-xl text-xs font-semibold bg-slate-50 focus:bg-white focus:border-sky-500 focus:outline-none" placeholder="Contoh: Tugas 3 - Praktik Hafalan / Kuis">
             </div>
-
             <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
               <button type="button" onclick="tutupPanelTambahTugasCepat()" class="h-9 bg-slate-100 text-slate-700 px-4 rounded-xl text-xs font-semibold hover:bg-slate-200">Batal</button>
               <button type="button" onclick="simpanTugasBaruKeTP()" id="btn-simpan-tugas-cepat" class="h-9 bg-sky-600 text-white px-5 rounded-xl text-xs font-bold shadow-xs hover:bg-sky-700 transition">
@@ -321,6 +333,7 @@
               <p id="subjudul-psas" class="text-xs text-slate-500 mt-0.5">Nilai PSAS otomatis dikalkulasikan dengan Rata-rata Seluruh TP menjadi Nilai Rapor.</p>
             </div>
             <div class="flex flex-wrap gap-2">
+              <button onclick="isiCepatPSAS()" class="h-9 bg-violet-50 text-violet-800 border border-violet-200 px-3.5 rounded-xl text-xs font-semibold hover:bg-violet-100 transition">⚡ Isi Kosong = KKTP</button>
               <button onclick="downloadTemplatePSAS()" class="h-9 bg-teal-50 text-teal-800 border border-teal-200 px-3.5 rounded-xl text-xs font-semibold hover:bg-teal-100 transition">📄 Template PSAS</button>
               <button onclick="document.getElementById('file-excel-psas').click()" class="h-9 bg-amber-50 text-amber-800 border border-amber-200 px-3.5 rounded-xl text-xs font-semibold hover:bg-amber-100 transition">📥 Impor PSAS</button>
               <input type="file" id="file-excel-psas" onchange="handleImportPSAS(event)" accept=".xlsx, .xls" class="hidden" />
@@ -348,7 +361,7 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 4: REKAP NILAI LEGER (SCROLL HORIZONTAL + KOLOM KIRI STICKY)-->
+      <!-- HALAMAN 4: REKAP NILAI LEGER                                        -->
       <!-- =================================================================== -->
       <div id="halaman-Rekap Nilai Leger" class="halaman hidden w-full max-w-full">
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
@@ -374,7 +387,7 @@
       </div>
 
       <!-- =================================================================== -->
-      <!-- HALAMAN 5: CETAK & KIRIM NILAI (SIMETRIS 2 KOLOM)                   -->
+      <!-- HALAMAN 5: CETAK & KIRIM NILAI                                      -->
       <!-- =================================================================== -->
       <div id="halaman-Cetak & Kirim Nilai" class="halaman hidden max-w-6xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -529,9 +542,10 @@
 
   <script>
     // =========================================================================
-    // WAJIB GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
+    const CACHE_KEY = "erapor_cloud_cache_v2";
 
     let dataSiswaGlobal = [];
     let configGlobal = {
@@ -552,6 +566,7 @@
     let nilaiPSASGlobal = {};
     let menuAktif = "Data Siswa";
     let kartuTerbukaManual = {};
+    let adaPerubahanBelumDisimpan = false;
 
     let tempConfig = null;
     let tempMapelModalId = null;
@@ -563,6 +578,77 @@
       "Rekap Nilai Leger": "Leger nilai lengkap bertingkat seluruh TP, PH, PSAS, dan Nilai Rapor per kelas",
       "Cetak & Kirim Nilai": "Ekspor dokumen resmi Excel / PDF dan pelaporan ke Wali Kelas"
     };
+
+    // =========================================================================
+    // NOTIFIKASI TOAST & STATUS SINKRONISASI
+    // =========================================================================
+    function showToast(pesan, tipe = "success") {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const warna = tipe === "error" ? "bg-rose-600 text-white" : (tipe === "info" ? "bg-slate-800 text-white" : "bg-emerald-600 text-white");
+      toast.className = `toast-enter pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-xs font-bold flex items-center gap-2.5 max-w-sm ${warna}`;
+      toast.innerHTML = `<span>${tipe === "error" ? "⚠️" : (tipe === "info" ? "☁️" : "✅")}</span><span>${pesan}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transition = "opacity 0.3s";
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function setCloudStatus(status, teks) {
+      const dot = document.getElementById('cloud-status-dot');
+      const txt = document.getElementById('cloud-status-text');
+      if (!dot || !txt) return;
+      txt.innerText = teks;
+      dot.className = `w-2 h-2 rounded-full shrink-0 ${
+        status === 'syncing' ? 'bg-amber-400 animate-ping' : (status === 'error' ? 'bg-rose-500' : 'bg-emerald-500')
+      }`;
+    }
+
+    function tandaiBelumDisimpan(status) {
+      adaPerubahanBelumDisimpan = status;
+      const badge = document.getElementById('badge-unsaved');
+      if (badge) badge.classList.toggle('hidden', !status);
+    }
+
+    window.addEventListener('beforeunload', (e) => {
+      if (adaPerubahanBelumDisimpan) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // =========================================================================
+    // CACHE LOKAL (STALE-WHILE-REVALIDATE UNTUK LOADING INSTAN < 0.1 DETIK)
+    // =========================================================================
+    function simpanCacheLokal() {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          siswa: dataSiswaGlobal,
+          config: configGlobal,
+          nilaiDetail: nilaiDetailGlobal,
+          nilaiPSAS: nilaiPSASGlobal
+        }));
+      } catch (e) { console.warn("Cache penuh:", e); }
+    }
+
+    function muatDariCacheLokal() {
+      try {
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.siswa)) {
+          dataSiswaGlobal = parsed.siswa;
+          if (parsed.config && Array.isArray(parsed.config.mapels)) configGlobal = parsed.config;
+          if (parsed.nilaiDetail) nilaiDetailGlobal = parsed.nilaiDetail;
+          if (parsed.nilaiPSAS) nilaiPSASGlobal = parsed.nilaiPSAS;
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
 
     function getMapelAktif() {
       const m = configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
@@ -591,9 +677,7 @@
       return m.babsByKelas[kelasId];
     }
 
-    function getKKTPAktif() {
-      return Number(getMapelAktif().kktp ?? 75);
-    }
+    function getKKTPAktif() { return Number(getMapelAktif().kktp ?? 75); }
 
     function isDiBawahKKTP(nilai) {
       if (nilai === "" || nilai === null || nilai === undefined || nilai === "-" || isNaN(nilai)) return false;
@@ -608,6 +692,25 @@
       const sb = document.getElementById('sidebar');
       sb.classList.toggle('w-64');
       sb.classList.toggle('w-0');
+    }
+
+    function pulihkanStateNavigasi() {
+      const savedMapel = localStorage.getItem('erapor_mapel_aktif');
+      if (savedMapel && configGlobal.mapels.find(m => m.id === savedMapel)) {
+        mapelAktifId = savedMapel;
+      } else if (configGlobal.mapels.length > 0) {
+        mapelAktifId = configGlobal.mapels[0].id;
+      }
+
+      const savedKelas = localStorage.getItem('erapor_kelas_aktif');
+      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => String(s.ID_Kelas)).filter(Boolean))];
+      if (savedKelas && (savedKelas === 'ALL' || kelasUnik.includes(savedKelas))) {
+        kelasAktifFilter = savedKelas;
+      }
+
+      const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
+      const savedMenu = localStorage.getItem('erapor_menu_aktif');
+      return validMenus.includes(savedMenu) ? savedMenu : 'Data Siswa';
     }
 
     function gantiMenu(namaMenu) {
@@ -645,62 +748,65 @@
       document.getElementById('tabel-siswa-container').classList.toggle('hidden', status);
     }
 
-    async function muatSemuaData() {
-      // Langsung buka tab halaman terakhir sebelum loading selesai agar tidak berkedip ke Data Siswa
-      const savedMenuAwal = localStorage.getItem('erapor_menu_aktif');
-      const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
-      if (validMenus.includes(savedMenuAwal) && savedMenuAwal !== 'Data Siswa') {
-        gantiMenu(savedMenuAwal);
-      } else {
-        sinkronTopbar();
-      }
-
+    async function muatSemuaData(paksaSpinner = false) {
       if (!API_URL || API_URL.includes("MASUKKAN_URL_GAS")) {
-        alert("⚠️ URL Google Apps Script belum dimasukkan di file index.html! Silakan ganti tulisan MASUKKAN_URL_GAS_ANDA_DI_SINI dengan URL Web App GAS Anda.");
+        alert("⚠️ URL Google Apps Script belum dimasukkan di file index.html!");
         return;
       }
 
-      setLoading(true);
+      // 1. Tampilkan data dari cache lokal seketika (0 ms delay)
+      const adaCache = muatDariCacheLokal();
+      if (adaCache) {
+        const targetMenuAwal = pulihkanStateNavigasi();
+        gantiMenu(targetMenuAwal);
+      } else {
+        const savedMenuAwal = localStorage.getItem('erapor_menu_aktif');
+        const validMenus = ['Data Siswa', 'Input Nilai TP', 'Input Nilai PSAS', 'Rekap Nilai Leger', 'Cetak & Kirim Nilai'];
+        if (validMenus.includes(savedMenuAwal) && savedMenuAwal !== 'Data Siswa') {
+          gantiMenu(savedMenuAwal);
+        } else {
+          sinkronTopbar();
+        }
+      }
+
+      // Hanya tampilkan spinner besar jika cache kosong atau diminta paksa
+      if (!adaCache || paksaSpinner) setLoading(true);
+      setCloudStatus('syncing', 'Menyinkronkan...');
+
       try {
-        const [resSiswa, resNilai] = await Promise.all([
-          fetch(`${API_URL}?action=getSiswa`).then(r => r.json()),
-          fetch(`${API_URL}?action=getAllNilaiData`).then(r => r.json())
-        ]);
-        dataSiswaGlobal = resSiswa.data || [];
-        if (resNilai.config && Array.isArray(resNilai.config.mapels) && resNilai.config.mapels.length > 0) {
-          configGlobal = resNilai.config;
-          configGlobal.mapels.forEach(m => {
-            if (m.kktp === undefined) m.kktp = 75;
-            if (!m.babsByKelas) m.babsByKelas = {};
-          });
+        // 2. Cukup 1x request ke getInitialData (mengurangi cold start GAS hingga 50%)
+        const res = await fetch(`${API_URL}?action=getInitialData`).then(r => r.json());
+        
+        if (res.status === "success") {
+          dataSiswaGlobal = res.siswa || [];
+          if (res.config && Array.isArray(res.config.mapels) && res.config.mapels.length > 0) {
+            configGlobal = res.config;
+            configGlobal.mapels.forEach(m => {
+              if (m.kktp === undefined) m.kktp = 75;
+              if (!m.babsByKelas) m.babsByKelas = {};
+            });
+          }
+          if (res.nilaiDetail) nilaiDetailGlobal = res.nilaiDetail;
+          if (res.nilaiPSAS) nilaiPSASGlobal = res.nilaiPSAS;
+
+          simpanCacheLokal();
+          tandaiBelumDisimpan(false);
+
+          const targetMenu = pulihkanStateNavigasi();
+          gantiMenu(targetMenu);
+          setCloudStatus('ok', 'Tersinkronisasi');
+          if (paksaSpinner) showToast("Data berhasil disinkronkan dengan Google Sheets");
         }
-        if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
-        if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
-
-        // Pulihkan Mapel, Kelas, dan Halaman terakhir dari localStorage
-        const savedMapel = localStorage.getItem('erapor_mapel_aktif');
-        if (savedMapel && configGlobal.mapels.find(m => m.id === savedMapel)) {
-          mapelAktifId = savedMapel;
-        } else if (!configGlobal.mapels.find(m => m.id === mapelAktifId)) {
-          mapelAktifId = configGlobal.mapels[0].id;
-        }
-
-        const savedKelas = localStorage.getItem('erapor_kelas_aktif');
-        const kelasUnik = [...new Set(dataSiswaGlobal.map(s => String(s.ID_Kelas)).filter(Boolean))];
-        if (savedKelas && (savedKelas === 'ALL' || kelasUnik.includes(savedKelas))) {
-          kelasAktifFilter = savedKelas;
-        }
-
-        const savedMenu = localStorage.getItem('erapor_menu_aktif');
-        const targetMenu = validMenus.includes(savedMenu) ? savedMenu : 'Data Siswa';
-
-        gantiMenu(targetMenu);
       } catch (e) {
         console.error(e);
-        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS benar dan sudah di-Deploy versi terbaru.");
+        setCloudStatus('error', 'Mode Offline (Cache)');
+        if (!adaCache) {
+          showToast("Gagal terhubung ke Google Sheets. Periksa koneksi internet.", "error");
+        }
       }
       setLoading(false);
     }
+
     function sinkronTopbar() {
       const mAktif = getMapelAktif();
       document.getElementById('sidebar-mapel-aktif').innerText = mAktif.nama;
@@ -728,7 +834,7 @@
     }
 
     function gantiMapelAktif(newId) {
-      localStorage.setItem('erapor_mapel_aktif', newId); // <-- TAMBAHKAN BARIS INI
+      localStorage.setItem('erapor_mapel_aktif', newId);
       mapelAktifId = newId;
       sinkronTopbar();
       if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
@@ -738,7 +844,7 @@
     }
 
     function gantiFilterKelas(val) {
-      localStorage.setItem('erapor_kelas_aktif', val); // <-- TAMBAHKAN BARIS INI
+      localStorage.setItem('erapor_kelas_aktif', val);
       kelasAktifFilter = val;
       tutupPanelSalinTPKelas();
       tutupPanelTambahTugasCepat();
@@ -864,14 +970,16 @@
       await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
       btn.innerText = "Simpan Data Siswa"; btn.disabled = false;
       tutupFormSiswa();
-      muatSemuaData();
+      showToast(isEdit ? "Data siswa diperbarui" : "Siswa baru ditambahkan");
+      muatSemuaData(true);
     }
 
     async function hapusDataSiswa(nisn) {
       if (!confirm(`Hapus siswa dengan NISN / NIS ${nisn}?`)) return;
       setLoading(true);
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "delete", data: { NISN: nisn } }) });
-      muatSemuaData();
+      showToast("Data siswa dihapus");
+      muatSemuaData(true);
     }
 
     function downloadTemplateSiswa() {
@@ -883,7 +991,7 @@
 
     function exportExcelSiswa() {
       const siswaTampil = getSiswaTerfilter();
-      if (siswaTampil.length === 0) return alert("Data siswa kosong!");
+      if (siswaTampil.length === 0) return showToast("Data siswa kosong!", "error");
       const rows = siswaTampil.map((s, i) => ({ No: i + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], ID_Kelas: s.ID_Kelas }));
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
@@ -909,9 +1017,10 @@
 
         if (importedData.length > 0) {
           await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "import", data: importedData }) });
-          muatSemuaData();
+          showToast(`${importedData.length} siswa berhasil diimpor!`);
+          muatSemuaData(true);
         } else {
-          setLoading(false); alert("File Excel kosong atau kolom NISN / NIS belum diisi!");
+          setLoading(false); showToast("File Excel kosong atau kolom NISN / NIS belum diisi!", "error");
         }
       };
       reader.readAsBinaryString(file);
@@ -919,7 +1028,7 @@
     }
 
     // =========================================================================
-    // RUMUS PERHITUNGAN NILAI TP & RAPOR (PER KELAS)
+    // RUMUS PERHITUNGAN NILAI TP & RAPOR
     // =========================================================================
     function hitungNilaiTPSiswa(nisn, tpObj) {
       const mAktif = getMapelAktif();
@@ -973,7 +1082,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP (TERPISAH PER KELAS + SALIN DARI KELAS LAIN)
+    // HALAMAN 2: INPUT NILAI TP
     // =========================================================================
     function toggleKartuTP(tpId) {
       const bodyEl = document.getElementById(`body-tp-${tpId}`);
@@ -990,6 +1099,38 @@
         kartuTerbukaManual[tpId] = false;
         if (btnToggle) btnToggle.innerText = "👁️ Lihat Nilai";
       }
+    }
+
+    function isiCepatNilaiTP(tpId) {
+      const kktp = getKKTPAktif();
+      const mAktif = getMapelAktif();
+      const daftarTP = getDaftarTPKelas(kelasAktifFilter);
+      const tp = daftarTP.find(b => b.id === tpId);
+      const siswaList = getSiswaTerfilter();
+      if (!tp || siswaList.length === 0) return;
+
+      let terisi = 0;
+      siswaList.forEach(s => {
+        const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
+        if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
+        if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
+
+        tp.tugas.forEach(t => {
+          if (nilaiDetailGlobal[key].tugas[t] === "" || nilaiDetailGlobal[key].tugas[t] === undefined) {
+            nilaiDetailGlobal[key].tugas[t] = kktp;
+            terisi++;
+          }
+        });
+        if (nilaiDetailGlobal[key].psh === "" || nilaiDetailGlobal[key].psh === undefined) {
+          nilaiDetailGlobal[key].psh = kktp;
+          terisi++;
+        }
+      });
+
+      if (terisi === 0) return showToast("Semua kolom nilai sudah terisi.", "info");
+      tandaiBelumDisimpan(true);
+      renderHalamanInputTP();
+      showToast(`${terisi} kolom kosong diisi dengan KKTP (${kktp}). Jangan lupa klik Simpan!`);
     }
 
     function renderHalamanInputTP() {
@@ -1076,6 +1217,7 @@
                     🔓 Buka Kunci
                   </button>
                 ` : `
+                  <button onclick="isiCepatNilaiTP('${tp.id}')" title="Isi kolom kosong dengan nilai KKTP" class="h-8 bg-violet-50 border border-violet-200 text-violet-800 px-2.5 rounded-lg text-xs font-bold hover:bg-violet-100 transition">⚡ Isi KKTP</button>
                   <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold hover:bg-sky-100 transition">+ Tugas</button>
                   <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit</button>
                   <button onclick="downloadTemplateTPById('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100 transition">📄 Template</button>
@@ -1149,17 +1291,17 @@
     }
 
     // =========================================================================
-    // FITUR BARU: SALIN MATERI (TP) & TUGAS DARI KELAS PILIHAN
+    // SALIN MATERI (TP) & TUGAS DARI KELAS PILIHAN
     // =========================================================================
     function bukaPanelSalinTPKelas() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas tujuan terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas tujuan terlebih dahulu!", "error");
       const mAktif = getMapelAktif();
       const kelasLainBerisi = Object.keys(mAktif.babsByKelas || {}).filter(
         k => String(k) !== String(kelasAktifFilter) && Array.isArray(mAktif.babsByKelas[k]) && mAktif.babsByKelas[k].length > 0
       );
 
       if (kelasLainBerisi.length === 0) {
-        return alert("Belum ada kelas lain pada mata pelajaran ini yang memiliki TP / Materi untuk disalin.");
+        return showToast("Belum ada kelas lain pada mapel ini yang memiliki TP untuk disalin.", "info");
       }
 
       document.getElementById('kartu-form-tp').classList.add('hidden');
@@ -1208,9 +1350,7 @@
       checkboxes.forEach(c => c.checked = adaYangBelum);
     }
 
-    function tutupPanelSalinTPKelas() {
-      document.getElementById('panel-salin-tp-kelas').classList.add('hidden');
-    }
+    function tutupPanelSalinTPKelas() { document.getElementById('panel-salin-tp-kelas').classList.add('hidden'); }
 
     async function eksekusiSalinTPDariKelas() {
       if (kelasAktifFilter === "ALL") return;
@@ -1219,7 +1359,7 @@
       const sumberTP = mAktif.babsByKelas[kelasSumber] || [];
       const terpilihIdx = Array.from(document.querySelectorAll('.chk-salin-tp:checked')).map(c => Number(c.value));
 
-      if (terpilihIdx.length === 0) return alert("Centang minimal 1 TP / Materi yang akan disalin!");
+      if (terpilihIdx.length === 0) return showToast("Centang minimal 1 TP / Materi!", "error");
 
       const daftarTujuan = getDaftarTPKelas(kelasAktifFilter);
       const stamp = Date.now();
@@ -1238,20 +1378,21 @@
       const btn = document.getElementById('btn-eksekusi-salin-tp');
       btn.innerText = "⏳ Menyalin..."; btn.disabled = true;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+      simpanCacheLokal();
       btn.innerText = "📋 Salin Materi & Tugas Terpilih"; btn.disabled = false;
 
       tutupPanelSalinTPKelas();
       renderHalamanInputTP();
-      alert(`✅ Berhasil menyalin ${terpilihIdx.length} TP / Materi beserta daftar tugasnya dari Kelas ${kelasSumber} ke Kelas ${kelasAktifFilter}!`);
+      showToast(`Berhasil menyalin ${terpilihIdx.length} TP dari Kelas ${kelasSumber} ke Kelas ${kelasAktifFilter}`);
     }
 
     // =========================================================================
     // PANEL CEPAT: TAMBAH TUGAS KE TP YANG SUDAH ADA
     // =========================================================================
     function bukaPanelTambahTugasCepat(tpIdPreselect = null) {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas terlebih dahulu!", "error");
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
-      if (daftarTP.length === 0) return alert("Belum ada TP pada kelas ini. Buat TP / Materi terlebih dahulu.");
+      if (daftarTP.length === 0) return showToast("Buat TP / Materi terlebih dahulu.", "error");
 
       document.getElementById('kartu-form-tp').classList.add('hidden');
       document.getElementById('panel-salin-tp-kelas').classList.add('hidden');
@@ -1270,22 +1411,20 @@
       panel.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function tutupPanelTambahTugasCepat() {
-      document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden');
-    }
+    function tutupPanelTambahTugasCepat() { document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden'); }
 
     async function simpanTugasBaruKeTP() {
       if (kelasAktifFilter === "ALL") return;
       const tpId = document.getElementById('select-tp-untuk-tugas').value;
       const namaTugasBaru = document.getElementById('input-nama-tugas-baru').value.trim();
-      if (!namaTugasBaru) return alert("Nama tugas baru tidak boleh kosong!");
+      if (!namaTugasBaru) return showToast("Nama tugas baru tidak boleh kosong!", "error");
 
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const tpObj = daftarTP.find(b => b.id === tpId);
       if (!tpObj) return;
 
       if (tpObj.tugas.some(t => t.toLowerCase() === namaTugasBaru.toLowerCase())) {
-        return alert(`Nama tugas "${namaTugasBaru}" sudah ada pada ${tpObj.nama}. Gunakan nama lain.`);
+        return showToast(`Nama tugas "${namaTugasBaru}" sudah ada pada TP ini.`, "error");
       }
 
       tpObj.tugas.push(namaTugasBaru);
@@ -1295,17 +1434,19 @@
       const btn = document.getElementById('btn-simpan-tugas-cepat');
       btn.innerText = "⏳ Menambahkan..."; btn.disabled = true;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+      simpanCacheLokal();
       btn.innerText = "💾 Tambahkan Tugas"; btn.disabled = false;
 
       tutupPanelTambahTugasCepat();
       renderHalamanInputTP();
+      showToast(`Tugas "${namaTugasBaru}" ditambahkan ke ${tpObj.nama}`);
     }
 
     // =========================================================================
     // FORM TAMBAH TP / MATERI BARU & EDIT STRUKTUR
     // =========================================================================
     function tampilkanFormTambahTP() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas terlebih dahulu!", "error");
       document.getElementById('panel-tambah-tugas-cepat').classList.add('hidden');
       document.getElementById('panel-salin-tp-kelas').classList.add('hidden');
 
@@ -1340,9 +1481,7 @@
       document.getElementById('kartu-form-tp').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function tutupFormTP() {
-      document.getElementById('kartu-form-tp').classList.add('hidden');
-    }
+    function tutupFormTP() { document.getElementById('kartu-form-tp').classList.add('hidden'); }
 
     let tempTugasList = [];
     function renderInputTugasForm(list) {
@@ -1368,12 +1507,12 @@
     }
 
     async function simpanStrukturTP() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas terlebih dahulu!", "error");
       const namaTP = document.getElementById('input-nama-tp').value.trim();
-      if (!namaTP) return alert("Nama Tujuan Pembelajaran (TP) wajib diisi!");
+      if (!namaTP) return showToast("Nama Tujuan Pembelajaran (TP) wajib diisi!", "error");
 
       const tugasBersih = tempTugasList.map(t => t.trim()).filter(Boolean);
-      if (tugasBersih.length === 0) return alert("Minimal harus ada 1 kolom tugas!");
+      if (tugasBersih.length === 0) return showToast("Minimal harus ada 1 kolom tugas!", "error");
 
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const editId = document.getElementById('edit-tp-id').value;
@@ -1396,10 +1535,12 @@
       const btn = document.getElementById('btn-simpan-struktur-tp');
       btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+      simpanCacheLokal();
       btn.innerText = "💾 Simpan TP / Materi"; btn.disabled = false;
 
       tutupFormTP();
       renderHalamanInputTP();
+      showToast("Struktur TP / Materi tersimpan!");
     }
 
     function perbaruiTampilanBarisTP(nisn, tpId, hasil) {
@@ -1424,6 +1565,8 @@
       if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
       nilaiDetailGlobal[key].tugas[namaTugas] = val === "" ? "" : Number(val);
 
+      tandaiBelumDisimpan(true);
+
       if (isDiBawahKKTP(val)) {
         inputEl.classList.remove('text-slate-900', 'border-slate-300', 'bg-white');
         inputEl.classList.add('text-rose-600', 'border-rose-400', 'bg-rose-50/50');
@@ -1444,6 +1587,8 @@
       const key = `${mAktif.id}_${nisn}_${tpId}`;
       if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
       nilaiDetailGlobal[key].psh = val === "" ? "" : Number(val);
+
+      tandaiBelumDisimpan(true);
 
       if (isDiBawahKKTP(val)) {
         inputEl.classList.remove('text-slate-900', 'border-amber-300', 'bg-white');
@@ -1467,6 +1612,7 @@
 
       const btn = document.getElementById(`btn-save-${tpId}`);
       if (btn) { btn.innerText = "⏳ Menyimpan..."; btn.disabled = true; }
+      setCloudStatus('syncing', 'Menyimpan nilai...');
 
       const siswaList = getSiswaTerfilter();
       const updates = siswaList.map(s => {
@@ -1489,11 +1635,17 @@
         tp.selesai = true;
         kartuTerbukaManual[tp.id] = false;
         await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+        simpanCacheLokal();
+        tandaiBelumDisimpan(false);
+        setCloudStatus('ok', 'Tersinkronisasi');
         renderHalamanInputTP();
-        alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) tersimpan & kartu ditutup rapi!`);
+        showToast(`Nilai ${tp.nama} tersimpan & kartu ditutup rapi!`);
       } else {
+        simpanCacheLokal();
+        tandaiBelumDisimpan(false);
+        setCloudStatus('ok', 'Tersinkronisasi');
         if (btn) { btn.innerText = "💾 Simpan"; btn.disabled = false; }
-        alert(`✅ Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) berhasil disimpan ke Google Cloud!`);
+        showToast(`Nilai ${tp.nama} (Kelas ${kelasAktifFilter}) tersimpan!`);
       }
     }
 
@@ -1504,6 +1656,7 @@
       tp.selesai = statusBaru;
       kartuTerbukaManual[tp.id] = !statusBaru;
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: configGlobal }) });
+      simpanCacheLokal();
       renderHalamanInputTP();
     }
 
@@ -1538,8 +1691,9 @@
             if (phVal !== undefined && phVal !== "") nilaiDetailGlobal[key].psh = Number(phVal);
             count++;
           });
+          tandaiBelumDisimpan(true);
           renderHalamanInputTP();
-          alert(`✅ Berhasil mengimpor nilai ${tp.nama} untuk ${count} siswa! Klik "💾 Simpan" pada kartu TP.`);
+          showToast(`Berhasil mengimpor nilai ${tp.nama} untuk ${count} siswa! Klik Simpan.`);
         };
         reader.readAsBinaryString(file);
       };
@@ -1551,7 +1705,7 @@
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const tp = daftarTP.find(b => b.id === tpId);
       const siswaList = getSiswaTerfilter();
-      if (!tp || siswaList.length === 0) return alert("Data siswa kosong!");
+      if (!tp || siswaList.length === 0) return showToast("Data siswa kosong!", "error");
 
       const rows = siswaList.map((s, idx) => {
         const key = `${mAktif.id}_${s.NISN}_${tp.id}`;
@@ -1569,7 +1723,7 @@
     }
 
     // =========================================================================
-    // EKSPOR EXCEL BERWARNA, TEBAL & BER-BORDER (MENGGUNAKAN EXCELJS)
+    // EKSPOR EXCEL BERWARNA, TEBAL & BER-BORDER (EXCELJS)
     // =========================================================================
     const BORDER_TIPIS = {
       top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
@@ -1599,13 +1753,13 @@
     }
 
     async function exportTPExcelById(tpId) {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas spesifik terlebih dahulu!", "error");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const tp = daftarTP.find(b => b.id === tpId);
       const siswaList = getSiswaTerfilter();
       const kktp = getKKTPAktif();
-      if (!tp || siswaList.length === 0) return alert("Data kosong!");
+      if (!tp || siswaList.length === 0) return showToast("Data kosong!", "error");
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet("Nilai_TP", { views: [{ state: 'frozen', xSplit: 4, ySplit: 5 }] });
@@ -1619,11 +1773,8 @@
       ws.getCell(2, 1).value = `Tujuan Pembelajaran: ${tp.nama}  |  Kelas: ${kelasAktifFilter}  |  Standar KKTP: ${kktp}`;
       ws.getCell(2, 1).font = { name: 'Calibri', size: 10, italic: true, color: { argb: 'FF475569' } };
 
-      // Header Bertingkat Baris 4 & 5
-      const r4 = ws.getRow(4);
-      const r5 = ws.getRow(5);
-      r4.height = 24;
-      r5.height = 22;
+      ws.getRow(4).height = 24;
+      ws.getRow(5).height = 22;
 
       const identitas = ["No", "NISN / NIS", "Nama Lengkap", "L/P"];
       identitas.forEach((judul, i) => {
@@ -1718,12 +1869,12 @@
     }
 
     async function exportLegerExcel() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas spesifik terlebih dahulu!", "error");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
       const kktp = getKKTPAktif();
-      if (siswaList.length === 0) return alert("Data kosong!");
+      if (siswaList.length === 0) return showToast("Data kosong!", "error");
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet("Rekap_Leger", { views: [{ state: 'frozen', xSplit: 4, ySplit: 5 }] });
@@ -1863,12 +2014,12 @@
     }
 
     async function exportRaporRingkasExcel() {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas spesifik terlebih dahulu!", "error");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const siswaList = getSiswaTerfilter();
       const kktp = getKKTPAktif();
-      if (siswaList.length === 0) return alert("Data kosong!");
+      if (siswaList.length === 0) return showToast("Data kosong!", "error");
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet("Nilai_Rapor", { views: [{ state: 'frozen', xSplit: 4, ySplit: 4 }] });
@@ -1944,6 +2095,26 @@
     // =========================================================================
     // HALAMAN 3: INPUT NILAI PSAS
     // =========================================================================
+    function isiCepatPSAS() {
+      const kktp = getKKTPAktif();
+      const mAktif = getMapelAktif();
+      const siswaList = getSiswaTerfilter();
+      let terisi = 0;
+
+      siswaList.forEach(s => {
+        const key = `${mAktif.id}_${s.NISN}`;
+        if (nilaiPSASGlobal[key] === "" || nilaiPSASGlobal[key] === undefined || nilaiPSASGlobal[key] === null) {
+          nilaiPSASGlobal[key] = kktp;
+          terisi++;
+        }
+      });
+
+      if (terisi === 0) return showToast("Semua nilai PSAS sudah terisi.", "info");
+      tandaiBelumDisimpan(true);
+      renderHalamanPSAS();
+      showToast(`${terisi} kolom PSAS kosong diisi dengan KKTP (${kktp}).`);
+    }
+
     function renderHalamanPSAS() {
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
@@ -1989,6 +2160,7 @@
       const val = inputEl.value;
       const mAktif = getMapelAktif();
       nilaiPSASGlobal[`${mAktif.id}_${nisn}`] = val === "" ? "" : Number(val);
+      tandaiBelumDisimpan(true);
 
       if (isDiBawahKKTP(val)) {
         inputEl.classList.remove('text-slate-900', 'border-amber-300', 'bg-white');
@@ -2011,13 +2183,13 @@
       btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
       await simpanRekapCloud(true);
       btn.innerText = "💾 Simpan Nilai PSAS"; btn.disabled = false;
-      alert("✅ Nilai PSAS dan Rekap Leger berhasil disimpan ke Google Cloud!");
+      showToast("Nilai PSAS dan Rekap Leger berhasil disimpan!");
     }
 
     function downloadTemplatePSAS() {
       const mAktif = getMapelAktif();
       const siswaList = getSiswaTerfilter();
-      if (siswaList.length === 0) return alert("Data siswa kosong!");
+      if (siswaList.length === 0) return showToast("Data siswa kosong!", "error");
       const rows = siswaList.map((s, i) => ({
         No: i + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], Kelas: s.ID_Kelas,
         Nilai_PSAS: nilaiPSASGlobal[`${mAktif.id}_${s.NISN}`] ?? ""
@@ -2044,15 +2216,16 @@
             count++;
           }
         });
+        tandaiBelumDisimpan(true);
         renderHalamanPSAS();
-        alert(`✅ Berhasil mengimpor Nilai PSAS untuk ${count} siswa! Klik "💾 Simpan Nilai PSAS".`);
+        showToast(`Berhasil mengimpor Nilai PSAS untuk ${count} siswa! Klik Simpan.`);
       };
       reader.readAsBinaryString(file);
       e.target.value = "";
     }
 
     // =========================================================================
-    // HALAMAN 4: REKAP NILAI LEGER (SCROLL HORIZONTAL + KOLOM IDENTITAS STICKY)
+    // HALAMAN 4: REKAP NILAI LEGER
     // =========================================================================
     function renderHalamanLeger() {
       const mAktif = getMapelAktif();
@@ -2179,31 +2352,42 @@
       const mAktif = getMapelAktif();
       const btn = document.getElementById('btn-simpan-leger');
       if (!silent && btn) { btn.innerText = "⏳ Menyimpan..."; btn.disabled = true; }
+      setCloudStatus('syncing', 'Menyimpan rekap...');
 
       const daftarTPContoh = kelasAktifFilter !== "ALL" ? getDaftarTPKelas(kelasAktifFilter) : [];
-      const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "L/P", "ID_Kelas", ...daftarTPContoh.map(b => b.nama), "Rata_Seluruh_TP", "Nilai_PSAS", "Nilai_Rapor"];
+      const headers = ["ID_Mapel", "Nama_Mapel", "NISN", "Nama_Lengkap", "L/P", "ID_Kelas", ...daftarTPContoh.map(b => b.nama), "Rata_Seluruh_TP", "Nilai_PSAS", "Nilai_Rapor"];
       const siswaTarget = getSiswaTerfilter();
 
       const rows = siswaTarget.map(s => {
         const daftarTPSiswa = getDaftarTPKelas(s.ID_Kelas);
         const nilaiTPs = daftarTPSiswa.map(b => hitungNilaiTPSiswa(s.NISN, b).nilaiAkhirTP);
         const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
-        return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s["L/P"], s.ID_Kelas, ...nilaiTPs, rekap.rataSeluruhTPStr, rekap.psasRaw === "" ? 0 : rekap.psasRaw, rekap.nilaiRapor];
+        return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s["L/P"], s.ID_Kelas, ...nilaiTPs, rekap.rataSeluruhTPStr, rekap.psasRaw === "" ? "" : rekap.psasRaw, rekap.nilaiRapor];
       });
 
       await fetch(API_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "saveRekapRapor", mapelId: mAktif.id, headers: headers, rows: rows })
+        body: JSON.stringify({
+          action: "saveRekapRapor",
+          mapelId: mAktif.id,
+          kelasFilter: kelasAktifFilter,
+          headers: headers,
+          rows: rows
+        })
       });
+
+      simpanCacheLokal();
+      tandaiBelumDisimpan(false);
+      setCloudStatus('ok', 'Tersinkronisasi');
 
       if (!silent && btn) {
         btn.innerText = "☁️ Sinkronkan Sheet"; btn.disabled = false;
-        alert("✅ Rekap Nilai Leger berhasil disinkronkan ke Google Cloud!");
+        showToast("Rekap Nilai Leger berhasil disinkronkan ke Google Sheet!");
       }
     }
 
     // =========================================================================
-    // HALAMAN 5: CETAK & KIRIM NILAI (PDF ANTI POTONG HURUF & PILIH FORMAT WA)
+    // HALAMAN 5: CETAK & KIRIM NILAI
     // =========================================================================
     function renderHalamanCetakKirim() {
       const mAktif = getMapelAktif();
@@ -2226,12 +2410,12 @@
     }
 
     function cetakPDF(tipe, tpId = null) {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas spesifik terlebih dahulu!", "error");
       const mAktif = getMapelAktif();
       const daftarTP = getDaftarTPKelas(kelasAktifFilter);
       const kktp = getKKTPAktif();
       const siswaList = getSiswaTerfilter();
-      if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
+      if (siswaList.length === 0) return showToast("Data siswa pada kelas ini kosong!", "error");
 
       const { jsPDF } = window.jspdf;
       const labelKelas = `Kelas ${kelasAktifFilter}`;
@@ -2239,7 +2423,6 @@
       let totalKolomLeger = 7;
       daftarTP.forEach(b => { totalKolomLeger += (b.tugas.length + 3); });
 
-      // Gunakan kertas A3 Landscape jika kolom leger >= 13 agar setiap kata judul kolom muat utuh 1 kata per baris
       let formatKertas = "a4";
       if (tipe === "LEGER") {
         formatKertas = totalKolomLeger >= 13 ? "a3" : [330, 215];
@@ -2264,7 +2447,7 @@
 
       if (tipe === "TP") {
         const tp = daftarTP.find(b => b.id === tpId);
-        if (!tp) return alert("Pilih Tujuan Pembelajaran (TP) terlebih dahulu!");
+        if (!tp) return showToast("Pilih Tujuan Pembelajaran (TP) terlebih dahulu!", "error");
         doc.text(`DAFTAR NILAI TUJUAN PEMBELAJARAN — ${mAktif.nama.toUpperCase()}`, 10, 12);
         doc.setFontSize(9.5);
         doc.setFont("helvetica", "normal");
@@ -2308,12 +2491,7 @@
         doc.setTextColor(71, 85, 105);
         doc.text(`${labelKelas}   |   Standar KKTP: ${kktp}   |   Bobot TP: Tugas ${mAktif.bobotTugas}% + PH ${mAktif.bobotPSH}%   |   Bobot Rapor: TP ${mAktif.bobotBAB}% + PSAS ${mAktif.bobotPSAS}%`, 10, 18);
 
-        const paletHeaderTP = [
-          [5, 150, 105],   // Emerald
-          [2, 132, 199],   // Sky
-          [217, 119, 6],   // Amber
-          [79, 70, 229]    // Indigo
-        ];
+        const paletHeaderTP = [[5, 150, 105], [2, 132, 199], [217, 119, 6], [79, 70, 229]];
 
         let barisHeader1 = [
           { content: "No", rowSpan: 2, styles: { valign: "middle" } },
@@ -2333,7 +2511,6 @@
           });
 
           b.tugas.forEach(t => {
-            // Sisipkan pemisah baris otomatis per spasi kata agar kata seperti "Membaca Ayat" turun per kata, bukan terbelah per huruf
             const labelRapi = t.replace(/\s+/g, "\n");
             barisHeader2.push({ content: labelRapi, styles: { fillColor: [241, 245, 249], textColor: [30, 41, 59] } });
           });
@@ -2407,8 +2584,8 @@
       }
 
       if (tipe === "LEGER") {
-        const lebarIdentitas = 7 + 21 + 38 + 7; // 73mm
-        const marginTotal = 20; // 10mm kiri + 10mm kanan
+        const lebarIdentitas = 73;
+        const marginTotal = 20;
         const sisaLebar = pageWidth - marginTotal - lebarIdentitas;
         const lebarPerKolomNilai = Math.max(13, Math.min(22, sisaLebar / Math.max(1, totalKolomLeger - 4)));
         for (let c = 4; c < totalKolomLeger; c++) {
@@ -2440,9 +2617,7 @@
           valign: "middle",
           overflow: "linebreak"
         },
-        alternateRowStyles: {
-          fillColor: [248, 250, 252]
-        },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
         didParseCell: function (data) {
           if (data.section === 'body' && data.column.index >= 4) {
             const val = parseFloat(data.cell.raw);
@@ -2453,12 +2628,8 @@
           }
           if (data.section === 'body' && tipe === "LEGER") {
             const totalCols = data.table.columns.length;
-            if (data.column.index >= totalCols - 3) {
-              data.cell.styles.fontStyle = 'bold';
-            }
-            if (data.column.index === totalCols - 1) {
-              data.cell.styles.fillColor = [236, 253, 245];
-            }
+            if (data.column.index >= totalCols - 3) data.cell.styles.fontStyle = 'bold';
+            if (data.column.index === totalCols - 1) data.cell.styles.fillColor = [236, 253, 245];
           }
         },
         didDrawPage: function () {
@@ -2477,9 +2648,9 @@
     }
 
     async function kirimKeWaliKelasWA(formatPilihan = 'PDF') {
-      if (kelasAktifFilter === "ALL") return alert("Pilih kelas spesifik terlebih dahulu!");
+      if (kelasAktifFilter === "ALL") return showToast("Pilih kelas spesifik terlebih dahulu!", "error");
       let nomor = document.getElementById('wa-nomor-walas').value.replace(/[^0-9]/g, "");
-      if (!nomor) return alert("Masukkan nomor WhatsApp Wali Kelas terlebih dahulu!");
+      if (!nomor) return showToast("Masukkan nomor WhatsApp Wali Kelas terlebih dahulu!", "error");
       if (nomor.startsWith("0")) nomor = "62" + nomor.slice(1);
 
       let hasilUnduh = null;
@@ -2559,10 +2730,10 @@
     async function simpanModalMapelBobot() {
       simpanFormBobotModalKeTemp();
       for (const m of tempConfig.mapels) {
-        if (!m.nama.trim()) return alert("Nama mata pelajaran tidak boleh kosong!");
-        if (m.kktp < 0 || m.kktp > 100) return alert(`Nilai KKTP pada mapel "${m.nama}" harus antara 0 - 100!`);
+        if (!m.nama.trim()) return showToast("Nama mata pelajaran tidak boleh kosong!", "error");
+        if (m.kktp < 0 || m.kktp > 100) return showToast(`Nilai KKTP pada "${m.nama}" harus 0 - 100!`, "error");
         if (m.bobotTugas + m.bobotPSH !== 100 || m.bobotBAB + m.bobotPSAS !== 100) {
-          return alert(`Total bobot pada mapel "${m.nama}" harus 100%!`);
+          return showToast(`Total bobot pada "${m.nama}" harus 100%!`, "error");
         }
       }
       const btn = document.getElementById('btn-simpan-modal-mb');
@@ -2570,13 +2741,15 @@
       await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveConfig", data: tempConfig }) });
       configGlobal = tempConfig;
       mapelAktifId = tempMapelModalId;
+      simpanCacheLokal();
       btn.innerText = "💾 Simpan Pengaturan"; btn.disabled = false;
       tutupModalMapelBobot();
       sinkronTopbar();
       gantiMenu(menuAktif);
+      showToast("Pengaturan Mapel, KKTP & Bobot berhasil disimpan!");
     }
 
-    window.onload = muatSemuaData;
+    window.onload = () => muatSemuaData(false);
   </script>
 </body>
 </html>
