@@ -17,7 +17,8 @@
     </div>
     <nav class="flex-1 p-4 space-y-2 mt-2">
       <button onclick="gantiMenu('Data Siswa')" id="btn-Data Siswa" class="menu-btn w-full text-left p-3 rounded-lg font-medium bg-emerald-700 transition">👥 Data Siswa</button>
-      <button onclick="gantiMenu('Input Nilai')" id="btn-Input Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-emerald-700 transition">📝 Input Nilai</button>
+      <button onclick="gantiMenu('Input Nilai')" id="btn-Input Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-emerald-700 transition">📝 Input Nilai BAB</button>
+      <button onclick="gantiMenu('Rekap Nilai')" id="btn-Rekap Nilai" class="menu-btn w-full text-left p-3 rounded-lg font-medium hover:bg-emerald-700 transition">🏆 Rekap Nilai & Rapor</button>
     </nav>
     <div class="p-4 text-xs text-emerald-300 border-t border-emerald-700">Cloud Mode (Multi-Mapel)</div>
   </aside>
@@ -98,19 +99,19 @@
     </div>
 
     <!-- ===================================================================== -->
-    <!-- HALAMAN 2: INPUT NILAI DINAMIS MULTI-MAPEL                            -->
+    <!-- HALAMAN 2: INPUT NILAI PER BAB                                        -->
     <!-- ===================================================================== -->
     <div id="halaman-Input Nilai" class="halaman hidden">
       <header class="mb-6 flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h1 id="judul-halaman-nilai" class="text-3xl font-bold text-gray-800">Input Nilai</h1>
-          <p class="text-sm text-gray-500 mt-1">Pilih mata pelajaran & kelas, lalu kelola tugas dinamis serta bobot penilaian.</p>
+          <h1 id="judul-halaman-nilai" class="text-3xl font-bold text-gray-800">Input Nilai BAB</h1>
+          <p class="text-sm text-gray-500 mt-1">Pilih mata pelajaran & kelas, lalu isi nilai tugas dinamis dan PSH per BAB.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <select id="pilih-mapel" onchange="gantiMapelAktif(this.value)" class="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-2 rounded-lg shadow-sm font-bold focus:outline-none focus:border-emerald-600">
+          <select id="pilih-mapel-input" onchange="gantiMapelAktif(this.value)" class="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-2 rounded-lg shadow-sm font-bold focus:outline-none focus:border-emerald-600 min-w-[220px]">
           </select>
 
-          <select id="filter-kelas" onchange="renderAreaNilai()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:border-emerald-500">
+          <select id="filter-kelas-input" onchange="sinkronFilterKelas(this.value)" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:border-emerald-500">
             <option value="ALL">Semua Kelas</option>
           </select>
 
@@ -120,10 +121,10 @@
         </div>
       </header>
 
-      <!-- Tab Navigasi BAB & Rekap Rapor -->
+      <!-- Tab Navigasi BAB -->
       <div id="tabs-bab" class="flex flex-wrap gap-2 mb-4 border-b border-gray-200 pb-3"></div>
 
-      <!-- Area Tabel Input Nilai -->
+      <!-- Area Tabel Input Nilai BAB -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div class="p-4 bg-emerald-50/60 border-b border-gray-200 flex flex-wrap justify-between items-center gap-4">
           <div>
@@ -131,20 +132,68 @@
             <p id="info-bobot-aktif" class="text-xs text-emerald-700 mt-0.5">Bobot: Tugas 70% + PSH 30%</p>
           </div>
           
-          <!-- Tombol Aksi Excel & Simpan Nilai -->
           <div class="flex flex-wrap gap-2">
-            <button onclick="downloadTemplateNilai()" class="bg-teal-50 text-teal-700 border border-teal-300 px-3 py-2 rounded-lg shadow-sm hover:bg-teal-100 text-sm font-medium">📄 Unduh Template</button>
-            <button onclick="document.getElementById('file-excel-nilai').click()" class="bg-orange-50 text-orange-700 border border-orange-300 px-3 py-2 rounded-lg shadow-sm hover:bg-orange-100 text-sm font-medium">📥 Impor (Excel)</button>
-            <input type="file" id="file-excel-nilai" onchange="handleImportNilai(event)" accept=".xlsx, .xls" class="hidden" />
-            <button onclick="exportNilaiExcel()" class="bg-purple-50 text-purple-700 border border-purple-300 px-3 py-2 rounded-lg shadow-sm hover:bg-purple-100 text-sm font-medium">📤 Ekspor (Excel)</button>
-            <button onclick="simpanNilaiTabAktif()" id="btn-simpan-nilai" class="bg-emerald-600 text-white px-5 py-2 rounded-lg shadow hover:bg-emerald-700 text-sm font-bold">💾 Simpan Nilai</button>
+            <button onclick="downloadTemplateBab()" class="bg-teal-50 text-teal-700 border border-teal-300 px-3 py-2 rounded-lg shadow-sm hover:bg-teal-100 text-sm font-medium">📄 Unduh Template</button>
+            <button onclick="document.getElementById('file-excel-bab').click()" class="bg-orange-50 text-orange-700 border border-orange-300 px-3 py-2 rounded-lg shadow-sm hover:bg-orange-100 text-sm font-medium">📥 Impor (Excel)</button>
+            <input type="file" id="file-excel-bab" onchange="handleImportBab(event)" accept=".xlsx, .xls" class="hidden" />
+            <button onclick="exportBabExcel()" class="bg-purple-50 text-purple-700 border border-purple-300 px-3 py-2 rounded-lg shadow-sm hover:bg-purple-100 text-sm font-medium">📤 Ekspor (Excel)</button>
+            <button onclick="simpanNilaiBabAktif()" id="btn-simpan-bab" class="bg-emerald-600 text-white px-5 py-2 rounded-lg shadow hover:bg-emerald-700 text-sm font-bold">💾 Simpan Nilai BAB</button>
           </div>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-sm">
-            <thead id="thead-nilai" class="bg-gray-50 border-b border-gray-200 text-gray-700"></thead>
-            <tbody id="tbody-nilai"></tbody>
+            <thead id="thead-bab" class="bg-gray-50 border-b border-gray-200 text-gray-700"></thead>
+            <tbody id="tbody-bab"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- HALAMAN 3: REKAPITULASI NILAI AKHIR & PSAS (MENU MANDIRI SIDEBAR)     -->
+    <!-- ===================================================================== -->
+    <div id="halaman-Rekap Nilai" class="halaman hidden">
+      <header class="mb-6 flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <h1 id="judul-halaman-rekap" class="text-3xl font-bold text-gray-800">Rekap Nilai & Rapor</h1>
+          <p class="text-sm text-gray-500 mt-1">Rekapitulasi nilai seluruh BAB, input nilai PSAS, dan perhitungan Nilai Akhir Rapor.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <select id="pilih-mapel-rekap" onchange="gantiMapelAktif(this.value)" class="bg-amber-50 border border-amber-300 text-amber-900 px-4 py-2 rounded-lg shadow-sm font-bold focus:outline-none focus:border-amber-600 min-w-[220px]">
+          </select>
+
+          <select id="filter-kelas-rekap" onchange="sinkronFilterKelas(this.value)" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg shadow-sm font-medium focus:outline-none focus:border-amber-500">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+
+          <button onclick="bukaModalPengaturan()" class="bg-slate-800 text-white px-4 py-2 rounded-lg shadow hover:bg-slate-900 text-sm font-medium flex items-center gap-2">
+            ⚙️ Atur Bobot Rapor
+          </button>
+        </div>
+      </header>
+
+      <!-- Area Tabel Rekapitulasi -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-4 bg-amber-50/70 border-b border-amber-200 flex flex-wrap justify-between items-center gap-4">
+          <div>
+            <h2 id="judul-rekap-aktif" class="text-lg font-bold text-amber-950">🏆 Rekapitulasi Nilai Akhir</h2>
+            <p id="info-bobot-rekap" class="text-xs text-amber-800 mt-0.5">Rumus Rapor: (Rata-rata Semua BAB × 70%) + (Nilai PSAS × 30%)</p>
+          </div>
+          
+          <div class="flex flex-wrap gap-2">
+            <button onclick="downloadTemplatePSAS()" class="bg-teal-50 text-teal-700 border border-teal-300 px-3 py-2 rounded-lg shadow-sm hover:bg-teal-100 text-sm font-medium">📄 Unduh Template PSAS</button>
+            <button onclick="document.getElementById('file-excel-psas').click()" class="bg-orange-50 text-orange-700 border border-orange-300 px-3 py-2 rounded-lg shadow-sm hover:bg-orange-100 text-sm font-medium">📥 Impor PSAS (Excel)</button>
+            <input type="file" id="file-excel-psas" onchange="handleImportPSAS(event)" accept=".xlsx, .xls" class="hidden" />
+            <button onclick="exportRekapExcel()" class="bg-purple-50 text-purple-700 border border-purple-300 px-3 py-2 rounded-lg shadow-sm hover:bg-purple-100 text-sm font-medium">📤 Ekspor Rekap (Excel)</button>
+            <button onclick="simpanRekapRapor()" id="btn-simpan-rekap" class="bg-amber-600 text-white px-5 py-2 rounded-lg shadow hover:bg-amber-700 text-sm font-bold">💾 Simpan Rekap Rapor</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead id="thead-rekap" class="bg-gray-50 border-b border-gray-200 text-gray-700"></thead>
+            <tbody id="tbody-rekap"></tbody>
           </table>
         </div>
       </div>
@@ -163,7 +212,6 @@
       </div>
       
       <div class="p-6 overflow-y-auto space-y-6 flex-1">
-        <!-- Bagian 1: Identitas & Pemilihan Mapel -->
         <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
           <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
             <h4 class="font-bold text-emerald-900">1. Kelola Mata Pelajaran</h4>
@@ -185,7 +233,6 @@
           </div>
         </div>
 
-        <!-- Bagian 2: Pengaturan Bobot Mapel Terpilih -->
         <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
           <h4 class="font-bold text-amber-900 mb-3">2. Pengaturan Bobot Penilaian (%) untuk Mapel Ini</h4>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
@@ -209,7 +256,6 @@
           <p class="text-xs text-amber-700 mt-2">*Pastikan Tugas + PSH = 100%, dan Rata-rata BAB + PSAS = 100%.</p>
         </div>
 
-        <!-- Bagian 3: Struktur BAB & Tugas Dinamis -->
         <div>
           <div class="flex justify-between items-center mb-3">
             <h4 class="font-bold text-gray-800">3. Daftar BAB & Jenis Tugas (Hafalan, Video, Tulis, dll.)</h4>
@@ -228,7 +274,7 @@
 
   <script>
     // =========================================================================
-    // WAJIB DIGANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    // WAJIB GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
 
@@ -245,9 +291,11 @@
     };
 
     let mapelAktifId = "MAPEL_DEFAULT";
-    let nilaiDetailGlobal = {}; // { "MAPELID_NISN_BABID": { tugas: { "Tugas 1": 85 }, psh: 90 } }
-    let nilaiPSASGlobal = {};   // { "MAPELID_NISN": 88 }
-    let tabAktif = "BAB1";
+    let kelasAktifFilter = "ALL";
+    let nilaiDetailGlobal = {};
+    let nilaiPSASGlobal = {};
+    let babAktifId = "BAB1";
+    let menuAktif = "Data Siswa";
     
     let tempConfig = null;
     let tempMapelEditId = null;
@@ -256,23 +304,24 @@
       return configGlobal.mapels.find(m => m.id === mapelAktifId) || configGlobal.mapels[0];
     }
 
-    // Helper ambil nilai NISN/NIS dari baris Excel impor (mendukung header "NISN / NIS", "NISN", maupun "NIS")
     function ambilIdSiswaExcel(row) {
       return String(row["NISN / NIS"] ?? row["NISN/NIS"] ?? row["NISN"] ?? row["NIS"] ?? "").trim();
     }
 
-    // --- NAVIGASI MENU ---
+    // --- NAVIGASI MENU SIDEBAR ---
     function gantiMenu(namaMenu) {
+      menuAktif = namaMenu;
       document.querySelectorAll('.halaman').forEach(el => el.classList.add('hidden'));
       document.getElementById('halaman-' + namaMenu).classList.remove('hidden');
       document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('bg-emerald-700'));
       document.getElementById('btn-' + namaMenu).classList.add('bg-emerald-700');
 
+      sinkronSemuaDropdown();
       if (namaMenu === 'Input Nilai') {
-        isiDropdownMapel();
-        isiDropdownKelas();
         renderTabsBab();
-        renderAreaNilai();
+        renderTabelBab();
+      } else if (namaMenu === 'Rekap Nilai') {
+        renderTabelRekap();
       }
     }
 
@@ -283,6 +332,17 @@
 
     // --- MUAT SEMUA DATA AWAL ---
     async function muatSemuaData() {
+      // Langsung isi dropdown default terlebih dahulu agar UI selalu responsif dan tidak pernah kosong
+      sinkronSemuaDropdown();
+      renderTabsBab();
+      renderTabelBab();
+      renderTabelRekap();
+
+      if (!API_URL || API_URL.includes("MASUKKAN_URL_GAS")) {
+        alert("⚠️ URL Google Apps Script belum dimasukkan di file index.html! Silakan ganti tulisan MASUKKAN_URL_GAS_ANDA_DI_SINI dengan URL Web App GAS Anda.");
+        return;
+      }
+
       setLoading(true);
       try {
         const [resSiswa, resNilai] = await Promise.all([
@@ -290,7 +350,9 @@
           fetch(`${API_URL}?action=getAllNilaiData`).then(r => r.json())
         ]);
         dataSiswaGlobal = resSiswa.data || [];
-        if (resNilai.config && resNilai.config.mapels) configGlobal = resNilai.config;
+        if (resNilai.config && Array.isArray(resNilai.config.mapels) && resNilai.config.mapels.length > 0) {
+          configGlobal = resNilai.config;
+        }
         if (resNilai.nilaiDetail) nilaiDetailGlobal = resNilai.nilaiDetail;
         if (resNilai.nilaiPSAS) nilaiPSASGlobal = resNilai.nilaiPSAS;
 
@@ -298,20 +360,68 @@
           mapelAktifId = configGlobal.mapels[0].id;
         }
         const mAktif = getMapelAktif();
-        document.getElementById('sidebar-mapel-aktif').innerText = `Mapel: ${mAktif.nama}`;
-        
-        if (mAktif.babs.length > 0 && tabAktif !== "RAPOR") {
-          tabAktif = mAktif.babs[0].id;
+        if (mAktif.babs.length > 0 && !mAktif.babs.find(b => b.id === babAktifId)) {
+          babAktifId = mAktif.babs[0].id;
         }
+
         renderTabelSiswa();
+        sinkronSemuaDropdown();
+        renderTabsBab();
+        renderTabelBab();
+        renderTabelRekap();
       } catch (e) {
-        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS sudah benar dan sudah di-Deploy versi baru.");
+        console.error(e);
+        alert("Gagal terhubung ke Google Sheets. Pastikan URL GAS benar dan sudah di-Deploy versi terbaru.");
       }
       setLoading(false);
     }
 
     // =========================================================================
-    // LOGIKA HALAMAN 1: DATA SISWA (CRUD & EXCEL)
+    // SINKRONISASI DROPDOWN MAPEL & KELAS DI SEMUA HALAMAN
+    // =========================================================================
+    function sinkronSemuaDropdown() {
+      const mAktif = getMapelAktif();
+      document.getElementById('sidebar-mapel-aktif').innerText = `Mapel: ${mAktif.nama}`;
+      document.getElementById('judul-halaman-nilai').innerText = `Input Nilai: ${mAktif.nama}`;
+      document.getElementById('judul-halaman-rekap').innerText = `Rekap Nilai & Rapor: ${mAktif.nama}`;
+
+      const opsiMapel = configGlobal.mapels.map(m => 
+        `<option value="${m.id}" ${m.id === mapelAktifId ? 'selected' : ''}>📚 ${m.nama}</option>`
+      ).join('');
+      document.getElementById('pilih-mapel-input').innerHTML = opsiMapel;
+      document.getElementById('pilih-mapel-rekap').innerHTML = opsiMapel;
+
+      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
+      const opsiKelas = `<option value="ALL" ${kelasAktifFilter === 'ALL' ? 'selected' : ''}>Semua Kelas (${dataSiswaGlobal.length} Siswa)</option>` +
+        kelasUnik.map(k => `<option value="${k}" ${String(kelasAktifFilter) === String(k) ? 'selected' : ''}>Kelas ${k}</option>`).join('');
+      document.getElementById('filter-kelas-input').innerHTML = opsiKelas;
+      document.getElementById('filter-kelas-rekap').innerHTML = opsiKelas;
+    }
+
+    function gantiMapelAktif(newId) {
+      mapelAktifId = newId;
+      const mAktif = getMapelAktif();
+      if (mAktif.babs.length > 0) babAktifId = mAktif.babs[0].id;
+      sinkronSemuaDropdown();
+      renderTabsBab();
+      renderTabelBab();
+      renderTabelRekap();
+    }
+
+    function sinkronFilterKelas(val) {
+      kelasAktifFilter = val;
+      document.getElementById('filter-kelas-input').value = val;
+      document.getElementById('filter-kelas-rekap').value = val;
+      renderTabelBab();
+      renderTabelRekap();
+    }
+
+    function getSiswaTerfilter() {
+      return kelasAktifFilter === "ALL" ? dataSiswaGlobal : dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kelasAktifFilter));
+    }
+
+    // =========================================================================
+    // HALAMAN 1: DATA SISWA (CRUD & EXCEL)
     // =========================================================================
     function renderTabelSiswa() {
       const tbody = document.getElementById('tbody-siswa');
@@ -438,29 +548,8 @@
     }
 
     // =========================================================================
-    // LOGIKA HALAMAN 2: PENGATURAN MULTI-MAPEL, BAB, TUGAS DINAMIS & BOBOT
+    // MODAL PENGATURAN MAPEL, BAB, TUGAS DINAMIS & BOBOT
     // =========================================================================
-    function isiDropdownMapel() {
-      const select = document.getElementById('pilih-mapel');
-      select.innerHTML = configGlobal.map(m => 
-        `<option value="${m.id}" ${m.id === mapelAktifId ? 'selected' : ''}>📚 ${m.nama}</option>`
-      ).join('');
-      
-      const mAktif = getMapelAktif();
-      document.getElementById('judul-halaman-nilai').innerText = `Input Nilai: ${mAktif.nama}`;
-      document.getElementById('sidebar-mapel-aktif').innerText = `Mapel: ${mAktif.nama}`;
-    }
-
-    function gantiMapelAktif(newId) {
-      mapelAktifId = newId;
-      const mAktif = getMapelAktif();
-      document.getElementById('judul-halaman-nilai').innerText = `Input Nilai: ${mAktif.nama}`;
-      document.getElementById('sidebar-mapel-aktif').innerText = `Mapel: ${mAktif.nama}`;
-      if (mAktif.babs.length > 0) tabAktif = mAktif.babs[0].id;
-      renderTabsBab();
-      renderAreaNilai();
-    }
-
     function bukaModalPengaturan() {
       tempConfig = JSON.parse(JSON.stringify(configGlobal));
       tempMapelEditId = mapelAktifId;
@@ -558,9 +647,7 @@
       `).join('');
     }
 
-    function ubahNamaBab(bIdx, val) {
-      tempConfig.mapels.find(m => m.id === tempMapelEditId).babs[bIdx].nama = val;
-    }
+    function ubahNamaBab(bIdx, val) { tempConfig.mapels.find(m => m.id === tempMapelEditId).babs[bIdx].nama = val; }
     function tambahBabBaru() {
       const mObj = tempConfig.mapels.find(m => m.id === tempMapelEditId);
       mObj.babs.push({ id: "BAB_" + Date.now(), nama: `BAB ${mObj.babs.length + 1} - Materi Baru`, tugas: ["Tugas 1"] });
@@ -571,9 +658,7 @@
       tempConfig.mapels.find(m => m.id === tempMapelEditId).babs.splice(bIdx, 1);
       renderEditorBab();
     }
-    function ubahNamaTugas(bIdx, tIdx, val) {
-      tempConfig.mapels.find(m => m.id === tempMapelEditId).babs[bIdx].tugas[tIdx] = val;
-    }
+    function ubahNamaTugas(bIdx, tIdx, val) { tempConfig.mapels.find(m => m.id === tempMapelEditId).babs[bIdx].tugas[tIdx] = val; }
     function tambahTugas(bIdx) {
       const mObj = tempConfig.mapels.find(m => m.id === tempMapelEditId);
       mObj.babs[bIdx].tugas.push(`Tugas ${mObj.babs[bIdx].tugas.length + 1}`);
@@ -602,55 +687,21 @@
       mapelAktifId = tempMapelEditId;
       
       const mAktif = getMapelAktif();
-      if (!mAktif.babs.find(b => b.id === tabAktif) && tabAktif !== "RAPOR") {
-        tabAktif = mAktif.babs[0].id;
+      if (!mAktif.babs.find(b => b.id === babAktifId)) {
+        babAktifId = mAktif.babs[0].id;
       }
 
       btn.innerText = "💾 Simpan Semua ke Cloud"; btn.disabled = false;
       tutupModalPengaturan();
-      isiDropdownMapel();
+      sinkronSemuaDropdown();
       renderTabsBab();
-      renderAreaNilai();
+      renderTabelBab();
+      renderTabelRekap();
     }
 
     // =========================================================================
-    // LOGIKA HALAMAN 2: TABEL INPUT NILAI & RUMUS PERHITUNGAN
+    // RUMUS PERHITUNGAN NILAI BAB
     // =========================================================================
-    function isiDropdownKelas() {
-      const select = document.getElementById('filter-kelas');
-      const kelasUnik = [...new Set(dataSiswaGlobal.map(s => s.ID_Kelas).filter(Boolean))];
-      select.innerHTML = `<option value="ALL">Semua Kelas (${dataSiswaGlobal.length} Siswa)</option>` +
-        kelasUnik.map(k => `<option value="${k}">Kelas ${k}</option>`).join('');
-    }
-
-    function renderTabsBab() {
-      const mAktif = getMapelAktif();
-      const container = document.getElementById('tabs-bab');
-      let html = mAktif.babs.map(bab => `
-        <button onclick="pilihTab('${bab.id}')" class="px-4 py-2 rounded-lg text-sm font-bold transition ${tabAktif === bab.id ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-600 hover:bg-gray-100 border'}">
-          ${bab.nama}
-        </button>
-      `).join('');
-
-      html += `
-        <button onclick="pilihTab('RAPOR')" class="px-4 py-2 rounded-lg text-sm font-bold transition ${tabAktif === 'RAPOR' ? 'bg-amber-600 text-white shadow' : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'}">
-          🏆 Rekap Nilai Akhir & PSAS
-        </button>
-      `;
-      container.innerHTML = html;
-    }
-
-    function pilihTab(id) {
-      tabAktif = id;
-      renderTabsBab();
-      renderAreaNilai();
-    }
-
-    function getSiswaTerfilter() {
-      const kls = document.getElementById('filter-kelas').value;
-      return kls === "ALL" ? dataSiswaGlobal : dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kls));
-    }
-
     function hitungNilaiBabSiswa(nisn, babObj) {
       const mAktif = getMapelAktif();
       const key = `${mAktif.id}_${nisn}_${babObj.id}`;
@@ -677,102 +728,80 @@
       };
     }
 
-    function renderAreaNilai() {
+    // =========================================================================
+    // HALAMAN 2: TABEL INPUT NILAI PER BAB
+    // =========================================================================
+    function renderTabsBab() {
       const mAktif = getMapelAktif();
+      const container = document.getElementById('tabs-bab');
+      container.innerHTML = mAktif.babs.map(bab => `
+        <button onclick="pilihTabBab('${bab.id}')" class="px-4 py-2 rounded-lg text-sm font-bold transition ${babAktifId === bab.id ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-600 hover:bg-gray-100 border'}">
+          ${bab.nama}
+        </button>
+      `).join('');
+    }
+
+    function pilihTabBab(id) {
+      babAktifId = id;
+      renderTabsBab();
+      renderTabelBab();
+    }
+
+    function renderTabelBab() {
+      const mAktif = getMapelAktif();
+      const bab = mAktif.babs.find(b => b.id === babAktifId) || mAktif.babs[0];
+      if (!bab) return;
+
+      document.getElementById('judul-tab-aktif').innerText = `${mAktif.nama} — ${bab.nama}`;
+      document.getElementById('info-bobot-aktif').innerText = `Rumus: (Rata-rata Tugas × ${mAktif.bobotTugas}%) + (PSH × ${mAktif.bobotPSH}%)`;
+
+      const thead = document.getElementById('thead-bab');
+      const tbody = document.getElementById('tbody-bab');
       const siswaList = getSiswaTerfilter();
-      const thead = document.getElementById('thead-nilai');
-      const tbody = document.getElementById('tbody-nilai');
 
-      if (tabAktif !== "RAPOR") {
-        const bab = mAktif.babs.find(b => b.id === tabAktif);
-        if (!bab) return;
+      thead.innerHTML = `
+        <tr>
+          <th class="p-3 border-r">NISN / NIS</th>
+          <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
+          ${bab.tugas.map(t => `<th class="p-3 text-center bg-blue-50/50 border-r min-w-[110px]">${t}</th>`).join('')}
+          <th class="p-3 text-center bg-blue-100/50 border-r font-bold text-blue-900">Rata Tugas</th>
+          <th class="p-3 text-center bg-amber-50/60 border-r min-w-[100px] font-bold text-amber-900">Nilai PSH</th>
+          <th class="p-3 text-center bg-emerald-100/60 font-bold text-emerald-900">Total ${bab.nama.split('-')[0]}</th>
+        </tr>
+      `;
 
-        document.getElementById('judul-tab-aktif').innerText = `${mAktif.nama} — ${bab.nama}`;
-        document.getElementById('info-bobot-aktif').innerText = `Rumus: (Rata-rata Tugas × ${mAktif.bobotTugas}%) + (PSH × ${mAktif.bobotPSH}%)`;
-
-        thead.innerHTML = `
-          <tr>
-            <th class="p-3 border-r">NISN / NIS</th>
-            <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
-            ${bab.tugas.map(t => `<th class="p-3 text-center bg-blue-50/50 border-r min-w-[110px]">${t}</th>`).join('')}
-            <th class="p-3 text-center bg-blue-100/50 border-r font-bold text-blue-900">Rata Tugas</th>
-            <th class="p-3 text-center bg-amber-50/60 border-r min-w-[100px] font-bold text-amber-900">Nilai PSH</th>
-            <th class="p-3 text-center bg-emerald-100/60 font-bold text-emerald-900">Total ${bab.nama.split('-')[0]}</th>
-          </tr>
-        `;
-
-        tbody.innerHTML = siswaList.map(s => {
-          const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
-          const record = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
-          const hasil = hitungNilaiBabSiswa(s.NISN, bab);
-
-          return `
-            <tr class="border-b hover:bg-gray-50">
-              <td class="p-3 border-r text-gray-600">${s.NISN}</td>
-              <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
-              ${bab.tugas.map(t => {
-                const val = (record.tugas && record.tugas[t] !== undefined) ? record.tugas[t] : "";
-                return `<td class="p-2 border-r text-center">
-                  <input type="number" min="0" max="100" value="${val}" 
-                    oninput="updateNilaiTugas('${s.NISN}', '${bab.id}', '${t}', this.value)"
-                    class="w-20 text-center border border-gray-300 rounded p-1 focus:border-emerald-500 focus:outline-none">
-                </td>`;
-              }).join('')}
-              <td id="rata-${s.NISN}" class="p-3 border-r text-center font-semibold text-blue-800 bg-blue-50/30">${hasil.rataTugas}</td>
-              <td class="p-2 border-r text-center bg-amber-50/30">
-                <input type="number" min="0" max="100" value="${hasil.nilaiPSH}"
-                  oninput="updateNilaiPSH('${s.NISN}', '${bab.id}', this.value)"
-                  class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
-              </td>
-              <td id="total-${s.NISN}" class="p-3 text-center font-bold text-emerald-800 bg-emerald-50/40 text-base">${hasil.nilaiAkhirBab}</td>
-            </tr>
-          `;
-        }).join('');
-      } else {
-        document.getElementById('judul-tab-aktif').innerText = `🏆 Rekap Nilai Akhir & PSAS — ${mAktif.nama}`;
-        document.getElementById('info-bobot-aktif').innerText = `Rumus Rapor: (Rata-rata Semua BAB × ${mAktif.bobotBAB}%) + (Nilai PSAS × ${mAktif.bobotPSAS}%)`;
-
-        thead.innerHTML = `
-          <tr>
-            <th class="p-3 border-r">NISN / NIS</th>
-            <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
-            ${mAktif.babs.map(b => `<th class="p-3 text-center border-r bg-gray-100">${b.nama.split('-')[0]}</th>`).join('')}
-            <th class="p-3 text-center border-r bg-blue-50 font-bold text-blue-900">Rata-rata BAB</th>
-            <th class="p-3 text-center border-r bg-amber-50 font-bold text-amber-900">Nilai PSAS</th>
-            <th class="p-3 text-center bg-emerald-100 font-bold text-emerald-900">Nilai Rapor</th>
-          </tr>
-        `;
-
-        tbody.innerHTML = siswaList.map(s => {
-          let sumBab = 0;
-          const kolomBabHtml = mAktif.babs.map(b => {
-            const h = hitungNilaiBabSiswa(s.NISN, b);
-            sumBab += h.nilaiAkhirBab;
-            return `<td class="p-3 text-center border-r text-gray-700">${h.nilaiAkhirBab}</td>`;
-          }).join('');
-
-          const rataSemuaBab = mAktif.babs.length > 0 ? (sumBab / mAktif.babs.length) : 0;
-          const psasKey = `${mAktif.id}_${s.NISN}`;
-          const psasVal = nilaiPSASGlobal[psasKey] !== undefined ? nilaiPSASGlobal[psasKey] : "";
-          const psasNum = (psasVal !== "" && !isNaN(psasVal)) ? Number(psasVal) : 0;
-          const nilaiRapor = (rataSemuaBab * (mAktif.bobotBAB / 100)) + (psasNum * (mAktif.bobotPSAS / 100));
-
-          return `
-            <tr class="border-b hover:bg-gray-50">
-              <td class="p-3 border-r text-gray-600">${s.NISN}</td>
-              <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
-              ${kolomBabHtml}
-              <td class="p-3 text-center border-r font-semibold text-blue-800 bg-blue-50/30">${rataSemuaBab.toFixed(1)}</td>
-              <td class="p-2 text-center border-r bg-amber-50/30">
-                <input type="number" min="0" max="100" value="${psasVal}"
-                  oninput="updateNilaiPSAS('${s.NISN}', ${rataSemuaBab}, this.value)"
-                  class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
-              </td>
-              <td id="rapor-${s.NISN}" class="p-3 text-center font-bold text-emerald-900 bg-emerald-100/50 text-base">${nilaiRapor.toFixed(1)}</td>
-            </tr>
-          `;
-        }).join('');
+      if (siswaList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${bab.tugas.length + 5}" class="p-8 text-center text-gray-500">Belum ada data siswa pada kelas ini.</td></tr>`;
+        return;
       }
+
+      tbody.innerHTML = siswaList.map(s => {
+        const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
+        const record = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+        const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+
+        return `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3 border-r text-gray-600">${s.NISN}</td>
+            <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
+            ${bab.tugas.map(t => {
+              const val = (record.tugas && record.tugas[t] !== undefined) ? record.tugas[t] : "";
+              return `<td class="p-2 border-r text-center">
+                <input type="number" min="0" max="100" value="${val}" 
+                  oninput="updateNilaiTugas('${s.NISN}', '${bab.id}', '${t}', this.value)"
+                  class="w-20 text-center border border-gray-300 rounded p-1 focus:border-emerald-500 focus:outline-none">
+              </td>`;
+            }).join('')}
+            <td id="rata-${s.NISN}" class="p-3 border-r text-center font-semibold text-blue-800 bg-blue-50/30">${hasil.rataTugas}</td>
+            <td class="p-2 border-r text-center bg-amber-50/30">
+              <input type="number" min="0" max="100" value="${hasil.nilaiPSH}"
+                oninput="updateNilaiPSH('${s.NISN}', '${bab.id}', this.value)"
+                class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
+            </td>
+            <td id="total-${s.NISN}" class="p-3 text-center font-bold text-emerald-800 bg-emerald-50/40 text-base">${hasil.nilaiAkhirBab}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function updateNilaiTugas(nisn, babId, namaTugas, val) {
@@ -799,6 +828,191 @@
       document.getElementById(`total-${nisn}`).innerText = hasil.nilaiAkhirBab;
     }
 
+    async function simpanNilaiBabAktif() {
+      const mAktif = getMapelAktif();
+      const bab = mAktif.babs.find(b => b.id === babAktifId);
+      const btn = document.getElementById('btn-simpan-bab');
+      btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
+      const siswaList = getSiswaTerfilter();
+
+      try {
+        const updates = siswaList.map(s => {
+          const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
+          const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+          return {
+            nisn: s.NISN,
+            kelas: s.ID_Kelas,
+            detailObj: nilaiDetailGlobal[key] || { tugas: {}, psh: "" },
+            nilaiAkhirBab: hasil.nilaiAkhirBab
+          };
+        });
+
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "saveNilaiBab", mapelId: mAktif.id, babId: bab.id, updates: updates })
+        });
+        alert(`✅ Nilai ${bab.nama} berhasil disimpan ke Google Sheets!`);
+      } catch (e) {
+        alert("Terjadi kesalahan saat menyimpan nilai.");
+      }
+
+      btn.innerText = "💾 Simpan Nilai BAB"; btn.disabled = false;
+    }
+
+    // Template, Impor & Ekspor khusus Input Nilai BAB
+    function downloadTemplateBab() {
+      const mAktif = getMapelAktif();
+      const bab = mAktif.babs.find(b => b.id === babAktifId);
+      const siswaList = getSiswaTerfilter();
+      if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
+
+      const cleanMapel = mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_");
+      const labelKelas = kelasAktifFilter === "ALL" ? "SemuaKelas" : `Kelas_${kelasAktifFilter}`;
+      const namaFile = `Template_${cleanMapel}_${bab.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas}.xlsx`;
+
+      const templateRows = siswaList.map(s => {
+        const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
+        const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+        let row = { "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+        bab.tugas.forEach(t => row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
+        row["Nilai_PSH"] = rec.psh !== undefined ? rec.psh : "";
+        return row;
+      });
+
+      const ws = XLSX.utils.json_to_sheet(templateRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Template_Nilai");
+      XLSX.writeFile(wb, namaFile);
+    }
+
+    function handleImportBab(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const wb = XLSX.read(evt.target.result, { type: "binary" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+          if (rows.length === 0) return alert("File Excel kosong!");
+
+          const mAktif = getMapelAktif();
+          const bab = mAktif.babs.find(b => b.id === babAktifId);
+          let count = 0;
+
+          rows.forEach(row => {
+            const nisn = ambilIdSiswaExcel(row);
+            if (!nisn) return;
+            const key = `${mAktif.id}_${nisn}_${bab.id}`;
+            if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
+            if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
+
+            bab.tugas.forEach(namaTugas => {
+              if (row[namaTugas] !== undefined && row[namaTugas] !== "") {
+                nilaiDetailGlobal[key].tugas[namaTugas] = Number(row[namaTugas]);
+              }
+            });
+            if (row["Nilai_PSH"] !== undefined && row["Nilai_PSH"] !== "") {
+              nilaiDetailGlobal[key].psh = Number(row["Nilai_PSH"]);
+            }
+            count++;
+          });
+
+          renderTabelBab();
+          alert(`✅ Berhasil mengimpor nilai ${bab.nama} untuk ${count} siswa!\nKlik "💾 Simpan Nilai BAB" untuk menyimpan ke cloud.`);
+        } catch (err) {
+          alert("Gagal membaca file Excel. Pastikan menggunakan template yang sesuai.");
+        }
+      };
+      reader.readAsBinaryString(file);
+      e.target.value = "";
+    }
+
+    function exportBabExcel() {
+      const mAktif = getMapelAktif();
+      const bab = mAktif.babs.find(b => b.id === babAktifId);
+      const siswaList = getSiswaTerfilter();
+      if (siswaList.length === 0) return alert("Tidak ada data siswa untuk diekspor!");
+
+      const cleanMapel = mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_");
+      const namaFile = `Nilai_${cleanMapel}_${bab.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
+      const dataExport = siswaList.map(s => {
+        const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
+        const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
+        const hasil = hitungNilaiBabSiswa(s.NISN, bab);
+        let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+        bab.tugas.forEach(t => row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
+        row["Rata_Rata_Tugas"] = hasil.rataTugas;
+        row["Nilai_PSH"] = hasil.nilaiPSH;
+        row["Nilai_Total_BAB"] = hasil.nilaiAkhirBab;
+        return row;
+      });
+
+      const ws = XLSX.utils.json_to_sheet(dataExport);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Nilai_BAB");
+      XLSX.writeFile(wb, namaFile);
+    }
+
+    // =========================================================================
+    // HALAMAN 3: REKAPITULASI NILAI AKHIR & PSAS (MENU MANDIRI)
+    // =========================================================================
+    function renderTabelRekap() {
+      const mAktif = getMapelAktif();
+      document.getElementById('judul-rekap-aktif').innerText = `🏆 Rekapitulasi Nilai Akhir & PSAS — ${mAktif.nama}`;
+      document.getElementById('info-bobot-rekap').innerText = `Rumus Rapor: (Rata-rata Semua BAB × ${mAktif.bobotBAB}%) + (Nilai PSAS × ${mAktif.bobotPSAS}%)`;
+
+      const thead = document.getElementById('thead-rekap');
+      const tbody = document.getElementById('tbody-rekap');
+      const siswaList = getSiswaTerfilter();
+
+      thead.innerHTML = `
+        <tr>
+          <th class="p-3 border-r">NISN / NIS</th>
+          <th class="p-3 border-r min-w-[200px]">Nama Lengkap</th>
+          ${mAktif.babs.map(b => `<th class="p-3 text-center border-r bg-gray-100">${b.nama.split('-')[0]}</th>`).join('')}
+          <th class="p-3 text-center border-r bg-blue-50 font-bold text-blue-900">Rata-rata BAB</th>
+          <th class="p-3 text-center border-r bg-amber-50 font-bold text-amber-900">Nilai PSAS</th>
+          <th class="p-3 text-center bg-emerald-100 font-bold text-emerald-900">Nilai Rapor</th>
+        </tr>
+      `;
+
+      if (siswaList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${mAktif.babs.length + 5}" class="p-8 text-center text-gray-500">Belum ada data siswa pada kelas ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = siswaList.map(s => {
+        let sumBab = 0;
+        const kolomBabHtml = mAktif.babs.map(b => {
+          const h = hitungNilaiBabSiswa(s.NISN, b);
+          sumBab += h.nilaiAkhirBab;
+          return `<td class="p-3 text-center border-r text-gray-700">${h.nilaiAkhirBab}</td>`;
+        }).join('');
+
+        const rataSemuaBab = mAktif.babs.length > 0 ? (sumBab / mAktif.babs.length) : 0;
+        const psasKey = `${mAktif.id}_${s.NISN}`;
+        const psasVal = nilaiPSASGlobal[psasKey] !== undefined ? nilaiPSASGlobal[psasKey] : "";
+        const psasNum = (psasVal !== "" && !isNaN(psasVal)) ? Number(psasVal) : 0;
+        const nilaiRapor = (rataSemuaBab * (mAktif.bobotBAB / 100)) + (psasNum * (mAktif.bobotPSAS / 100));
+
+        return `
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3 border-r text-gray-600">${s.NISN}</td>
+            <td class="p-3 border-r font-medium">${s.Nama_Lengkap}</td>
+            ${kolomBabHtml}
+            <td class="p-3 text-center border-r font-semibold text-blue-800 bg-blue-50/30">${rataSemuaBab.toFixed(1)}</td>
+            <td class="p-2 text-center border-r bg-amber-50/30">
+              <input type="number" min="0" max="100" value="${psasVal}"
+                oninput="updateNilaiPSAS('${s.NISN}', ${rataSemuaBab}, this.value)"
+                class="w-20 text-center border border-amber-300 rounded p-1 font-semibold focus:border-amber-500 focus:outline-none">
+            </td>
+            <td id="rapor-${s.NISN}" class="p-3 text-center font-bold text-emerald-900 bg-emerald-100/50 text-base">${nilaiRapor.toFixed(1)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     function updateNilaiPSAS(nisn, rataSemuaBab, val) {
       const mAktif = getMapelAktif();
       const psasKey = `${mAktif.id}_${nisn}`;
@@ -808,222 +1022,126 @@
       document.getElementById(`rapor-${nisn}`).innerText = nilaiRapor.toFixed(1);
     }
 
-    async function simpanNilaiTabAktif() {
+    async function simpanRekapRapor() {
       const mAktif = getMapelAktif();
-      const btn = document.getElementById('btn-simpan-nilai');
+      const btn = document.getElementById('btn-simpan-rekap');
       btn.innerText = "⏳ Menyimpan..."; btn.disabled = true;
-      const siswaList = getSiswaTerfilter();
 
       try {
-        if (tabAktif !== "RAPOR") {
-          const bab = mAktif.babs.find(b => b.id === tabAktif);
-          const updates = siswaList.map(s => {
-            const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
-            const hasil = hitungNilaiBabSiswa(s.NISN, bab);
-            return {
-              nisn: s.NISN,
-              kelas: s.ID_Kelas,
-              detailObj: nilaiDetailGlobal[key] || { tugas: {}, psh: "" },
-              nilaiAkhirBab: hasil.nilaiAkhirBab
-            };
+        const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "ID_Kelas", ...mAktif.babs.map(b => b.nama), "Rata_Rata_BAB", "Nilai_PSAS", "Nilai_Rapor"];
+        const rows = dataSiswaGlobal.map(s => {
+          let sumBab = 0;
+          const nilaiBabs = mAktif.babs.map(b => {
+            const h = hitungNilaiBabSiswa(s.NISN, b);
+            sumBab += h.nilaiAkhirBab;
+            return h.nilaiAkhirBab;
           });
+          const rataBab = mAktif.babs.length > 0 ? Number((sumBab / mAktif.babs.length).toFixed(1)) : 0;
+          const psasKey = `${mAktif.id}_${s.NISN}`;
+          const psas = nilaiPSASGlobal[psasKey] !== undefined && nilaiPSASGlobal[psasKey] !== "" ? Number(nilaiPSASGlobal[psasKey]) : 0;
+          const rapor = Number(((rataBab * (mAktif.bobotBAB / 100)) + (psas * (mAktif.bobotPSAS / 100))).toFixed(1));
+          return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s.ID_Kelas, ...nilaiBabs, rataBab, psas, rapor];
+        });
 
-          await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "saveNilaiBab", mapelId: mAktif.id, babId: bab.id, updates: updates })
-          });
-        } else {
-          const headers = ["ID_Mapel", "Nama_Mapel", "NISN / NIS", "Nama_Lengkap", "ID_Kelas", ...mAktif.babs.map(b => b.nama), "Rata_Rata_BAB", "Nilai_PSAS", "Nilai_Rapor"];
-          const rows = dataSiswaGlobal.map(s => {
-            let sumBab = 0;
-            const nilaiBabs = mAktif.babs.map(b => {
-              const h = hitungNilaiBabSiswa(s.NISN, b);
-              sumBab += h.nilaiAkhirBab;
-              return h.nilaiAkhirBab;
-            });
-            const rataBab = mAktif.babs.length > 0 ? Number((sumBab / mAktif.babs.length).toFixed(1)) : 0;
-            const psasKey = `${mAktif.id}_${s.NISN}`;
-            const psas = nilaiPSASGlobal[psasKey] !== undefined && nilaiPSASGlobal[psasKey] !== "" ? Number(nilaiPSASGlobal[psasKey]) : 0;
-            const rapor = Number(((rataBab * (mAktif.bobotBAB / 100)) + (psas * (mAktif.bobotPSAS / 100))).toFixed(1));
-            return [mAktif.id, mAktif.nama, s.NISN, s.Nama_Lengkap, s.ID_Kelas, ...nilaiBabs, rataBab, psas, rapor];
-          });
-
-          await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify({ action: "saveRekapRapor", mapelId: mAktif.id, headers: headers, rows: rows })
-          });
-        }
-        alert("✅ Nilai berhasil disimpan ke Google Sheets!");
+        await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ action: "saveRekapRapor", mapelId: mAktif.id, headers: headers, rows: rows })
+        });
+        alert("✅ Rekap Nilai & Rapor berhasil disimpan ke Google Sheets!");
       } catch (e) {
-        alert("Terjadi kesalahan saat menyimpan nilai.");
+        alert("Terjadi kesalahan saat menyimpan rekap rapor.");
       }
 
-      btn.innerText = "💾 Simpan Nilai"; btn.disabled = false;
+      btn.innerText = "💾 Simpan Rekap Rapor"; btn.disabled = false;
     }
 
-    // =========================================================================
-    // FITUR TEMPLATE, IMPOR & EKSPOR EXCEL UNTUK MENU INPUT NILAI
-    // =========================================================================
-    function downloadTemplateNilai() {
+    // Template, Impor & Ekspor khusus Rekap Rapor & PSAS
+    function downloadTemplatePSAS() {
       const mAktif = getMapelAktif();
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Data siswa pada kelas ini kosong!");
 
       const cleanMapel = mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_");
-      const kelasFilter = document.getElementById('filter-kelas').value;
-      const labelKelas = kelasFilter === "ALL" ? "SemuaKelas" : `Kelas_${kelasFilter}`;
+      const labelKelas = kelasAktifFilter === "ALL" ? "SemuaKelas" : `Kelas_${kelasAktifFilter}`;
+      const namaFile = `Template_PSAS_${cleanMapel}_${labelKelas}.xlsx`;
 
-      let templateRows = [];
-      let namaFile = "";
-
-      if (tabAktif !== "RAPOR") {
-        const bab = mAktif.babs.find(b => b.id === tabAktif);
-        namaFile = `Template_${cleanMapel}_${bab.nama.replace(/[^a-zA-Z0-9]/g, "_")}_${labelKelas}.xlsx`;
-        
-        templateRows = siswaList.map(s => {
-          const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
-          const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
-          let row = {
-            "NISN / NIS": s.NISN,
-            Nama_Lengkap: s.Nama_Lengkap,
-            Kelas: s.ID_Kelas
-          };
-          bab.tugas.forEach(t => {
-            row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "";
-          });
-          row["Nilai_PSH"] = rec.psh !== undefined ? rec.psh : "";
-          return row;
-        });
-      } else {
-        namaFile = `Template_PSAS_${cleanMapel}_${labelKelas}.xlsx`;
-        templateRows = siswaList.map(s => {
-          const psasKey = `${mAktif.id}_${s.NISN}`;
-          return {
-            "NISN / NIS": s.NISN,
-            Nama_Lengkap: s.Nama_Lengkap,
-            Kelas: s.ID_Kelas,
-            Nilai_PSAS: nilaiPSASGlobal[psasKey] !== undefined ? nilaiPSASGlobal[psasKey] : ""
-          };
-        });
-      }
+      const templateRows = siswaList.map(s => {
+        const psasKey = `${mAktif.id}_${s.NISN}`;
+        return {
+          "NISN / NIS": s.NISN,
+          Nama_Lengkap: s.Nama_Lengkap,
+          Kelas: s.ID_Kelas,
+          Nilai_PSAS: nilaiPSASGlobal[psasKey] !== undefined ? nilaiPSASGlobal[psasKey] : ""
+        };
+      });
 
       const ws = XLSX.utils.json_to_sheet(templateRows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Template_Nilai");
+      XLSX.utils.book_append_sheet(wb, ws, "Template_PSAS");
       XLSX.writeFile(wb, namaFile);
     }
 
-    function handleImportNilai(e) {
+    function handleImportPSAS(e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = (evt) => {
         try {
           const wb = XLSX.read(evt.target.result, { type: "binary" });
           const ws = wb.Sheets[wb.SheetNames[0]];
           const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
-
-          if (rows.length === 0) {
-            alert("File Excel kosong!");
-            return;
-          }
+          if (rows.length === 0) return alert("File Excel kosong!");
 
           const mAktif = getMapelAktif();
-          let jumlahTerupdate = 0;
+          let count = 0;
 
-          if (tabAktif !== "RAPOR") {
-            const bab = mAktif.babs.find(b => b.id === tabAktif);
-            
-            rows.forEach(row => {
-              const nisn = ambilIdSiswaExcel(row);
-              if (!nisn) return;
+          rows.forEach(row => {
+            const nisn = ambilIdSiswaExcel(row);
+            if (!nisn) return;
+            if (row["Nilai_PSAS"] !== undefined && row["Nilai_PSAS"] !== "") {
+              const psasKey = `${mAktif.id}_${nisn}`;
+              nilaiPSASGlobal[psasKey] = Number(row["Nilai_PSAS"]);
+              count++;
+            }
+          });
 
-              const key = `${mAktif.id}_${nisn}_${bab.id}`;
-              if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
-              if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
-
-              bab.tugas.forEach(namaTugas => {
-                if (row[namaTugas] !== undefined && row[namaTugas] !== "") {
-                  nilaiDetailGlobal[key].tugas[namaTugas] = Number(row[namaTugas]);
-                }
-              });
-
-              if (row["Nilai_PSH"] !== undefined && row["Nilai_PSH"] !== "") {
-                nilaiDetailGlobal[key].psh = Number(row["Nilai_PSH"]);
-              }
-
-              jumlahTerupdate++;
-            });
-          } else {
-            rows.forEach(row => {
-              const nisn = ambilIdSiswaExcel(row);
-              if (!nisn) return;
-
-              if (row["Nilai_PSAS"] !== undefined && row["Nilai_PSAS"] !== "") {
-                const psasKey = `${mAktif.id}_${nisn}`;
-                nilaiPSASGlobal[psasKey] = Number(row["Nilai_PSAS"]);
-                jumlahTerupdate++;
-              }
-            });
-          }
-
-          renderAreaNilai();
-          alert(`✅ Berhasil mengimpor nilai untuk ${jumlahTerupdate} siswa ke tabel!\n\nJangan lupa klik tombol "💾 Simpan Nilai" untuk menyimpannya ke Google Sheets.`);
+          renderTabelRekap();
+          alert(`✅ Berhasil mengimpor Nilai PSAS untuk ${count} siswa!\nKlik "💾 Simpan Rekap Rapor" untuk menyimpan ke cloud.`);
         } catch (err) {
-          alert("Gagal membaca file Excel. Pastikan format file menggunakan template yang sesuai.");
+          alert("Gagal membaca file Excel. Pastikan menggunakan template PSAS yang sesuai.");
         }
       };
       reader.readAsBinaryString(file);
       e.target.value = "";
     }
 
-    function exportNilaiExcel() {
+    function exportRekapExcel() {
       const mAktif = getMapelAktif();
       const siswaList = getSiswaTerfilter();
       if (siswaList.length === 0) return alert("Tidak ada data siswa untuk diekspor!");
 
       const cleanMapel = mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_");
-      let dataExport = [];
-      let namaFile = `Nilai_${cleanMapel}.xlsx`;
-
-      if (tabAktif !== "RAPOR") {
-        const bab = mAktif.babs.find(b => b.id === tabAktif);
-        namaFile = `Nilai_${cleanMapel}_${bab.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
-        dataExport = siswaList.map(s => {
-          const key = `${mAktif.id}_${s.NISN}_${bab.id}`;
-          const rec = nilaiDetailGlobal[key] || { tugas: {}, psh: "" };
-          const hasil = hitungNilaiBabSiswa(s.NISN, bab);
-          let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
-          bab.tugas.forEach(t => row[t] = (rec.tugas && rec.tugas[t] !== undefined) ? rec.tugas[t] : "");
-          row["Rata_Rata_Tugas"] = hasil.rataTugas;
-          row["Nilai_PSH"] = hasil.nilaiPSH;
-          row["Nilai_Total_BAB"] = hasil.nilaiAkhirBab;
-          return row;
+      const namaFile = `Rekap_Rapor_${cleanMapel}.xlsx`;
+      const dataExport = siswaList.map(s => {
+        let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
+        let sumBab = 0;
+        mAktif.babs.forEach(b => {
+          const h = hitungNilaiBabSiswa(s.NISN, b);
+          row[b.nama] = h.nilaiAkhirBab;
+          sumBab += h.nilaiAkhirBab;
         });
-      } else {
-        namaFile = `Rekap_Rapor_${cleanMapel}.xlsx`;
-        dataExport = siswaList.map(s => {
-          let row = { Mata_Pelajaran: mAktif.nama, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, Kelas: s.ID_Kelas };
-          let sumBab = 0;
-          mAktif.babs.forEach(b => {
-            const h = hitungNilaiBabSiswa(s.NISN, b);
-            row[b.nama] = h.nilaiAkhirBab;
-            sumBab += h.nilaiAkhirBab;
-          });
-          const rataBab = mAktif.babs.length > 0 ? Number((sumBab / mAktif.babs.length).toFixed(1)) : 0;
-          const psasKey = `${mAktif.id}_${s.NISN}`;
-          const psas = nilaiPSASGlobal[psasKey] !== undefined && nilaiPSASGlobal[psasKey] !== "" ? Number(nilaiPSASGlobal[psasKey]) : 0;
-          row["Rata_Rata_BAB"] = rataBab;
-          row["Nilai_PSAS"] = psas;
-          row["Nilai_Rapor"] = Number(((rataBab * (mAktif.bobotBAB / 100)) + (psas * (mAktif.bobotPSAS / 100))).toFixed(1));
-          return row;
-        });
-      }
+        const rataBab = mAktif.babs.length > 0 ? Number((sumBab / mAktif.babs.length).toFixed(1)) : 0;
+        const psasKey = `${mAktif.id}_${s.NISN}`;
+        const psas = nilaiPSASGlobal[psasKey] !== undefined && nilaiPSASGlobal[psasKey] !== "" ? Number(nilaiPSASGlobal[psasKey]) : 0;
+        row["Rata_Rata_BAB"] = rataBab;
+        row["Nilai_PSAS"] = psas;
+        row["Nilai_Rapor"] = Number(((rataBab * (mAktif.bobotBAB / 100)) + (psas * (mAktif.bobotPSAS / 100))).toFixed(1));
+        return row;
+      });
 
       const ws = XLSX.utils.json_to_sheet(dataExport);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Nilai");
+      XLSX.utils.book_append_sheet(wb, ws, "Rekap_Rapor");
       XLSX.writeFile(wb, namaFile);
     }
 
