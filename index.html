@@ -14,7 +14,6 @@
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
-    /* Hilangkan panah spinner bawaan input number agar angka presisi di tengah */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
@@ -26,7 +25,6 @@
   <!-- SIDEBAR E-RAPOR MODERN (COLLAPSIBLE)                                  -->
   <!-- ===================================================================== -->
   <aside id="sidebar" class="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-2xl shrink-0 transition-all duration-300 overflow-hidden border-r border-slate-800">
-    <!-- Brand Header -->
     <div class="h-16 px-5 border-b border-slate-800 flex items-center gap-3 shrink-0">
       <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center font-extrabold text-white text-base shadow-inner shrink-0">
         ER
@@ -37,13 +35,11 @@
       </div>
     </div>
 
-    <!-- Info Mapel Aktif -->
     <div class="px-4 py-3 bg-slate-800/60 border-b border-slate-800">
       <div class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Mata Pelajaran Aktif</div>
       <div id="sidebar-mapel-aktif" class="text-xs font-semibold text-white mt-0.5 truncate">PAI & Budi Pekerti</div>
     </div>
 
-    <!-- Navigasi 5 Menu Utama -->
     <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
       <button onclick="gantiMenu('Data Siswa')" id="btn-Data Siswa" class="menu-btn w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white shadow-sm transition flex items-center gap-3">
         <span class="text-base w-5 text-center">👥</span>
@@ -67,7 +63,6 @@
       </button>
     </nav>
 
-    <!-- Footer Status -->
     <div class="p-4 border-t border-slate-800 flex items-center gap-2 text-[11px] text-slate-400">
       <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
       <span class="truncate">Terhubung Google Cloud</span>
@@ -91,7 +86,6 @@
         </div>
       </div>
 
-      <!-- Kontrol Global Mapel & Kelas -->
       <div class="flex items-center gap-2.5 shrink-0">
         <select id="global-pilih-mapel" onchange="gantiMapelAktif(this.value)" class="h-9 bg-emerald-50/80 border border-emerald-200 text-emerald-950 px-3 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/30 max-w-[230px]">
         </select>
@@ -122,7 +116,6 @@
           <button onclick="bukaFormSiswaTambah()" class="h-9 bg-emerald-600 text-white px-4 text-xs rounded-xl shadow-sm hover:bg-emerald-700 font-bold transition">+ Tambah Siswa</button>
         </div>
 
-        <!-- Form Tambah / Edit Siswa -->
         <form id="form-siswa" onsubmit="simpanDataSiswa(event)" class="hidden bg-white p-6 rounded-2xl shadow-sm border-2 border-emerald-500/80">
           <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
             <h3 id="judul-form-siswa" class="text-sm font-extrabold text-slate-900">✨ Formulir Data Siswa Baru</h3>
@@ -156,7 +149,6 @@
           </div>
         </form>
 
-        <!-- Tabel Siswa -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
           <div id="loading-box" class="hidden flex flex-col items-center p-14">
             <div class="animate-spin rounded-full h-9 w-9 border-2 border-emerald-600 border-t-transparent mb-3"></div>
@@ -186,7 +178,6 @@
       <div id="halaman-Input Nilai TP" class="halaman hidden max-w-full mx-auto space-y-6">
         <div id="container-kartu-tp" class="space-y-6"></div>
 
-        <!-- Panel Tambah TP Berikutnya -->
         <div id="area-tambah-tp-lanjut" class="hidden bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center">
           <p id="teks-status-tp" class="text-sm font-medium text-slate-600 mb-3">Seluruh Tujuan Pembelajaran (TP) yang terdaftar telah ditampilkan.</p>
           <button onclick="tampilkanFormTambahTP()" class="h-10 bg-emerald-600 text-white px-5 rounded-xl font-bold shadow-sm hover:bg-emerald-700 text-xs transition">
@@ -194,7 +185,6 @@
           </button>
         </div>
 
-        <!-- Kartu Formulir Pembuatan / Edit Struktur TP & Jenis Tugas -->
         <div id="kartu-form-tp" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-md border-2 border-emerald-500 p-6">
           <div class="flex justify-between items-center border-b border-slate-100 pb-3.5 mb-5">
             <div>
@@ -309,7 +299,6 @@
                 <p class="text-xs text-slate-500 mt-0.5">Unduh dokumen siap cetak dalam format Excel (.xlsx) maupun PDF.</p>
               </div>
 
-              <!-- 1. Cetak Nilai Per TP -->
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
                 <div class="font-bold text-slate-800 text-xs uppercase tracking-wider">1. Cetak Nilai Harian / Per TP</div>
                 <div class="flex gap-2 items-center">
@@ -319,7 +308,6 @@
                 </div>
               </div>
 
-              <!-- 2. Cetak Rekap Nilai Leger -->
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex justify-between items-center gap-3">
                 <div>
                   <div class="font-bold text-slate-800 text-xs uppercase tracking-wider">2. Cetak Rekap Nilai Leger</div>
@@ -331,7 +319,6 @@
                 </div>
               </div>
 
-              <!-- 3. Cetak Daftar Nilai Rapor -->
               <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex justify-between items-center gap-3">
                 <div>
                   <div class="font-bold text-slate-800 text-xs uppercase tracking-wider">3. Cetak Daftar Nilai Rapor</div>
@@ -446,7 +433,7 @@
     // =========================================================================
     // WAJIB GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
     // =========================================================================
-    const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec"; 
+    const API_URL = "MASUKKAN_URL_GAS_ANDA_DI_SINI"; 
 
     let dataSiswaGlobal = [];
     let configGlobal = {
@@ -455,7 +442,7 @@
           id: "MAPEL_DEFAULT",
           nama: "Pendidikan Agama Islam dan Budi Pekerti",
           bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30,
-          babs: [] // Menampung daftar Tujuan Pembelajaran (TP)
+          babs: []
         }
       ]
     };
@@ -485,7 +472,6 @@
       return String(row["NISN / NIS"] ?? row["NISN/NIS"] ?? row["NISN"] ?? row["NIS"] ?? "").trim();
     }
 
-    // --- TOGGLE SIDEBAR & NAVIGASI ---
     function toggleSidebar() {
       const sb = document.getElementById('sidebar');
       sb.classList.toggle('w-64');
@@ -509,6 +495,7 @@
       document.getElementById('topbar-subjudul').innerText = SUBJUDUL_MENU[namaMenu] || "";
 
       sinkronTopbar();
+      if (namaMenu === 'Data Siswa') renderTabelSiswa();
       if (namaMenu === 'Input Nilai TP') renderHalamanInputTP();
       if (namaMenu === 'Input Nilai PSAS') renderHalamanPSAS();
       if (namaMenu === 'Rekap Nilai Leger') renderHalamanLeger();
@@ -520,7 +507,6 @@
       document.getElementById('tabel-siswa-container').classList.toggle('hidden', status);
     }
 
-    // --- MUAT SEMUA DATA AWAL ---
     async function muatSemuaData() {
       sinkronTopbar();
       renderHalamanInputTP();
@@ -547,8 +533,8 @@
           mapelAktifId = configGlobal.mapels[0].id;
         }
 
-        renderTabelSiswa();
         sinkronTopbar();
+        renderTabelSiswa();
         if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
         if (menuAktif === 'Input Nilai PSAS') renderHalamanPSAS();
         if (menuAktif === 'Rekap Nilai Leger') renderHalamanLeger();
@@ -585,6 +571,7 @@
 
     function gantiFilterKelas(val) {
       kelasAktifFilter = val;
+      if (menuAktif === 'Data Siswa') renderTabelSiswa();
       if (menuAktif === 'Input Nilai TP') renderHalamanInputTP();
       if (menuAktif === 'Input Nilai PSAS') renderHalamanPSAS();
       if (menuAktif === 'Rekap Nilai Leger') renderHalamanLeger();
@@ -600,28 +587,34 @@
     // =========================================================================
     function renderTabelSiswa() {
       const tbody = document.getElementById('tbody-siswa');
-      if (dataSiswaGlobal.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-xs text-slate-500">Belum ada data peserta didik. Klik "+ Tambah Siswa" atau "Impor Excel".</td></tr>`;
+      const siswaTampil = getSiswaTerfilter();
+
+      if (siswaTampil.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-xs text-slate-500">Belum ada data peserta didik pada kelas ini. Klik "+ Tambah Siswa" atau "Impor Excel".</td></tr>`;
         return;
       }
-      tbody.innerHTML = dataSiswaGlobal.map((item, idx) => `
-        <tr class="hover:bg-slate-50/80 transition">
-          <td class="py-3 px-4 text-center text-slate-400 text-xs font-semibold tabular-nums">${idx + 1}</td>
-          <td class="py-3 px-4 text-slate-700 font-medium tabular-nums">${item.NISN}</td>
-          <td class="py-3 px-4 text-slate-900 font-semibold">${item.Nama_Lengkap}</td>
-          <td class="py-3 px-4 text-center">
-            <span class="inline-block px-2 py-0.5 rounded-md text-xs font-bold ${item["L/P"] === 'P' ? 'bg-rose-50 text-rose-700' : 'bg-sky-50 text-sky-700'}">${item["L/P"]}</span>
-          </td>
-          <td class="py-3 px-4 text-center">
-            <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700">${item.ID_Kelas}</span>
-          </td>
-          <td class="py-3 px-4 text-right space-x-2 text-xs">
-            <button onclick="bukaFormSiswaEdit(${idx})" class="text-emerald-600 hover:text-emerald-800 font-bold">Edit</button>
-            <span class="text-slate-300">|</span>
-            <button onclick="hapusDataSiswa('${item.NISN}')" class="text-rose-600 hover:text-rose-800 font-bold">Hapus</button>
-          </td>
-        </tr>
-      `).join('');
+
+      tbody.innerHTML = siswaTampil.map((item, idx) => {
+        const realIndex = dataSiswaGlobal.findIndex(s => String(s.NISN) === String(item.NISN));
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-3 px-4 text-center text-slate-400 text-xs font-semibold tabular-nums">${idx + 1}</td>
+            <td class="py-3 px-4 text-slate-700 font-medium tabular-nums">${item.NISN}</td>
+            <td class="py-3 px-4 text-slate-900 font-semibold">${item.Nama_Lengkap}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-block px-2 py-0.5 rounded-md text-xs font-bold ${item["L/P"] === 'P' ? 'bg-rose-50 text-rose-700' : 'bg-sky-50 text-sky-700'}">${item["L/P"]}</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700">${item.ID_Kelas}</span>
+            </td>
+            <td class="py-3 px-4 text-right space-x-2 text-xs">
+              <button onclick="bukaFormSiswaEdit(${realIndex})" class="text-emerald-600 hover:text-emerald-800 font-bold">Edit</button>
+              <span class="text-slate-300">|</span>
+              <button onclick="hapusDataSiswa('${item.NISN}')" class="text-rose-600 hover:text-rose-800 font-bold">Hapus</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function bukaFormSiswaTambah() {
@@ -632,11 +625,12 @@
       document.getElementById('input-nisn').readOnly = false;
       document.getElementById('input-nama').value = "";
       document.getElementById('input-lp').value = "L";
-      document.getElementById('input-kelas').value = "";
+      document.getElementById('input-kelas').value = kelasAktifFilter !== "ALL" ? kelasAktifFilter : "";
     }
 
     function bukaFormSiswaEdit(idx) {
       const item = dataSiswaGlobal[idx];
+      if (!item) return;
       document.getElementById('form-siswa').classList.remove('hidden');
       document.getElementById('judul-form-siswa').innerText = "✏️ Perbarui Data Siswa";
       document.getElementById('mode-edit-siswa').value = "true";
@@ -684,8 +678,9 @@
     }
 
     function exportExcelSiswa() {
-      if (dataSiswaGlobal.length === 0) return alert("Data siswa kosong!");
-      const rows = dataSiswaGlobal.map((s, i) => ({ No: i + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], ID_Kelas: s.ID_Kelas }));
+      const siswaTampil = getSiswaTerfilter();
+      if (siswaTampil.length === 0) return alert("Data siswa kosong!");
+      const rows = siswaTampil.map((s, i) => ({ No: i + 1, "NISN / NIS": s.NISN, Nama_Lengkap: s.Nama_Lengkap, "L/P": s["L/P"], ID_Kelas: s.ID_Kelas }));
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Data_Siswa");
@@ -768,7 +763,7 @@
     }
 
     // =========================================================================
-    // HALAMAN 2: INPUT NILAI TP (ALUR KARTU TUJUAN PEMBELAJARAN BERTAHAP)
+    // HALAMAN 2: INPUT NILAI TP
     // =========================================================================
     function renderHalamanInputTP() {
       const mAktif = getMapelAktif();
@@ -790,7 +785,6 @@
         const isSelesai = tp.selesai === true;
         return `
           <div class="bg-white rounded-2xl shadow-sm border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden">
-            <!-- Header Kartu TP -->
             <div class="px-5 py-4 ${isSelesai ? 'bg-emerald-50/70 border-b border-emerald-200' : 'bg-slate-50 border-b border-slate-200'} flex flex-wrap justify-between items-center gap-3">
               <div class="flex items-center gap-3">
                 <span class="px-3 py-1 rounded-lg text-[11px] font-extrabold tracking-wide uppercase ${isSelesai ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
@@ -802,7 +796,6 @@
                 </div>
               </div>
 
-              <!-- Toolbar Kartu TP -->
               <div class="flex flex-wrap gap-1.5">
                 <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold hover:bg-slate-100 transition">⚙️ Edit Tugas</button>
                 <button onclick="downloadTemplateTPById('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100 transition">📄 Template</button>
@@ -821,7 +814,6 @@
               </div>
             </div>
 
-            <!-- Tabel Penilaian TP Simetris -->
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs tabular-nums">
                 <thead>
@@ -1049,7 +1041,6 @@
       renderHalamanInputTP();
     }
 
-    // --- TEMPLATE, IMPOR & EKSPOR PER TP ---
     let importTargetTPId = null;
     function triggerImportTP(tpId) {
       importTargetTPId = tpId;
@@ -1240,7 +1231,6 @@
         { top: "bg-amber-500 text-white", sub: "bg-amber-50 text-amber-950", total: "bg-amber-100 text-amber-950" }
       ];
 
-      // HEADER TINGKAT 1
       let row1 = `
         <tr class="border-b border-slate-300 font-bold text-center text-[11px] uppercase tracking-wider">
           <th rowspan="3" class="p-2.5 border-r border-slate-300 bg-slate-200 text-slate-800 w-10">No</th>
@@ -1260,7 +1250,6 @@
         </tr>
       `;
 
-      // HEADER TINGKAT 2
       let row2 = `<tr class="border-b border-slate-300 font-bold text-center text-[11px]">`;
       mAktif.babs.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
@@ -1273,7 +1262,6 @@
       });
       row2 += `</tr>`;
 
-      // HEADER TINGKAT 3
       let row3 = `<tr class="border-b-2 border-slate-400 font-semibold text-center text-[11px]">`;
       mAktif.babs.forEach((tp, idx) => {
         const w = warnaBlok[idx % warnaBlok.length];
