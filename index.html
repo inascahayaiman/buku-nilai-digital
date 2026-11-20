@@ -2158,10 +2158,13 @@
                 <p class="text-[11px] text-slate-500">Kelas ${kelasAktifFilter} • Tugas: ${tp.tugas.join(', ')} • KKTP: ${kktp}</p>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold">+ Tugas</button>
-                <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold">Edit</button>
-                <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold">Simpan Nilai</button>
-              </div>
+             <button onclick="downloadTemplateTP('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100">Template</button>
+             <button onclick="document.getElementById('file-excel-tp-${tp.id}').click()" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100">Impor</button>
+             <input type="file" id="file-excel-tp-${tp.id}" onchange="handleImportNilaiTP(event, '${tp.id}')" accept=".xlsx, .xls" class="hidden" />
+             <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold">+ Tugas</button>
+             <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold">Edit</button>
+             <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold">Simpan Nilai</button>
+           </div>
             </div>
             <div class="w-full overflow-x-auto table-scroll-x">
               <table class="min-w-max w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
@@ -2243,6 +2246,78 @@
       showToast(`Nilai ${tp.nama} tersimpan!`);
     }
 
+    function downloadTemplateTP(tpId) {
+   const mAktif = getMapelAktif();
+   const tp = getDaftarTPKelas(kelasAktifFilter).find(b => b.id === tpId);
+   if (!tp) return;
+
+   const rows = getSiswaTerfilter().map((s, i) => {
+     const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`] || { tugas: {}, psh: "" };
+     const rowObj = {
+       No: i + 1,
+       "NISN / NIS": s.NISN,
+       Nama_Lengkap: s.Nama_Lengkap
+     };
+     tp.tugas.forEach(t => {
+       rowObj[t] = rec.tugas?.[t] ?? "";
+     });
+     rowObj["PH"] = rec.psh ?? "";
+     return rowObj;
+   });
+
+   const ws = XLSX.utils.json_to_sheet(rows);
+   const wb = XLSX.utils.book_new();
+   XLSX.utils.book_append_sheet(wb, ws, "Nilai_TP");
+   const namaBersih = `${kelasAktifFilter}_${tp.nama}`.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 40);
+   XLSX.writeFile(wb, `Template_${namaBersih}.xlsx`);
+ }
+
+ function handleImportNilaiTP(e, tpId) {
+   const file = e.target.files[0];
+   if (!file) return;
+
+   const mAktif = getMapelAktif();
+   const tp = getDaftarTPKelas(kelasAktifFilter).find(b => b.id === tpId);
+   if (!tp) return;
+
+   const reader = new FileReader();
+   reader.onload = (evt) => {
+     const wb = XLSX.read(evt.target.result, { type: "binary" });
+     const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+     let jumlahTerimpor = 0;
+
+     rows.forEach(r => {
+       const nisn = String(r["NISN / NIS"] ?? r["NISN"] ?? r["NIS"] ?? "").trim();
+       if (!nisn) return;
+
+       const key = `${mAktif.id}_${nisn}_${tp.id}`;
+       if (!nilaiDetailGlobal[key]) nilaiDetailGlobal[key] = { tugas: {}, psh: "" };
+       if (!nilaiDetailGlobal[key].tugas) nilaiDetailGlobal[key].tugas = {};
+
+       tp.tugas.forEach(t => {
+         if (r[t] !== undefined && r[t] !== "") {
+           nilaiDetailGlobal[key].tugas[t] = Number(r[t]);
+         }
+       });
+
+       if (r["PH"] !== undefined && r["PH"] !== "") {
+         nilaiDetailGlobal[key].psh = Number(r["PH"]);
+       }
+       jumlahTerimpor++;
+     });
+
+     if (jumlahTerimpor > 0) {
+       tandaiBelumDisimpan(true);
+       renderHalamanInputTP();
+       showToast(`${jumlahTerimpor} data nilai diimpor! Klik "Simpan Nilai" untuk menyinkronkan ke Cloud.`);
+     } else {
+       showToast("Tidak ada data nilai valid di file Excel.", "error");
+     }
+   };
+   reader.readAsBinaryString(file);
+   e.target.value = "";
+ }
+    
     // Panel Salin & Tambah TP
     let tempTugasList = [];
     function tampilkanFormTambahTP() {
