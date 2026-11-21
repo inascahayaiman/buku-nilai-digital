@@ -1746,7 +1746,13 @@
         showToast(`Periode ${ta} • ${sem} berhasil dibuat`);
         await pindahPeriode(res.periodeId || id);
       } catch (err) {
-        // pesan kesalahan sudah ditampilkan oleh apiPost
+        // pesan kesalahan sudah ditampilkan oleh apiPost.
+        // Jika periode ternyata sudah ada di Cloud, segarkan daftar periode agar bisa dipilih.
+        if (String((err && err.message) || "").includes("sudah ada")) {
+          tutupModalPeriodeBaru();
+          await muatSemuaData(true);
+          showToast("Daftar periode diperbarui. Pilih periode lewat menu Tahun Ajaran / Semester.", "info");
+        }
       }
     }
 
