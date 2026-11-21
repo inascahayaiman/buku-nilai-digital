@@ -2184,12 +2184,14 @@
              <button onclick="toggleKartuTP('${tp.id}', ${isTerbuka})" class="h-8 bg-slate-200/70 hover:bg-slate-200 text-slate-800 px-3 rounded-lg text-xs font-bold">
                ${isTerbuka ? 'Tutup' : 'Buka'}
              </button>
-             <button onclick="downloadTemplateTP('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100">Template</button>
-             <button onclick="document.getElementById('file-excel-tp-${tp.id}').click()" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100">Impor</button>
-             <input type="file" id="file-excel-tp-${tp.id}" onchange="handleImportNilaiTP(event, '${tp.id}')" accept=".xlsx, .xls" class="hidden" />
-             <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold">+ Tugas</button>
-             <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold">Edit</button>
-             <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold">Simpan Nilai</button>
+             ${isTerbuka ? `
+               <button onclick="downloadTemplateTP('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100">Template</button>
+               <button onclick="document.getElementById('file-excel-tp-${tp.id}').click()" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100">Impor</button>
+               <input type="file" id="file-excel-tp-${tp.id}" onchange="handleImportNilaiTP(event, '${tp.id}')" accept=".xlsx, .xls" class="hidden" />
+               <button onclick="bukaPanelTambahTugasCepat('${tp.id}')" class="h-8 bg-sky-50 border border-sky-200 text-sky-800 px-3 rounded-lg text-xs font-bold">+ Tugas</button>
+               <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold">Edit</button>
+               <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold">Simpan Nilai</button>
+             ` : ''}
            </div>
          </div>
          <div class="${isTerbuka ? '' : 'hidden'} w-full overflow-x-auto table-scroll-x">
