@@ -1271,7 +1271,6 @@
    const pesan = LABEL_AKSI_CLOUD[payloadObj.action] || "Sedang mengirim data ke Cloud...";
    setLoadingProses(true, pesan);
 
-   // Deteksi otomatis tombol yang sedang diklik agar berubah menjadi "Memproses..."
    const activeBtn = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
    let htmlAsli = "";
    if (activeBtn && !activeBtn.disabled) {
@@ -1284,11 +1283,20 @@
    try {
      const res = await fetch(API_URL, {
        method: "POST",
+       redirect: "follow",
+       headers: { "Content-Type": "text/plain;charset=utf-8" },
        body: JSON.stringify({ ...payloadObj, token: SECRET_TOKEN })
      });
-     return res;
+     const text = await res.text();
+     let json = {};
+     try { json = JSON.parse(text); } catch (e) {}
+     if (json.status === "error") {
+       throw new Error(json.message || "Server mengembalikan error");
+     }
+     return new Response(text, { status: res.status, headers: res.headers });
    } catch (err) {
-     showToast("Gagal terhubung ke server Cloud!", "error");
+     console.error("Cloud Sync Error:", err);
+     showToast("Gagal Cloud: " + (err.message || "Periksa URL Deployment / Koneksi"), "error");
      setCloudStatus('error', 'Gagal Sinkron');
      throw err;
    } finally {
@@ -3147,33 +3155,35 @@
       showToast("Mata pelajaran dihapus. Klik Simpan Mapel & Rubrik untuk memperbarui Cloud.", "info");
     }
 
-    // Kompresi gambar agar ringan disimpan ke Google Sheets JSON
-    function handleUploadGambar(e, target) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 220;
-          let w = img.width, h = img.height;
-          if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } }
-          else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/png', 0.8);
-          if (target === 'fotoGuru') configGlobal.guru.foto = dataUrl;
-          if (target === 'logoSekolah') configGlobal.identitas.logo = dataUrl;
-          renderHalamanPengaturan();
-          sinkronTopbar();
-          showToast("Gambar berhasil diunggah! Klik Simpan untuk menyinkronkan.");
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
+    // Kompresi gambar agar ringan disimpan ke Google Sheets JSON (< 50.000 karakter)
+ function handleUploadGambar(e, target) {
+   const file = e.target.files[0];
+   if (!file) return;
+   const reader = new FileReader();
+   reader.onload = (ev) => {
+     const img = new Image();
+     img.onload = () => {
+       const canvas = document.createElement('canvas');
+       const maxDim = 140;
+       let w = img.width, h = img.height;
+       if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } }
+       else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
+       canvas.width = w; canvas.height = h;
+       const ctx = canvas.getContext('2d');
+       ctx.fillStyle = "#FFFFFF";
+       ctx.fillRect(0, 0, w, h);
+       ctx.drawImage(img, 0, 0, w, h);
+       const dataUrl = canvas.toDataURL('image/jpeg', 0.65);
+       if (target === 'fotoGuru') configGlobal.guru.foto = dataUrl;
+       if (target === 'logoSekolah') configGlobal.identitas.logo = dataUrl;
+       renderHalamanPengaturan();
+       sinkronTopbar();
+       showToast("Gambar berhasil dikompresi! Klik Simpan untuk menyinkronkan.");
+     };
+     img.src = ev.target.result;
+   };
+   reader.readAsDataURL(file);
+ }
     function hapusGambarProfil(target) {
       if (target === 'fotoGuru') configGlobal.guru.foto = "";
       if (target === 'logoSekolah') configGlobal.identitas.logo = "";
