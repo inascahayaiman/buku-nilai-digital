@@ -2155,15 +2155,35 @@
       const siswaList = getSiswaTerfilter();
       container.innerHTML = daftarTP.map(tp => {
         const isSelesai = tp.selesai === true;
-        const isTerbuka = !isSelesai || kartuTerbukaManual[tp.id] === true;
-        return `
-          <div class="bg-white rounded-2xl shadow-xs border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden">
-            <div class="px-5 py-3.5 ${isSelesai ? 'bg-emerald-50/80' : 'bg-slate-50'} border-b border-slate-200 flex flex-wrap justify-between items-center gap-3">
-              <div>
-                <h3 class="text-sm font-extrabold text-slate-900">${tp.nama}</h3>
-                <p class="text-[11px] text-slate-500">Kelas ${kelasAktifFilter} • Tugas: ${tp.tugas.join(', ')} • KKTP: ${kktp}</p>
-              </div>
-              <div class="flex flex-wrap gap-1.5">
+        const isTerbuka = kartuTerbukaManual[tp.id] !== undefined ? kartuTerbukaManual[tp.id] : !isSelesai;
+     const jmlTerisi = siswaList.filter(s => {
+       const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`];
+       if (!rec) return false;
+       const adaTugas = tp.tugas.some(t => rec.tugas && rec.tugas[t] !== "" && rec.tugas[t] !== undefined);
+       return adaTugas || (rec.psh !== "" && rec.psh !== undefined);
+     }).length;
+
+     return `
+       <div class="bg-white rounded-2xl shadow-xs border ${isSelesai ? 'border-emerald-300' : 'border-slate-200/90'} overflow-hidden transition-all">
+         <div class="px-5 py-3.5 ${isSelesai ? 'bg-emerald-50/80' : 'bg-slate-50'} ${isTerbuka ? 'border-b border-slate-200' : ''} flex flex-wrap justify-between items-center gap-3">
+           <div onclick="toggleKartuTP('${tp.id}', ${isTerbuka})" class="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-[220px] group">
+             <button type="button" class="w-8 h-8 rounded-xl border border-slate-300 bg-white text-slate-700 group-hover:border-emerald-500 group-hover:text-emerald-600 flex items-center justify-center shrink-0 transition">
+               <i data-lucide="${isTerbuka ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4"></i>
+             </button>
+             <div>
+               <div class="flex items-center gap-2 flex-wrap">
+                 <h3 class="text-sm font-extrabold text-slate-900 group-hover:text-emerald-700 transition">${tp.nama}</h3>
+                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${jmlTerisi === siswaList.length && siswaList.length > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200/80 text-slate-700'}">
+                   ${jmlTerisi}/${siswaList.length} Siswa Terisi
+                 </span>
+               </div>
+               <p class="text-[11px] text-slate-500 mt-0.5">Kelas ${kelasAktifFilter} • Tugas: ${tp.tugas.join(', ')} • KKTP: ${kktp}</p>
+             </div>
+           </div>
+           <div class="flex flex-wrap gap-1.5">
+             <button onclick="toggleKartuTP('${tp.id}', ${isTerbuka})" class="h-8 bg-slate-200/70 hover:bg-slate-200 text-slate-800 px-3 rounded-lg text-xs font-bold">
+               ${isTerbuka ? 'Tutup' : 'Buka'}
+             </button>
              <button onclick="downloadTemplateTP('${tp.id}')" class="h-8 bg-teal-50 border border-teal-200 text-teal-800 px-3 rounded-lg text-xs font-bold hover:bg-teal-100">Template</button>
              <button onclick="document.getElementById('file-excel-tp-${tp.id}').click()" class="h-8 bg-amber-50 border border-amber-200 text-amber-800 px-3 rounded-lg text-xs font-bold hover:bg-amber-100">Impor</button>
              <input type="file" id="file-excel-tp-${tp.id}" onchange="handleImportNilaiTP(event, '${tp.id}')" accept=".xlsx, .xls" class="hidden" />
@@ -2171,47 +2191,52 @@
              <button onclick="bukaFormEditTP('${tp.id}')" class="h-8 bg-white border border-slate-300 text-slate-700 px-3 rounded-lg text-xs font-bold">Edit</button>
              <button onclick="simpanNilaiSatuTP('${tp.id}', false)" id="btn-save-${tp.id}" class="h-8 bg-emerald-600 text-white px-3.5 rounded-lg text-xs font-bold">Simpan Nilai</button>
            </div>
-            </div>
-            <div class="w-full overflow-x-auto table-scroll-x">
-              <table class="min-w-max w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
-                <thead>
-                  <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-700 uppercase">
-                    <th class="py-2.5 px-3 border-r w-12 text-center">No</th>
-                    <th class="py-2.5 px-3 border-r w-36">NISN</th>
-                    <th class="py-2.5 px-3 border-r min-w-[200px]">Nama Lengkap</th>
-                    ${tp.tugas.map(t => `<th class="py-2.5 px-3 border-r min-w-[90px] text-center bg-blue-50/70">${t}</th>`).join('')}
-                    <th class="py-2.5 px-3 border-r w-24 text-center bg-yellow-100/80">Rata Tugas</th>
-                    <th class="py-2.5 px-3 border-r w-24 text-center bg-amber-50">PH</th>
-                    <th class="py-2.5 px-3 w-24 text-center bg-emerald-100/80">Total TP</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  ${siswaList.map((s, sIdx) => {
-                    const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`] || { tugas: {}, psh: "" };
-                    const hasil = hitungNilaiTPSiswa(s.NISN, tp);
-                    return `
-                      <tr>
-                        <td class="py-2 px-3 border-r text-center text-slate-400">${sIdx + 1}</td>
-                        <td class="py-2 px-3 border-r text-slate-600">${s.NISN}</td>
-                        <td class="py-2 px-3 border-r font-semibold text-slate-900">${s.Nama_Lengkap}</td>
-                        ${tp.tugas.map(t => {
-                          const val = rec.tugas?.[t] ?? "";
-                          return `<td class="py-1.5 px-2 border-r text-center"><input type="number" min="0" max="100" value="${val}" oninput="updateNilaiTugas('${s.NISN}', '${tp.id}', '${t}', this)" class="w-16 h-8 text-center border rounded-lg font-bold ${isDiBawahKKTP(val) ? 'text-rose-600 border-rose-400 bg-rose-50' : 'border-slate-300'}"></td>`;
-                        }).join('')}
-                        <td id="rata-${tp.id}-${s.NISN}" class="py-2 px-2 border-r text-center font-bold bg-yellow-50/60">${hasil.rataTugasStr}</td>
-                        <td class="py-1.5 px-2 border-r text-center bg-amber-50/40"><input type="number" min="0" max="100" value="${hasil.nilaiPH}" oninput="updateNilaiPH('${s.NISN}', '${tp.id}', this)" class="w-16 h-8 text-center border rounded-lg font-bold ${isDiBawahKKTP(hasil.nilaiPH) ? 'text-rose-600 border-rose-400 bg-rose-50' : 'border-amber-300'}"></td>
-                        <td id="total-${tp.id}-${s.NISN}" class="py-2 px-2 text-center font-extrabold ${isDiBawahKKTP(hasil.nilaiAkhirTP) ? 'text-rose-600 bg-rose-50' : 'text-emerald-950 bg-emerald-50/70'}">${hasil.nilaiAkhirTP}</td>
-                      </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+         </div>
+         <div class="${isTerbuka ? '' : 'hidden'} w-full overflow-x-auto table-scroll-x">
+           <table class="min-w-max w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
+             <thead>
+               <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-700 uppercase">
+                 <th class="py-2.5 px-3 border-r w-12 text-center">No</th>
+                 <th class="py-2.5 px-3 border-r w-36">NISN</th>
+                 <th class="py-2.5 px-3 border-r min-w-[200px]">Nama Lengkap</th>
+                 ${tp.tugas.map(t => `<th class="py-2.5 px-3 border-r min-w-[90px] text-center bg-blue-50/70">${t}</th>`).join('')}
+                 <th class="py-2.5 px-3 border-r w-24 text-center bg-yellow-100/80">Rata Tugas</th>
+                 <th class="py-2.5 px-3 border-r w-24 text-center bg-amber-50">PH</th>
+                 <th class="py-2.5 px-3 w-24 text-center bg-emerald-100/80">Total TP</th>
+               </tr>
+             </thead>
+             <tbody class="divide-y divide-slate-100">
+               ${siswaList.map((s, sIdx) => {
+                 const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`] || { tugas: {}, psh: "" };
+                 const hasil = hitungNilaiTPSiswa(s.NISN, tp);
+                 return `
+                   <tr>
+                     <td class="py-2 px-3 border-r text-center text-slate-400">${sIdx + 1}</td>
+                     <td class="py-2 px-3 border-r text-slate-600">${s.NISN}</td>
+                     <td class="py-2 px-3 border-r font-semibold text-slate-900">${s.Nama_Lengkap}</td>
+                     ${tp.tugas.map(t => {
+                       const val = rec.tugas?.[t] ?? "";
+                       return `<td class="py-1.5 px-2 border-r text-center"><input type="number" min="0" max="100" value="${val}" oninput="updateNilaiTugas('${s.NISN}', '${tp.id}', '${t}', this)" class="w-16 h-8 text-center border rounded-lg font-bold ${isDiBawahKKTP(val) ? 'text-rose-600 border-rose-400 bg-rose-50' : 'border-slate-300'}"></td>`;
+                     }).join('')}
+                     <td id="rata-${tp.id}-${s.NISN}" class="py-2 px-2 border-r text-center font-bold bg-yellow-50/60">${hasil.rataTugasStr}</td>
+                     <td class="py-1.5 px-2 border-r text-center bg-amber-50/40"><input type="number" min="0" max="100" value="${hasil.nilaiPH}" oninput="updateNilaiPH('${s.NISN}', '${tp.id}', this)" class="w-16 h-8 text-center border rounded-lg font-bold ${isDiBawahKKTP(hasil.nilaiPH) ? 'text-rose-600 border-rose-400 bg-rose-50' : 'border-amber-300'}"></td>
+                     <td id="total-${tp.id}-${s.NISN}" class="py-2 px-2 text-center font-extrabold ${isDiBawahKKTP(hasil.nilaiAkhirTP) ? 'text-rose-600 bg-rose-50' : 'text-emerald-950 bg-emerald-50/70'}">${hasil.nilaiAkhirTP}</td>
+                   </tr>
+                 `;
+               }).join('')}
+             </tbody>
+           </table>
+         </div>
+       </div>
+     `;
+   }).join('');
+   lucide.createIcons();
+ }
 
+ function toggleKartuTP(tpId, statusSaatIni) {
+   kartuTerbukaManual[tpId] = !statusSaatIni;
+   renderHalamanInputTP();
+ }
     function updateNilaiTugas(nisn, tpId, namaTugas, inputEl) {
       const val = inputEl.value;
       const key = `${getMapelAktif().id}_${nisn}_${tpId}`;
