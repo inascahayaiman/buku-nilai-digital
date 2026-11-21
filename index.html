@@ -192,14 +192,11 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-300 rounded-xl px-2.5 h-9" title="Pilih Tahun Ajaran & Semester">
+        <div id="header-periode-chip" class="flex items-center gap-1.5 bg-amber-50 border border-amber-300 rounded-xl px-2.5 h-9 text-xs font-bold text-amber-950" title="Periode aktif (ubah di menu Pengaturan)">
           <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-          <select id="global-pilih-tahun" onchange="gantiTahunAjaran(this.value)" class="bg-transparent text-xs font-bold text-amber-950 focus:outline-none cursor-pointer"></select>
-          <select id="global-pilih-semester" onchange="gantiSemesterPeriode(this.value)" class="bg-transparent text-xs font-bold text-amber-950 focus:outline-none cursor-pointer"></select>
+          <span id="header-periode-teks">-</span>
+          <span id="header-periode-arsip" class="hidden px-1.5 py-0.5 rounded-md bg-amber-200 text-amber-900 text-[10px] font-extrabold">Periode Lama</span>
         </div>
-        <button onclick="bukaModalPeriodeBaru()" title="Buat periode baru" class="h-9 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
-          <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i><span class="hidden md:inline">Periode Baru</span>
-        </button>
         <select id="global-pilih-mapel" onchange="gantiMapelAktif(this.value)" class="h-9 bg-emerald-50/80 border border-emerald-200 text-emerald-950 px-3 rounded-xl text-xs font-bold focus:outline-none max-w-[210px]"></select>
         <select id="global-filter-kelas" onchange="gantiFilterKelas(this.value)" class="h-9 bg-slate-50 border border-slate-200 text-slate-700 px-3 rounded-xl text-xs font-semibold focus:outline-none">
           <option value="ALL">Semua Kelas</option>
@@ -209,11 +206,6 @@
 
     <!-- WORKSPACE -->
     <main class="flex-1 p-5 overflow-y-auto overflow-x-hidden">
-      <div id="banner-periode-lama" class="hidden max-w-7xl mx-auto mb-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-xl px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
-        <span>Anda sedang membuka periode <strong id="banner-periode-teks">-</strong> (bukan periode terbaru). Perubahan yang disimpan akan masuk ke periode ini.</span>
-        <button onclick="pindahKePeriodeTerbaru()" class="h-7 px-3 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700">Kembali ke periode terbaru</button>
-      </div>
-
       <!-- =================================================================== -->
       <!-- HALAMAN 0: DASHBOARD                                                -->
       <!-- =================================================================== -->
@@ -1155,6 +1147,16 @@
               <p class="text-xs text-slate-500">Setiap semester memiliki spreadsheet sendiri; data semester lain tidak ikut berubah</p>
             </div>
             <div class="space-y-2.5">
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Tahun Ajaran</label>
+                  <select id="set-pilih-tahun" onchange="gantiTahunAjaran(this.value)" class="w-full h-9 border border-slate-300 px-2 rounded-xl bg-slate-50 font-bold focus:outline-none"></select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-700 mb-1">Semester</label>
+                  <select id="set-pilih-semester" onchange="gantiSemesterPeriode(this.value)" class="w-full h-9 border border-slate-300 px-2 rounded-xl bg-slate-50 font-bold focus:outline-none"></select>
+                </div>
+              </div>
               <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3">Periode aktif: <strong id="set-info-periode" class="text-slate-900">-</strong></div>
               <button type="button" onclick="bukaModalPeriodeBaru()" id="btn-periode-baru" class="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition">
                 Buat Periode Baru (Semester / Tahun Ajaran)
@@ -1645,30 +1647,33 @@
     }
 
     function renderPemilihPeriode() {
-      const selT = document.getElementById('global-pilih-tahun');
-      const selS = document.getElementById('global-pilih-semester');
-      if (!selT || !selS) return;
+      const selT = document.getElementById('set-pilih-tahun');
+      const selS = document.getElementById('set-pilih-semester');
       const urut = urutkanPeriode(daftarPeriode);
       const p = getPeriodeAktif();
       const iden = configGlobal.identitas || {};
 
-      if (urut.length === 0 || !p) {
-        selT.innerHTML = `<option>${iden.tahunAjaran || '-'}</option>`;
-        selS.innerHTML = `<option>${iden.semester || '-'}</option>`;
-      } else {
-        const tahunList = [...new Set(urut.map(x => x.tahunAjaran))];
-        selT.innerHTML = tahunList.map(t => `<option value="${t}" ${t === p.tahunAjaran ? 'selected' : ''}>${t}</option>`).join('');
-        selS.innerHTML = urut.filter(x => x.tahunAjaran === p.tahunAjaran)
-          .map(x => `<option value="${x.semester}" ${x.id === p.id ? 'selected' : ''}>${x.semester}</option>`).join('');
+      if (selT && selS) {
+        if (urut.length === 0 || !p) {
+          selT.innerHTML = `<option>${iden.tahunAjaran || '-'}</option>`;
+          selS.innerHTML = `<option>${iden.semester || '-'}</option>`;
+        } else {
+          const tahunList = [...new Set(urut.map(x => x.tahunAjaran))];
+          selT.innerHTML = tahunList.map(t => `<option value="${t}" ${t === p.tahunAjaran ? 'selected' : ''}>${t}</option>`).join('');
+          selS.innerHTML = urut.filter(x => x.tahunAjaran === p.tahunAjaran)
+            .map(x => `<option value="${x.semester}" ${x.id === p.id ? 'selected' : ''}>${x.semester}</option>`).join('');
+        }
       }
 
+      // Chip periode di header: hanya tampilan, perubahan periode lewat menu Pengaturan
+      const teks = p ? `${p.tahunAjaran} • ${p.semester}` : `${iden.tahunAjaran || '-'} • ${iden.semester || '-'}`;
+      const elTeks = document.getElementById('header-periode-teks');
+      if (elTeks) elTeks.innerText = teks;
       const terbaru = urut[urut.length - 1];
-      const banner = document.getElementById('banner-periode-lama');
-      if (banner) {
-        const lama = !!(p && terbaru && p.id !== terbaru.id);
-        banner.classList.toggle('hidden', !lama);
-        if (lama) document.getElementById('banner-periode-teks').innerText = `${p.tahunAjaran} • ${p.semester}`;
-      }
+      const lama = !!(p && terbaru && p.id !== terbaru.id);
+      const elArsip = document.getElementById('header-periode-arsip');
+      if (elArsip) elArsip.classList.toggle('hidden', !lama);
+
       const info = document.getElementById('set-info-periode');
       if (info) info.innerText = p ? `${p.tahunAjaran} • Semester ${p.semester}` : "-";
     }
