@@ -90,41 +90,6 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- LOCK SCREEN (KUNCI LAYAR CEPAT - CUKUP PIN / PASSWORD)                -->
-  <!-- ===================================================================== -->
-  <div id="lock-screen" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-7 border border-slate-200 space-y-5">
-      <div class="text-center space-y-2">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">
-          <i data-lucide="lock" class="w-7 h-7"></i>
-        </div>
-        <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">LAYAR TERKUNCI</h2>
-        <p id="lock-screen-nama-guru" class="text-xs font-bold text-emerald-700">Guru Mata Pelajaran</p>
-        <p class="text-[11px] text-slate-500">Masukkan PIN / Password untuk melanjutkan pekerjaan</p>
-      </div>
-      <form onsubmit="bukaKunciLayar(event)" class="space-y-3.5">
-        <div>
-          <div class="relative">
-            <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-            <input type="password" id="input-unlock-pin" required autocomplete="off"
-              class="w-full h-11 pl-10 pr-3 border border-slate-300 rounded-xl text-center tracking-widest font-extrabold text-base bg-slate-50 focus:bg-white focus:border-amber-500 focus:outline-none"
-              placeholder="••••••">
-          </div>
-          <p id="unlock-error-msg" class="hidden text-xs font-bold text-rose-600 mt-2 text-center">PIN / Password salah!</p>
-        </div>
-        <button type="submit" class="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
-          <i data-lucide="unlock" class="w-4 h-4"></i> <span>Buka Kunci Layar</span>
-        </button>
-      </form>
-      <div id="lock-screen-logout-wrap" class="pt-2 border-t border-slate-100 text-center">
-        <button type="button" onclick="keluarResetSesi()" class="text-[11px] font-bold text-rose-600 hover:underline">
-          Keluar / Reset Sesi
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================== -->
   <!-- SIDEBAR MODERN                                                        -->
   <!-- ===================================================================== -->
   <aside id="sidebar" class="w-64 bg-slate-900 text-slate-100 flex flex-col shadow-2xl shrink-0 transition-all duration-300 overflow-hidden border-r border-slate-800">
@@ -200,7 +165,7 @@
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
         </button>
       </div>
-      <button id="sidebar-btn-kunci" onclick="kunciLayarSekarang()" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-amber-950/80 text-slate-300 hover:text-amber-300 font-semibold transition flex items-center justify-center gap-1.5">
+      <button onclick="kunciAplikasi()" class="w-full py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-rose-950/80 text-slate-300 hover:text-rose-300 font-semibold transition flex items-center justify-center gap-1.5">
         <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span>Kunci Layar</span>
       </button>
     </div>
@@ -231,11 +196,6 @@
         <select id="global-filter-kelas" onchange="gantiFilterKelas(this.value)" class="h-9 bg-slate-50 border border-slate-200 text-slate-700 px-3 rounded-xl text-xs font-semibold focus:outline-none">
           <option value="ALL">Semua Kelas</option>
         </select>
-        <button id="topbar-btn-kunci" type="button" onclick="kunciLayarSekarang()" title="Kunci Layar Cepat"
-          class="h-9 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold flex items-center gap-1.5 transition shrink-0">
-          <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-600"></i>
-          <span class="hidden md:inline">Kunci Layar</span>
-        </button>
       </div>
     </header>
 
@@ -1151,65 +1111,26 @@
 
         <!-- 4. KEAMANAN AKSES & ARSIP CLOUD -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <!-- Keamanan Akses & Kunci Layar -->
+          <!-- Keamanan Akses -->
           <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i> 4. Keamanan Akses & Kunci Layar
+                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i> 4. Keamanan Akses Akun
               </h3>
-              <p class="text-xs text-slate-500">Pilih gunakan login/kunci layar atau masuk langsung ke buku nilai</p>
+              <p class="text-xs text-slate-500">Ubah username dan password login aplikasi</p>
             </div>
             <div class="space-y-3 text-xs">
-              <!-- Opsi Aktifkan Login & Kunci Layar -->
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-                <label class="flex items-center justify-between gap-2 cursor-pointer">
-                  <div>
-                    <span class="font-bold text-slate-800 block">Gunakan Username & Password (Login Awal)</span>
-                    <span class="text-[11px] text-slate-500">Jika dimatikan, aplikasi langsung masuk tanpa login</span>
-                  </div>
-                  <input type="checkbox" id="set-gunakan-login" checked class="w-4 h-4 accent-emerald-600 rounded">
-                </label>
-                <div class="border-t border-slate-200/80 pt-2">
-                  <label class="flex items-center justify-between gap-2 cursor-pointer">
-                    <div>
-                      <span class="font-bold text-slate-800 block">Gunakan Kunci Layar (PIN Cepat & Otomatis)</span>
-                      <span class="text-[11px] text-slate-500">Tombol kunci layar 1-klik & kunci otomatis saat diam</span>
-                    </div>
-                    <input type="checkbox" id="set-gunakan-kunci-layar" checked class="w-4 h-4 accent-amber-600 rounded">
-                  </label>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Username Login</label>
-                  <input type="text" id="set-akun-username" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold">
-                </div>
-                <div>
-                  <label class="block font-bold text-slate-700 mb-1">Password / PIN</label>
-                  <input type="text" id="set-akun-password" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold">
-                </div>
-              </div>
-
               <div>
-                <label class="block font-bold text-slate-700 mb-1">Kunci Layar Otomatis (Auto-Lock)</label>
-                <select id="set-autolock-menit" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold text-slate-800">
-                  <option value="0">Nonaktif (Kunci Manual Saja)</option>
-                  <option value="3">Otomatis setelah 3 menit diam</option>
-                  <option value="5" selected>Otomatis setelah 5 menit diam</option>
-                  <option value="10">Otomatis setelah 10 menit diam</option>
-                  <option value="15">Otomatis setelah 15 menit diam</option>
-                </select>
+                <label class="block font-bold text-slate-700 mb-1">Username Login</label>
+                <input type="text" id="set-akun-username" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold">
               </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                <button type="button" onclick="perbaruiAkunKeamanan()" class="h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">
-                  Simpan Pengaturan Keamanan
-                </button>
-                <button type="button" onclick="keluarResetSesi()" class="h-10 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                  <i data-lucide="log-out" class="w-3.5 h-3.5"></i> <span>Keluar / Reset Sesi</span>
-                </button>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Password Baru</label>
+                <input type="text" id="set-akun-password" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold">
               </div>
+              <button onclick="perbaruiAkunKeamanan()" class="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition">
+                Perbarui Akun
+              </button>
             </div>
           </div>
 
@@ -1270,34 +1191,10 @@
     const CACHE_KEY = "bukunilai_cloud_cache_v4";
     const SESSION_AUTH_KEY = "bukunilai_authenticated_v2";
     const SISWA_PER_HALAMAN = 36;
-    const LOCK_STATE_KEY = "bukunilai_screen_locked_v1";
-    const KEAMANAN_PREF_KEY = "bukunilai_keamanan_pref_v1";
-
-    function getPreferensiKeamanan() {
-      let pref = { gunakanLogin: true, gunakanKunciLayar: true, autoLockMenit: 5 };
-      try {
-        const lokal = JSON.parse(localStorage.getItem(KEAMANAN_PREF_KEY) || "null");
-        if (lokal && typeof lokal === "object") pref = { ...pref, ...lokal };
-      } catch (e) {}
-      if (typeof configGlobal !== "undefined" && configGlobal && configGlobal.keamanan) {
-        pref = { ...pref, ...configGlobal.keamanan };
-      }
-      return pref;
+    // Cek status login seketika agar tidak berkedip saat refresh
+    if (sessionStorage.getItem(SESSION_AUTH_KEY) !== "true") {
+      document.getElementById('login-screen').classList.remove('hidden');
     }
-
-    // Cek status login & kunci layar seketika agar tidak berkedip saat refresh
-    (function initGateSeketika() {
-      const pref = getPreferensiKeamanan();
-      if (!pref.gunakanLogin) {
-        sessionStorage.setItem(SESSION_AUTH_KEY, "true");
-        document.getElementById('login-screen')?.classList.add('hidden');
-      } else if (sessionStorage.getItem(SESSION_AUTH_KEY) !== "true") {
-        document.getElementById('login-screen')?.classList.remove('hidden');
-      }
-      if (pref.gunakanKunciLayar && sessionStorage.getItem(SESSION_AUTH_KEY) === "true" && sessionStorage.getItem(LOCK_STATE_KEY) === "true") {
-        document.getElementById('lock-screen')?.classList.remove('hidden');
-      }
-    })();
 
     let dataSiswaGlobal = [];
     let halamanSiswaAktif = 1;
@@ -1314,7 +1211,6 @@
     let configGlobal = {
       akun: { username: "guru", password: "123456" },
       pinGuru: "123456",
-      keamanan: { gunakanLogin: true, gunakanKunciLayar: true, autoLockMenit: 5 },
       guru: {
         foto: "",
         nama: "Nama Guru Mapel, S.Pd.",
@@ -1435,50 +1331,11 @@
    }
  }
     // =========================================================================
-    // LOGIN, KUNCI LAYAR (1-KLIK & AUTO-LOCK) & KELUAR / RESET SESI
+    // LOGIN & KEAMANAN AKUN
     // =========================================================================
-    let timerAutoLock = null;
-
-    function getPasswordAktif() {
-      return (configGlobal.akun && configGlobal.akun.password)
-        ? String(configGlobal.akun.password)
-        : String(configGlobal.pinGuru || "123456");
-    }
-
-    function terapkanTampilanKeamananUI() {
-      const pref = getPreferensiKeamanan();
-      const btnTopKunci = document.getElementById('topbar-btn-kunci');
-      const btnSideKunci = document.getElementById('sidebar-btn-kunci');
-      if (btnTopKunci) btnTopKunci.classList.toggle('hidden', !pref.gunakanKunciLayar);
-      if (btnSideKunci) btnSideKunci.classList.toggle('hidden', !pref.gunakanKunciLayar);
-    }
-
     function cekStatusLogin() {
-      const pref = getPreferensiKeamanan();
-      terapkanTampilanKeamananUI();
-
-      if (!pref.gunakanLogin) {
-        sessionStorage.setItem(SESSION_AUTH_KEY, "true");
-        document.getElementById('login-screen')?.classList.add('hidden');
-      } else {
-        const isAuth = sessionStorage.getItem(SESSION_AUTH_KEY) === "true";
-        document.getElementById('login-screen')?.classList.toggle('hidden', isAuth);
-        if (!isAuth) {
-          document.getElementById('lock-screen')?.classList.add('hidden');
-          clearTimeout(timerAutoLock);
-          return;
-        }
-      }
-
-      if (pref.gunakanKunciLayar && sessionStorage.getItem(LOCK_STATE_KEY) === "true") {
-        kunciLayarSekarang(false);
-      } else {
-        if (!pref.gunakanKunciLayar) {
-          sessionStorage.removeItem(LOCK_STATE_KEY);
-          document.getElementById('lock-screen')?.classList.add('hidden');
-        }
-        resetTimerAutoLock();
-      }
+      const isAuth = sessionStorage.getItem(SESSION_AUTH_KEY) === "true";
+      document.getElementById('login-screen').classList.toggle('hidden', isAuth);
     }
 
     function prosesLoginAkun(e) {
@@ -1486,13 +1343,11 @@
       const u = document.getElementById('input-login-username').value.trim();
       const p = document.getElementById('input-login-password').value.trim();
       const validUser = (configGlobal.akun && configGlobal.akun.username) ? configGlobal.akun.username : "guru";
-      const validPass = getPasswordAktif();
+      const validPass = (configGlobal.akun && configGlobal.akun.password) ? configGlobal.akun.password : (configGlobal.pinGuru || "123456");
 
-      if (u === validUser && p === validPass) {
+      if (u === validUser && p === String(validPass)) {
         sessionStorage.setItem(SESSION_AUTH_KEY, "true");
-        sessionStorage.removeItem(LOCK_STATE_KEY);
         document.getElementById('login-error-msg').classList.add('hidden');
-        document.getElementById('input-login-password').value = "";
         cekStatusLogin();
         showToast("Berhasil masuk ke Buku Nilai Digital!");
       } else {
@@ -1500,87 +1355,10 @@
       }
     }
 
-    function kunciLayarSekarang(otomatis = false) {
-      const pref = getPreferensiKeamanan();
-      if (!pref.gunakanKunciLayar) {
-        return showToast("Fitur Kunci Layar sedang dinonaktifkan di Pengaturan.", "info");
-      }
-      if (sessionStorage.getItem(SESSION_AUTH_KEY) !== "true") return;
-
-      sessionStorage.setItem(LOCK_STATE_KEY, "true");
-      clearTimeout(timerAutoLock);
-
-      const lockEl = document.getElementById('lock-screen');
-      const namaEl = document.getElementById('lock-screen-nama-guru');
-      const pinInput = document.getElementById('input-unlock-pin');
-      const logoutWrap = document.getElementById('lock-screen-logout-wrap');
-
-      if (namaEl) namaEl.innerText = configGlobal?.guru?.nama || "Guru Mata Pelajaran";
-      if (pinInput) pinInput.value = "";
-      if (logoutWrap) logoutWrap.classList.toggle('hidden', !pref.gunakanLogin);
-      document.getElementById('unlock-error-msg')?.classList.add('hidden');
-
-      if (lockEl) {
-        lockEl.classList.remove('hidden');
-        setTimeout(() => pinInput?.focus(), 80);
-      }
-      if (otomatis) showToast("Layar dikunci otomatis karena tidak ada aktivitas.", "info");
-    }
-
-    function bukaKunciLayar(e) {
-      e.preventDefault();
-      const pin = document.getElementById('input-unlock-pin').value.trim();
-      if (pin === getPasswordAktif()) {
-        sessionStorage.removeItem(LOCK_STATE_KEY);
-        document.getElementById('lock-screen').classList.add('hidden');
-        document.getElementById('unlock-error-msg').classList.add('hidden');
-        document.getElementById('input-unlock-pin').value = "";
-        resetTimerAutoLock();
-        showToast("Kunci layar dibuka!");
-      } else {
-        document.getElementById('unlock-error-msg').classList.remove('hidden');
-        document.getElementById('input-unlock-pin').select();
-      }
-    }
-
-    function keluarResetSesi() {
-      if (!confirm("Keluar dari sesi dan bersihkan cache data sementara di browser ini?\n(Pastikan perubahan nilai sudah tersimpan ke Cloud terlebih dahulu)")) return;
-      clearTimeout(timerAutoLock);
-      sessionStorage.removeItem(SESSION_AUTH_KEY);
-      sessionStorage.removeItem(LOCK_STATE_KEY);
-      localStorage.removeItem(CACHE_KEY);
-      document.getElementById('lock-screen')?.classList.add('hidden');
-
-      const pref = getPreferensiKeamanan();
-      if (pref.gunakanLogin) {
-        document.getElementById('login-screen')?.classList.remove('hidden');
-      } else {
-        sessionStorage.setItem(SESSION_AUTH_KEY, "true");
-        muatSemuaData(true);
-      }
-      showToast("Sesi berakhir & jejak data lokal dibersihkan.", "info");
-    }
-
     function kunciAplikasi() {
-      kunciLayarSekarang(false);
+      sessionStorage.removeItem(SESSION_AUTH_KEY);
+      cekStatusLogin();
     }
-
-    function resetTimerAutoLock() {
-      clearTimeout(timerAutoLock);
-      const pref = getPreferensiKeamanan();
-      if (!pref.gunakanKunciLayar) return;
-      if (sessionStorage.getItem(SESSION_AUTH_KEY) !== "true") return;
-      if (sessionStorage.getItem(LOCK_STATE_KEY) === "true") return;
-
-      const menit = Number(pref.autoLockMenit ?? 5);
-      if (menit > 0) {
-        timerAutoLock = setTimeout(() => kunciLayarSekarang(true), menit * 60 * 1000);
-      }
-    }
-
-    ["mousemove", "mousedown", "keydown", "touchstart", "scroll"].forEach(evt => {
-      window.addEventListener(evt, resetTimerAutoLock, { passive: true });
-    });
 
     // =========================================================================
     // NOTIFIKASI TOAST & NORMALISASI DATA
@@ -1611,8 +1389,6 @@
 
     function normalisasiConfig(cfg) {
       if (!cfg.akun) cfg.akun = { username: "guru", password: cfg.pinGuru || "123456" };
-      if (!cfg.keamanan) cfg.keamanan = { gunakanLogin: true, gunakanKunciLayar: true, autoLockMenit: 5 };
-      try { localStorage.setItem(KEAMANAN_PREF_KEY, JSON.stringify(cfg.keamanan)); } catch (e) {}
       if (!cfg.guru) cfg.guru = { foto: "", nama: cfg.identitas?.namaGuru || "Nama Guru, S.Pd.", nip: cfg.identitas?.nipGuru || "-", nuptk: "-", mapel: "Mapel", pangkat: "-", jabatan: "Guru Mapel", tugasTambahan: "-" };
       if (!cfg.identitas) cfg.identitas = {};
       if (!cfg.kelasMeta) cfg.kelasMeta = {};
@@ -3877,11 +3653,7 @@
       document.getElementById('rubrik-c-desk').value = r.cDesk || "";
       document.getElementById('rubrik-d-desk').value = r.dDesk || "";
 
-      // Keamanan Akun & Kunci Layar
-      const prefKeamanan = getPreferensiKeamanan();
-      document.getElementById('set-gunakan-login').checked = prefKeamanan.gunakanLogin !== false;
-      document.getElementById('set-gunakan-kunci-layar').checked = prefKeamanan.gunakanKunciLayar !== false;
-      document.getElementById('set-autolock-menit').value = String(prefKeamanan.autoLockMenit ?? 5);
+      // Keamanan Akun
       document.getElementById('set-akun-username').value = akun.username || "guru";
       document.getElementById('set-akun-password').value = akun.password || "123456";
     }
@@ -4029,23 +3801,12 @@
     async function perbaruiAkunKeamanan() {
       const u = document.getElementById('set-akun-username').value.trim();
       const p = document.getElementById('set-akun-password').value.trim();
-      const gunakanLogin = document.getElementById('set-gunakan-login').checked;
-      const gunakanKunciLayar = document.getElementById('set-gunakan-kunci-layar').checked;
-      const autoLockMenit = Number(document.getElementById('set-autolock-menit').value) || 0;
-
-      if ((gunakanLogin || gunakanKunciLayar) && (!u || p.length < 4)) {
-        return showToast("Username wajib diisi dan Password/PIN minimal 4 karakter!", "error");
-      }
-
-      configGlobal.akun = { username: u || "guru", password: p || "123456" };
-      configGlobal.pinGuru = p || "123456";
-      configGlobal.keamanan = { gunakanLogin, gunakanKunciLayar, autoLockMenit };
-
-      try { localStorage.setItem(KEAMANAN_PREF_KEY, JSON.stringify(configGlobal.keamanan)); } catch (e) {}
+      if (!u || p.length < 4) return showToast("Username wajib diisi dan password minimal 4 karakter!", "error");
+      configGlobal.akun = { username: u, password: p };
+      configGlobal.pinGuru = p;
       await apiPost({ action: "saveConfig", data: configGlobal });
       simpanCacheLokal();
-      cekStatusLogin();
-      showToast("Pengaturan keamanan & kunci layar berhasil disimpan!");
+      showToast("Akun login berhasil diperbarui!");
     }
 
     async function arsipkanDanResetSemester() {
