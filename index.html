@@ -2840,45 +2840,65 @@
       const mAktif = getMapelAktif();
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const w = doc.internal.pageSize.getWidth();
+      const h = doc.internal.pageSize.getHeight();
 
       doc.setDrawColor(15, 23, 42);
-      doc.setLineWidth(0.8);
-      doc.rect(15, 15, w - 30, 267);
+      doc.setLineWidth(0.9);
+      doc.rect(14, 14, w - 28, h - 28);
+      doc.setLineWidth(0.3);
+      doc.rect(16, 16, w - 32, h - 32);
 
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("BUKU NILAI GURU", w / 2, 48, { align: "center" });
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(20);
+      doc.text("BUKU NILAI GURU", w / 2, 46, { align: "center" });
+
       doc.setFontSize(13);
-      doc.text("KURIKULUM MERDEKA", w / 2, 56, { align: "center" });
+      doc.setTextColor(5, 150, 105);
+      doc.text("KURIKULUM MERDEKA", w / 2, 54, { align: "center" });
 
       if (iden.logo) {
-        try { doc.addImage(iden.logo, "PNG", w / 2 - 18, 68, 36, 36); } catch (e) {}
+        try { doc.addImage(iden.logo, "PNG", w / 2 - 18, 66, 36, 36); } catch (e) {}
       }
 
+      doc.setTextColor(15, 23, 42);
       doc.setFontSize(14);
-      doc.text((iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase(), w / 2, 120, { align: "center" });
+      const namaSekolahLines = doc.splitTextToSize((iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase(), w - 50);
+      doc.text(namaSekolahLines, w / 2, 118, { align: "center" });
+
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`NPSN: ${iden.npsn || "-"} • ${iden.alamat || ""}`, w / 2, 127, { align: "center" });
+      doc.setFontSize(9.5);
+      doc.setTextColor(71, 85, 105);
+      const alamatY = 118 + (namaSekolahLines.length * 6);
+      const alamatLines = doc.splitTextToSize(`NPSN: ${iden.npsn || "-"}  •  ${iden.alamat || ""}`, w - 50);
+      doc.text(alamatLines, w / 2, alamatY, { align: "center" });
 
       doc.autoTable({
-        startY: 145,
-        margin: { left: 35, right: 35 },
+        startY: alamatY + (alamatLines.length * 5) + 12,
+        margin: { left: 32, right: 32 },
         theme: "plain",
-        styles: { fontSize: 11, cellPadding: 3 },
+        styles: { fontSize: 10.5, cellPadding: 3, textColor: [15, 23, 42], valign: "top" },
+        columnStyles: {
+          0: { cellWidth: 46, fontStyle: "bold" },
+          1: { cellWidth: 5, halign: "center" },
+          2: { cellWidth: w - 115 }
+        },
         body: [
-          ["Mata Pelajaran", `: ${mAktif.nama}`],
-          ["Nama Guru", `: ${guru.nama || iden.namaGuru || "-"}`],
-          ["NIP / NUPTK", `: ${guru.nip || "-"} / ${guru.nuptk || "-"}`],
-          ["Pangkat / Jabatan", `: ${guru.pangkat || "-"} (${guru.jabatan || "-"})`],
-          ["Tahun Ajaran", `: ${iden.tahunAjaran || "2026/2027"}`],
-          ["Semester", `: ${iden.semester || "Ganjil"}`]
+          ["Mata Pelajaran", ":", mAktif.nama || "-"],
+          ["Nama Guru", ":", guru.nama || iden.namaGuru || "-"],
+          ["NIP / NUPTK", ":", `${guru.nip || "-"} / ${guru.nuptk || "-"}`],
+          ["Pangkat / Jabatan", ":", `${guru.pangkat || "-"} (${guru.jabatan || "-"})`],
+          ["Tahun Ajaran", ":", iden.tahunAjaran || "2026/2027"],
+          ["Semester", ":", iden.semester || "Ganjil"]
         ]
       });
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-      doc.text(`${iden.kota || ""}, ${iden.provinsi || ""}`, w / 2, 255, { align: "center" });
+      doc.setTextColor(15, 23, 42);
+      const wilayah = [iden.kota, iden.provinsi].filter(Boolean).join(", ");
+      doc.text(wilayah.toUpperCase(), w / 2, h - 32, { align: "center" });
+
       doc.save(`Cover_Buku_Nilai_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
     }
 
@@ -2913,6 +2933,69 @@
       a.click();
     }
 
+    // Helper Cetak Header & Blok Pengesahan PDF yang Simetris
+    function gambarHeaderPDF(doc, opsi, judulLaporan, subInfo) {
+      const iden = configGlobal.identitas || {};
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const usableW = pageWidth - opsi.mKiri - opsi.mKanan;
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(11);
+      doc.text((iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase(), opsi.mKiri, opsi.mAtas + 3);
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(6, 95, 70);
+      doc.text(judulLaporan, opsi.mKiri, opsi.mAtas + 7.5);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      const subLines = doc.splitTextToSize(subInfo, usableW);
+      doc.text(subLines, opsi.mKiri, opsi.mAtas + 11.5);
+
+      const lineY = opsi.mAtas + 11.5 + (subLines.length * 3.6);
+      doc.setDrawColor(15, 23, 42);
+      doc.setLineWidth(0.4);
+      doc.line(opsi.mKiri, lineY, pageWidth - opsi.mKanan, lineY);
+      return lineY + 2.5;
+    }
+
+    function gambarPengesahanPDF(doc, opsi) {
+      const iden = configGlobal.identitas || {};
+      const guru = configGlobal.guru || {};
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      let yTtd = doc.lastAutoTable.finalY + 7;
+      if (yTtd + 28 > pageHeight - opsi.mBawah) {
+        doc.addPage();
+        yTtd = opsi.mAtas + 4;
+      }
+
+      const xKiri = opsi.mKiri + 8;
+      const xKanan = pageWidth - opsi.mKanan - 68;
+      const tglStr = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(15, 23, 42);
+
+      doc.text("Mengetahui,", xKiri, yTtd);
+      doc.text("Kepala Sekolah,", xKiri, yTtd + 4.2);
+      doc.setFont("helvetica", "bold");
+      doc.text(iden.namaKepsek || "Nama Kepala Sekolah", xKiri, yTtd + 20);
+      doc.setFont("helvetica", "normal");
+      doc.text(`NIP. ${iden.nipKepsek || "-"}`, xKiri, yTtd + 24.2);
+
+      doc.text(`${iden.kota || "Purwokerto"}, ${tglStr}`, xKanan, yTtd);
+      doc.text("Guru Mata Pelajaran,", xKanan, yTtd + 4.2);
+      doc.setFont("helvetica", "bold");
+      doc.text(guru.nama || iden.namaGuru || "Nama Guru", xKanan, yTtd + 20);
+      doc.setFont("helvetica", "normal");
+      doc.text(`NIP. ${guru.nip || "-"}`, xKanan, yTtd + 24.2);
+    }
+
     // -------------------------------------------------------------------------
     // DOKUMEN 2: RINCIAN NILAI TP / MATERI / BAB (PER TP PER HALAMAN/SHEET)
     // -------------------------------------------------------------------------
@@ -2924,7 +3007,6 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: opsi.orientasi, unit: "mm", format: opsi.format });
       const iden = configGlobal.identitas || {};
-      const guru = configGlobal.guru || {};
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
       let isFirstPage = true;
@@ -2935,19 +3017,18 @@
         if (daftarTP.length === 0) return;
 
         // Loop per TP / Materi / Bab -> 1 TP = 1 Halaman tersendiri
-        daftarTP.forEach((tp, idxTP) => {
+        daftarTP.forEach(tp => {
           if (!isFirstPage) doc.addPage();
           isFirstPage = false;
           const pageWidth = doc.internal.pageSize.getWidth();
+          const usableW = pageWidth - opsi.mKiri - opsi.mKanan;
 
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(11);
-          doc.text((iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase(), opsi.mKiri, opsi.mAtas);
-          doc.setFontSize(9.5);
-          doc.text(`RINCIAN NILAI FORMATIF & SUMATIF LINGKUP MATERI — ${mAktif.nama.toUpperCase()}`, opsi.mKiri, opsi.mAtas + 4.5);
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(8.5);
-          doc.text(`Kelas: ${k}  |  Materi / Bab: ${tp.nama}  |  KKTP: ${kktp}  |  Bobot Tugas ${mAktif.bobotTugas}% : PH ${mAktif.bobotPSH}%`, opsi.mKiri, opsi.mAtas + 9);
+          const startTableY = gambarHeaderPDF(
+            doc,
+            opsi,
+            `RINCIAN NILAI FORMATIF & SUMATIF LINGKUP MATERI — ${mAktif.nama.toUpperCase()}`,
+            `Kelas: ${k}  |  Materi / Bab: ${tp.nama}  |  Tahun Ajaran: ${iden.tahunAjaran || "-"} (${iden.semester || "-"})  |  KKTP: ${kktp}  |  Bobot Tugas ${mAktif.bobotTugas}% : PH ${mAktif.bobotPSH}%`
+          );
 
           const headRow1 = [
             { content: "No", rowSpan: 2 },
@@ -2959,7 +3040,7 @@
           ];
           const headRow2 = [
             ...tp.tugas,
-            "Rata Tugas",
+            "Rata",
             "PH",
             "Nilai TP"
           ];
@@ -2983,23 +3064,45 @@
             ];
           });
 
-          const idxKet = body[0] ? body[0].length - 1 : 7;
+          const jmlKolomNilai = tp.tugas.length + 3;
+          const wNo = 7;
+          const wNisn = 21;
+          const wLp = 8;
+          const wKet = 16;
+          const sisaUntukNamaDanNilai = usableW - (wNo + wNisn + wLp + wKet);
+          const wNama = Math.max(42, Math.min(62, sisaUntukNamaDanNilai * 0.36));
+          const wPerNilai = (sisaUntukNamaDanNilai - wNama) / jmlKolomNilai;
+          const idxKet = 4 + jmlKolomNilai;
+
+          const colStyles = {
+            0: { cellWidth: wNo },
+            1: { cellWidth: wNisn },
+            2: { halign: "left", cellWidth: wNama },
+            3: { cellWidth: wLp },
+            [idxKet]: { cellWidth: wKet }
+          };
+          for (let c = 4; c < idxKet; c++) {
+            colStyles[c] = { cellWidth: wPerNilai };
+          }
 
           doc.autoTable({
             head: [headRow1, headRow2],
             body,
-            startY: opsi.mAtas + 12.5,
+            startY: startTableY,
+            tableWidth: usableW,
             margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
             theme: "grid",
-            styles: { fontSize: 7.5, cellPadding: 1.5, halign: "center", valign: "middle", lineColor: [203, 213, 225], lineWidth: 0.2 },
-            columnStyles: {
-              0: { cellWidth: 8 },
-              1: { cellWidth: 22 },
-              2: { halign: "left", cellWidth: 48 },
-              3: { cellWidth: 9 },
-              [idxKet]: { cellWidth: 16 }
+            styles: {
+              fontSize: wPerNilai < 10 ? 6.5 : 7.5,
+              cellPadding: 1.4,
+              halign: "center",
+              valign: "middle",
+              overflow: "linebreak",
+              lineColor: [203, 213, 225],
+              lineWidth: 0.2
             },
-            headStyles: { fillColor: [6, 95, 70], textColor: 255, fontStyle: "bold" },
+            columnStyles: colStyles,
+            headStyles: { fillColor: [6, 95, 70], textColor: 255, fontStyle: "bold", halign: "center", valign: "middle" },
             didParseCell: function (data) {
               if (data.section === "body" && data.column.index >= 4 && data.column.index < idxKet) {
                 const rawVal = data.cell.raw;
@@ -3017,34 +3120,14 @@
             didDrawPage: function () {
               if (opsi.tampilHal) {
                 const noHal = opsi.halAwal + doc.internal.getNumberOfPages() - 1;
-                doc.setFontSize(8);
+                doc.setFontSize(7.5);
                 doc.setTextColor(120);
                 doc.text(`Halaman ${noHal}`, pageWidth - opsi.mKanan, doc.internal.pageSize.getHeight() - 4, { align: "right" });
               }
             }
           });
 
-          let yTtd = doc.lastAutoTable.finalY + 7;
-          if (yTtd + 28 > doc.internal.pageSize.getHeight() - opsi.mBawah) {
-            doc.addPage();
-            yTtd = opsi.mAtas + 5;
-          }
-          doc.setFontSize(8.5);
-          doc.setTextColor(15, 23, 42);
-          doc.text("Mengetahui,", opsi.mKiri + 5, yTtd);
-          doc.text("Kepala Sekolah,", opsi.mKiri + 5, yTtd + 4.5);
-          doc.setFont("helvetica", "bold");
-          doc.text(iden.namaKepsek || "Nama Kepala Sekolah", opsi.mKiri + 5, yTtd + 20);
-          doc.setFont("helvetica", "normal");
-          doc.text(`NIP. ${iden.nipKepsek || "-"}`, opsi.mKiri + 5, yTtd + 24.5);
-
-          const xKanan = pageWidth - opsi.mKanan - 65;
-          doc.text(`${iden.kota || "Purwokerto"}, ${new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })}`, xKanan, yTtd);
-          doc.text("Guru Mata Pelajaran,", xKanan, yTtd + 4.5);
-          doc.setFont("helvetica", "bold");
-          doc.text(guru.nama || iden.namaGuru || "Nama Guru", xKanan, yTtd + 20);
-          doc.setFont("helvetica", "normal");
-          doc.text(`NIP. ${guru.nip || "-"}`, xKanan, yTtd + 24.5);
+          gambarPengesahanPDF(doc, opsi);
         });
       });
 
@@ -3186,6 +3269,7 @@
       a.download = `Rincian_TP_${opsi.targetKelas}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.xlsx`;
       a.click();
     }
+
     // -------------------------------------------------------------------------
     // DOKUMEN 3: REKAP NILAI LEGER LENGKAP (PDF & EXCEL 100% SAMA)
     // -------------------------------------------------------------------------
@@ -3197,7 +3281,6 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: opsi.orientasi, unit: "mm", format: opsi.format });
       const iden = configGlobal.identitas || {};
-      const guru = configGlobal.guru || {};
       const mAktif = getMapelAktif();
       const kktp = getKKTPAktif();
 
@@ -3206,15 +3289,14 @@
         const siswaList = dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(k));
         const daftarTP = getDaftarTPTerfilterCetak(k, opsi.targetTP);
         const pageWidth = doc.internal.pageSize.getWidth();
+        const usableW = pageWidth - opsi.mKiri - opsi.mKanan;
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.text((iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase(), opsi.mKiri, opsi.mAtas);
-        doc.setFontSize(9.5);
-        doc.text(`REKAP NILAI LEGER, PREDIKAT & DESKRIPSI CP — ${mAktif.nama.toUpperCase()}`, opsi.mKiri, opsi.mAtas + 4.5);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(8.5);
-        doc.text(`Kelas: ${k}  |  Tahun Ajaran: ${iden.tahunAjaran || "-"} (${iden.semester || "-"})  |  KKTP: ${kktp}`, opsi.mKiri, opsi.mAtas + 9);
+        const startTableY = gambarHeaderPDF(
+          doc,
+          opsi,
+          `REKAP NILAI LEGER, PREDIKAT & DESKRIPSI CP — ${mAktif.nama.toUpperCase()}`,
+          `Kelas: ${k}  |  Tahun Ajaran: ${iden.tahunAjaran || "-"} (${iden.semester || "-"})  |  KKTP: ${kktp}  |  Bobot Rapor: Rata TP (${mAktif.bobotBAB}%) + PSAS (${mAktif.bobotPSAS}%)`
+        );
 
         // Header bertingkat 100% sama dengan Excel & Tabel Leger
         const headRow1 = [
@@ -3225,13 +3307,16 @@
         ];
         const headRow2 = [];
 
+        let totalKolomTP = 0;
         daftarTP.forEach(tp => {
-          headRow1.push({ content: tp.nama, colSpan: tp.tugas.length + 3, styles: { fillColor: [5, 150, 105] } });
+          const span = tp.tugas.length + 3;
+          totalKolomTP += span;
+          headRow1.push({ content: tp.nama, colSpan: span, styles: { fillColor: [5, 150, 105] } });
           tp.tugas.forEach(t => headRow2.push({ content: t, styles: { fillColor: [6, 95, 70] } }));
           headRow2.push(
             { content: "Rata", styles: { fillColor: [6, 95, 70] } },
             { content: "PH", styles: { fillColor: [6, 95, 70] } },
-            { content: "Total TP", styles: { fillColor: [4, 120, 87] } }
+            { content: "Total", styles: { fillColor: [4, 120, 87] } }
           );
         });
 
@@ -3239,7 +3324,7 @@
           { content: "Rata TP", rowSpan: 2 },
           { content: "PSAS", rowSpan: 2 },
           { content: "Rapor", rowSpan: 2, styles: { fillColor: [6, 95, 70] } },
-          { content: "Predikat", rowSpan: 2, styles: { fillColor: [55, 48, 163] } },
+          { content: "Pred.", rowSpan: 2, styles: { fillColor: [55, 48, 163] } },
           { content: "Deskripsi Capaian Pembelajaran", rowSpan: 2 }
         );
 
@@ -3269,25 +3354,52 @@
           return baris;
         });
 
-        const totalCols = body[0] ? body[0].length : 9;
+        const totalCols = 4 + totalKolomTP + 5;
         const idxDeskripsi = totalCols - 1;
         const idxPredikat = totalCols - 2;
+        const jmlKolomAngka = totalKolomTP + 3;
+
+        const wNo = 6;
+        const wNisn = 17;
+        const wLp = 7;
+        const wPred = 9;
+        const sisaW = usableW - (wNo + wNisn + wLp + wPred);
+
+        const wNama = Math.max(26, Math.min(36, sisaW * 0.16));
+        const wDesk = Math.max(46, Math.min(72, sisaW * 0.28));
+        const wAngka = Math.max(6.2, (sisaW - wNama - wDesk) / Math.max(1, jmlKolomAngka));
+        const fontSizeDinamis = wAngka < 7.2 ? 5.3 : (wAngka < 9 ? 6.0 : 6.8);
+
+        const colStyles = {
+          0: { cellWidth: wNo },
+          1: { cellWidth: wNisn },
+          2: { halign: "left", cellWidth: wNama },
+          3: { cellWidth: wLp },
+          [idxPredikat]: { cellWidth: wPred, fontStyle: "bold" },
+          [idxDeskripsi]: { halign: "left", cellWidth: wDesk }
+        };
+        for (let c = 4; c < idxPredikat; c++) {
+          colStyles[c] = { cellWidth: wAngka };
+        }
 
         doc.autoTable({
           head: [headRow1, headRow2],
           body,
-          startY: opsi.mAtas + 12.5,
+          startY: startTableY,
+          tableWidth: usableW,
           margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
           theme: "grid",
-          styles: { fontSize: 6.2, cellPadding: 1.1, halign: "center", valign: "middle", lineColor: [203, 213, 225], lineWidth: 0.2 },
-          columnStyles: {
-            0: { cellWidth: 6 },
-            1: { cellWidth: 16 },
-            2: { halign: "left", cellWidth: 28 },
-            3: { cellWidth: 7 },
-            [idxDeskripsi]: { halign: "left", cellWidth: 52 }
+          styles: {
+            fontSize: fontSizeDinamis,
+            cellPadding: 1.0,
+            halign: "center",
+            valign: "middle",
+            overflow: "linebreak",
+            lineColor: [203, 213, 225],
+            lineWidth: 0.2
           },
-          headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+          columnStyles: colStyles,
+          headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold", halign: "center", valign: "middle" },
           didParseCell: function (data) {
             if (data.section === "body" && data.column.index >= 4 && data.column.index < idxPredikat) {
               const rawVal = data.cell.raw;
@@ -3301,34 +3413,14 @@
           didDrawPage: function () {
             if (opsi.tampilHal) {
               const noHal = opsi.halAwal + doc.internal.getNumberOfPages() - 1;
-              doc.setFontSize(8);
+              doc.setFontSize(7.5);
               doc.setTextColor(120);
               doc.text(`Halaman ${noHal}`, pageWidth - opsi.mKanan, doc.internal.pageSize.getHeight() - 4, { align: "right" });
             }
           }
         });
 
-        let yTtd = doc.lastAutoTable.finalY + 7;
-        if (yTtd + 28 > doc.internal.pageSize.getHeight() - opsi.mBawah) {
-          doc.addPage();
-          yTtd = opsi.mAtas + 5;
-        }
-        doc.setFontSize(8.5);
-        doc.setTextColor(15, 23, 42);
-        doc.text("Mengetahui,", opsi.mKiri + 5, yTtd);
-        doc.text("Kepala Sekolah,", opsi.mKiri + 5, yTtd + 4.5);
-        doc.setFont("helvetica", "bold");
-        doc.text(iden.namaKepsek || "Nama Kepala Sekolah", opsi.mKiri + 5, yTtd + 20);
-        doc.setFont("helvetica", "normal");
-        doc.text(`NIP. ${iden.nipKepsek || "-"}`, opsi.mKiri + 5, yTtd + 24.5);
-
-        const xKanan = pageWidth - opsi.mKanan - 65;
-        doc.text(`${iden.kota || "Purwokerto"}, ${new Date().toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' })}`, xKanan, yTtd);
-        doc.text("Guru Mata Pelajaran,", xKanan, yTtd + 4.5);
-        doc.setFont("helvetica", "bold");
-        doc.text(guru.nama || iden.namaGuru || "Nama Guru", xKanan, yTtd + 20);
-        doc.setFont("helvetica", "normal");
-        doc.text(`NIP. ${guru.nip || "-"}`, xKanan, yTtd + 24.5);
+        gambarPengesahanPDF(doc, opsi);
       });
 
       const namaFile = `Rekap_Leger_${opsi.targetKelas}_${mAktif.nama.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
@@ -3495,7 +3587,7 @@
       const pesan = encodeURIComponent(document.getElementById('wa-pesan-pengantar').value);
       setTimeout(() => window.open(`https://wa.me/${nomor}?text=${pesan}`, "_blank"), 600);
     }
-
+    
     // =========================================================================
     // HALAMAN 8: PENGATURAN LENGKAP
     // =========================================================================
