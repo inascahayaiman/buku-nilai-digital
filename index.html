@@ -177,7 +177,7 @@
   <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
     
     <!-- TOPBAR -->
-    <header class="h-16 bg-white border-b border-slate-200 px-5 flex items-center justify-between gap-4 shrink-0">
+    <header class="min-h-16 bg-white border-b border-slate-200 px-5 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0">
       <div class="flex items-center gap-3 min-w-0">
         <button onclick="toggleSidebar()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition shrink-0">
           <i data-lucide="menu" class="w-4 h-4"></i>
@@ -191,7 +191,15 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-300 rounded-xl px-2.5 h-9" title="Pilih Tahun Ajaran & Semester">
+          <i data-lucide="calendar-range" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+          <select id="global-pilih-tahun" onchange="gantiTahunAjaran(this.value)" class="bg-transparent text-xs font-bold text-amber-950 focus:outline-none cursor-pointer"></select>
+          <select id="global-pilih-semester" onchange="gantiSemesterPeriode(this.value)" class="bg-transparent text-xs font-bold text-amber-950 focus:outline-none cursor-pointer"></select>
+        </div>
+        <button onclick="bukaModalPeriodeBaru()" title="Buat periode baru" class="h-9 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1.5 transition">
+          <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i><span class="hidden md:inline">Periode Baru</span>
+        </button>
         <select id="global-pilih-mapel" onchange="gantiMapelAktif(this.value)" class="h-9 bg-emerald-50/80 border border-emerald-200 text-emerald-950 px-3 rounded-xl text-xs font-bold focus:outline-none max-w-[210px]"></select>
         <select id="global-filter-kelas" onchange="gantiFilterKelas(this.value)" class="h-9 bg-slate-50 border border-slate-200 text-slate-700 px-3 rounded-xl text-xs font-semibold focus:outline-none">
           <option value="ALL">Semua Kelas</option>
@@ -201,6 +209,10 @@
 
     <!-- WORKSPACE -->
     <main class="flex-1 p-5 overflow-y-auto overflow-x-hidden">
+      <div id="banner-periode-lama" class="hidden max-w-7xl mx-auto mb-4 bg-amber-50 border border-amber-300 text-amber-900 rounded-xl px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2">
+        <span>Anda sedang membuka periode <strong id="banner-periode-teks">-</strong> (bukan periode terbaru). Perubahan yang disimpan akan masuk ke periode ini.</span>
+        <button onclick="pindahKePeriodeTerbaru()" class="h-7 px-3 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700">Kembali ke periode terbaru</button>
+      </div>
 
       <!-- =================================================================== -->
       <!-- HALAMAN 0: DASHBOARD                                                -->
@@ -1000,11 +1012,11 @@
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Tahun Ajaran</label>
-                <input type="text" id="set-sek-ta" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-semibold" placeholder="2026/2027">
+                <input type="text" id="set-sek-ta" disabled title="Ditentukan oleh periode yang dipilih di bilah atas" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-semibold" placeholder="2026/2027">
               </div>
               <div>
                 <label class="block font-bold text-slate-700 mb-1">Semester Aktif</label>
-                <select id="set-sek-sem" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-semibold">
+                <select id="set-sek-sem" disabled title="Ditentukan oleh periode yang dipilih di bilah atas" class="w-full h-9 border border-slate-300 px-3 rounded-xl bg-slate-50 font-semibold">
                   <option value="Ganjil">Ganjil</option>
                   <option value="Genap">Genap</option>
                 </select>
@@ -1138,13 +1150,17 @@
           <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-6 space-y-4 flex flex-col justify-between">
             <div class="border-b border-slate-100 pb-3">
               <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <i data-lucide="archive" class="w-5 h-5 text-rose-600"></i> 5. Arsip Semester & Pemeliharaan Cloud
+                <i data-lucide="archive" class="w-5 h-5 text-rose-600"></i> 5. Periode Semester & Pemeliharaan Cloud
               </h3>
-              <p class="text-xs text-slate-500">Cadangkan nilai semester lama atau bersihkan tab tidak terpakai di Google Sheets</p>
+              <p class="text-xs text-slate-500">Setiap semester memiliki spreadsheet sendiri; data semester lain tidak ikut berubah</p>
             </div>
             <div class="space-y-2.5">
-              <button type="button" onclick="arsipkanDanResetSemester()" id="btn-arsip-semester" class="w-full h-10 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">
-                Arsipkan Semester & Reset Nilai Aktif
+              <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3">Periode aktif: <strong id="set-info-periode" class="text-slate-900">-</strong></div>
+              <button type="button" onclick="bukaModalPeriodeBaru()" id="btn-periode-baru" class="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition">
+                Buat Periode Baru (Semester / Tahun Ajaran)
+              </button>
+              <button type="button" onclick="bukaSpreadsheetPeriode()" class="w-full h-10 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition">
+                Buka Spreadsheet Periode Ini
               </button>
               <button type="button" onclick="bersihkanSheetCloud()" id="btn-cleanup-sheets" class="w-full h-10 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition">
                 Hapus Sheet Tidak Terpakai di Spreadsheet
@@ -1156,6 +1172,54 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- MODAL BUAT PERIODE BARU -->
+  <div id="modal-periode-baru" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <form onsubmit="prosesBuatPeriode(event)" class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
+      <div class="px-5 py-4 bg-amber-600 text-white flex justify-between items-center">
+        <h3 class="text-sm font-extrabold flex items-center gap-2"><i data-lucide="calendar-plus" class="w-4 h-4"></i> Buat Periode Baru</h3>
+        <button type="button" onclick="tutupModalPeriodeBaru()" class="text-amber-100 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <div class="p-5 space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Tahun Ajaran</label>
+            <input type="text" id="pb-tahun" required placeholder="2026/2027" class="w-full h-10 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold focus:bg-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Semester</label>
+            <select id="pb-semester" class="w-full h-10 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold focus:outline-none">
+              <option value="Ganjil">Ganjil</option>
+              <option value="Genap">Genap</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Salin data dasar dari periode</label>
+          <select id="pb-sumber" class="w-full h-10 border border-slate-300 px-3 rounded-xl bg-slate-50 font-bold focus:outline-none"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+            <div class="font-extrabold text-emerald-900 mb-1">Ikut disalin</div>
+            <ul class="text-emerald-900/90 space-y-0.5 list-disc pl-4">
+              <li>Data siswa</li><li>Kelas &amp; wali kelas</li><li>Jadwal mengajar</li><li>Mapel, KKTP &amp; bobot</li><li>Rubrik predikat</li>
+            </ul>
+          </div>
+          <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+            <div class="font-extrabold text-rose-900 mb-1">Dikosongkan</div>
+            <ul class="text-rose-900/90 space-y-0.5 list-disc pl-4">
+              <li>TP / Materi</li><li>Nilai tugas &amp; PH</li><li>Nilai PSAS</li>
+            </ul>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500">Periode baru dibuat sebagai <strong>spreadsheet terpisah</strong> di Google Drive (folder "Buku Nilai Digital"). Data periode lain tidak berubah. Proses sekitar 10–20 detik.</p>
+      </div>
+      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button type="button" onclick="tutupModalPeriodeBaru()" class="h-9 bg-slate-100 text-slate-700 px-4 rounded-xl text-xs font-semibold hover:bg-slate-200">Batal</button>
+        <button type="submit" id="btn-buat-periode" class="h-9 bg-amber-600 text-white px-5 rounded-xl text-xs font-bold hover:bg-amber-700">Buat Periode</button>
+      </div>
+    </form>
   </div>
 
   <!-- MODAL LIHAT SISWA PER KELAS (DARI MENU DATA KELAS) -->
@@ -1188,7 +1252,7 @@
     // =========================================================================
     const API_URL = "https://script.google.com/macros/s/AKfycbwSHVgHvn_ioCxD0zc1jNAx7XaHEEd5-yCNKoRi_Om_sxYguoYeR9k7OFxgisc_do4UOw/exec";
     const SECRET_TOKEN = "BND_RAHASIA_2026";
-    const CACHE_KEY = "bukunilai_cloud_cache_v4";
+    const CACHE_KEY = "bukunilai_cloud_cache_v5";
     const SESSION_AUTH_KEY = "bukunilai_authenticated_v2";
     const SISWA_PER_HALAMAN = 36;
     // Cek status login seketika agar tidak berkedip saat refresh
@@ -1207,6 +1271,10 @@
     let adaPerubahanBelumDisimpan = false;
     let hanyaTampilkanRemedial = false;
     let mapelPengaturanId = "MAPEL_DEFAULT";
+    let daftarPeriode = [];
+    let periodeAktifId = "";
+    try { periodeAktifId = localStorage.getItem("bnd_periode_aktif") || ""; } catch (e) {}
+    let dataSiap = false; // true hanya setelah data periode berhasil dimuat (mencegah menimpa data dengan data kosong)
 
     let configGlobal = {
       akun: { username: "guru", password: "123456" },
@@ -1275,7 +1343,9 @@
    update: "Memperbarui data siswa...",
    delete: "Menghapus data siswa...",
    import: "Mengimpor data siswa ke Cloud...",
-   archiveAndReset: "Mengarsipkan semester & mereset data...",
+   savePSAS: "Menyimpan nilai PSAS...",
+   renameKelas: "Mengganti nama kelas di Cloud...",
+   createPeriode: "Membuat spreadsheet periode baru (±10–20 detik)...",
    cleanupUnusedSheets: "Membersihkan tab tidak terpakai..."
  };
 
@@ -1290,7 +1360,11 @@
  }
 
  async function apiPost(payloadObj) {
-   const pesan = LABEL_AKSI_CLOUD[payloadObj.action] || "Sedang mengirim data ke Cloud...";
+   if (!dataSiap && payloadObj.action !== "createPeriode") {
+   showToast("Data periode belum selesai dimuat. Tunggu sebentar lalu coba lagi.", "error");
+   throw new Error("Data periode belum termuat");
+ }
+ const pesan = LABEL_AKSI_CLOUD[payloadObj.action] || "Sedang mengirim data ke Cloud...";
    setLoadingProses(true, pesan);
 
    const activeBtn = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
@@ -1307,7 +1381,7 @@
        method: "POST",
        redirect: "follow",
        headers: { "Content-Type": "text/plain;charset=utf-8" },
-       body: JSON.stringify({ ...payloadObj, token: SECRET_TOKEN })
+       body: JSON.stringify({ periodeId: periodeAktifId, ...payloadObj, token: SECRET_TOKEN })
      });
      const text = await res.text();
      let json = {};
@@ -1413,7 +1487,7 @@
     function simpanCacheLokal() {
       try {
         localStorage.setItem(CACHE_KEY, JSON.stringify({
-          siswa: dataSiswaGlobal, config: configGlobal, nilaiDetail: nilaiDetailGlobal, nilaiPSAS: nilaiPSASGlobal
+          siswa: dataSiswaGlobal, config: configGlobal, nilaiDetail: nilaiDetailGlobal, nilaiPSAS: nilaiPSASGlobal, periodeId: periodeAktifId, daftarPeriode: daftarPeriode
         }));
       } catch (e) {}
     }
@@ -1424,10 +1498,15 @@
         if (!raw) return false;
         const p = JSON.parse(raw);
         if (p && Array.isArray(p.siswa)) {
+          if (periodeAktifId && p.periodeId && p.periodeId !== periodeAktifId) return false;
           dataSiswaGlobal = p.siswa;
           if (p.config) configGlobal = normalisasiConfig(p.config);
           if (p.nilaiDetail) nilaiDetailGlobal = p.nilaiDetail;
           if (p.nilaiPSAS) nilaiPSASGlobal = p.nilaiPSAS;
+          if (Array.isArray(p.daftarPeriode)) daftarPeriode = p.daftarPeriode;
+          if (!periodeAktifId && p.periodeId) periodeAktifId = p.periodeId;
+          terapkanPeriodeKeConfig();
+          dataSiap = true;
           return true;
         }
       } catch (e) {}
@@ -1499,30 +1578,182 @@
       lucide.createIcons();
     }
 
-    async function muatSemuaData(paksaSpinner = false) {
-      const adaCache = muatDariCacheLokal();
+    async function muatSemuaData(paksaSpinner = false, opsi = {}) {
+      const adaCache = opsi.abaikanCache ? false : muatDariCacheLokal();
       cekStatusLogin();
+      const pill = document.getElementById('global-loading-pill');
+      if (opsi.abaikanCache && pill) {
+        document.getElementById('global-loading-text').innerText = "Memuat data periode...";
+        pill.classList.remove('hidden');
+      }
       if (adaCache) gantiMenu(menuAktif);
       else sinkronTopbar();
 
       if (paksaSpinner) setCloudStatus('syncing', 'Menyinkronkan...');
       try {
-        const res = await fetch(`${API_URL}?action=getInitialData&token=${encodeURIComponent(SECRET_TOKEN)}`).then(r => r.json());
-        if (res.status === "success") {
-          dataSiswaGlobal = res.siswa || [];
-          if (res.config && Array.isArray(res.config.mapels)) configGlobal = normalisasiConfig(res.config);
-          if (res.nilaiDetail) nilaiDetailGlobal = res.nilaiDetail;
-          if (res.nilaiPSAS) nilaiPSASGlobal = res.nilaiPSAS;
-          simpanCacheLokal();
-          tandaiBelumDisimpan(false);
-          gantiMenu(menuAktif);
-          setCloudStatus('ok', 'Tersinkronisasi');
-          if (paksaSpinner) showToast("Data tersinkronisasi dengan Cloud");
+        const url = `${API_URL}?action=getInitialData&token=${encodeURIComponent(SECRET_TOKEN)}&periodeId=${encodeURIComponent(periodeAktifId || "")}`;
+        const res = await fetch(url).then(r => r.json());
+        if (res.status !== "success") throw new Error(res.message || "Server mengembalikan error");
+        if (Array.isArray(res.periodes)) daftarPeriode = res.periodes;
+        if (res.periodeId) {
+          periodeAktifId = res.periodeId;
+          try { localStorage.setItem("bnd_periode_aktif", periodeAktifId); } catch (e) {}
         }
+        dataSiswaGlobal = res.siswa || [];
+        nilaiDetailGlobal = res.nilaiDetail || {};
+        nilaiPSASGlobal = res.nilaiPSAS || {};
+        if (res.config && Array.isArray(res.config.mapels)) configGlobal = normalisasiConfig(res.config);
+        terapkanPeriodeKeConfig();
+        dataSiap = true;
+        if (kelasAktifFilter !== "ALL" && !getSemuaKelasUnik().map(String).includes(String(kelasAktifFilter))) {
+          kelasAktifFilter = "ALL";
+          sessionStorage.setItem("bnd_kelas_aktif", "ALL");
+        }
+        simpanCacheLokal();
+        tandaiBelumDisimpan(false);
+        gantiMenu(menuAktif);
+        setCloudStatus('ok', 'Tersinkronisasi');
+        if (paksaSpinner) showToast("Data tersinkronisasi dengan Cloud");
       } catch (e) {
         setCloudStatus('error', 'Mode Offline');
+        if (opsi.abaikanCache) showToast("Gagal memuat data periode: " + (e.message || e), "error");
+      } finally {
+        if (opsi.abaikanCache && pill) pill.classList.add('hidden');
       }
       lucide.createIcons();
+    }
+
+    // =========================================================================
+    // PERIODE (TAHUN AJARAN + SEMESTER) — satu spreadsheet per periode
+    // =========================================================================
+    function urutkanPeriode(list) {
+      return [...list].sort((a, b) =>
+        String(a.tahunAjaran).localeCompare(String(b.tahunAjaran)) ||
+        ((a.semester === "Ganjil" ? 0 : 1) - (b.semester === "Ganjil" ? 0 : 1)));
+    }
+
+    function getPeriodeAktif() {
+      return daftarPeriode.find(p => p.id === periodeAktifId) || null;
+    }
+
+    function terapkanPeriodeKeConfig() {
+      const p = getPeriodeAktif();
+      if (!p) return;
+      if (!configGlobal.identitas) configGlobal.identitas = {};
+      configGlobal.identitas.tahunAjaran = p.tahunAjaran;
+      configGlobal.identitas.semester = p.semester;
+    }
+
+    function renderPemilihPeriode() {
+      const selT = document.getElementById('global-pilih-tahun');
+      const selS = document.getElementById('global-pilih-semester');
+      if (!selT || !selS) return;
+      const urut = urutkanPeriode(daftarPeriode);
+      const p = getPeriodeAktif();
+      const iden = configGlobal.identitas || {};
+
+      if (urut.length === 0 || !p) {
+        selT.innerHTML = `<option>${iden.tahunAjaran || '-'}</option>`;
+        selS.innerHTML = `<option>${iden.semester || '-'}</option>`;
+      } else {
+        const tahunList = [...new Set(urut.map(x => x.tahunAjaran))];
+        selT.innerHTML = tahunList.map(t => `<option value="${t}" ${t === p.tahunAjaran ? 'selected' : ''}>${t}</option>`).join('');
+        selS.innerHTML = urut.filter(x => x.tahunAjaran === p.tahunAjaran)
+          .map(x => `<option value="${x.semester}" ${x.id === p.id ? 'selected' : ''}>${x.semester}</option>`).join('');
+      }
+
+      const terbaru = urut[urut.length - 1];
+      const banner = document.getElementById('banner-periode-lama');
+      if (banner) {
+        const lama = !!(p && terbaru && p.id !== terbaru.id);
+        banner.classList.toggle('hidden', !lama);
+        if (lama) document.getElementById('banner-periode-teks').innerText = `${p.tahunAjaran} • ${p.semester}`;
+      }
+      const info = document.getElementById('set-info-periode');
+      if (info) info.innerText = p ? `${p.tahunAjaran} • Semester ${p.semester}` : "-";
+    }
+
+    async function pindahPeriode(id) {
+      if (!id || id === periodeAktifId) { renderPemilihPeriode(); return; }
+      if (adaPerubahanBelumDisimpan && !confirm("Ada perubahan nilai yang belum disimpan. Pindah periode akan membuangnya. Lanjutkan?")) {
+        renderPemilihPeriode();
+        return;
+      }
+      periodeAktifId = id;
+      try { localStorage.setItem("bnd_periode_aktif", id); } catch (e) {}
+      dataSiap = false;
+      dataSiswaGlobal = []; nilaiDetailGlobal = {}; nilaiPSASGlobal = {};
+      kartuTerbukaManual = {}; hanyaTampilkanRemedial = false; halamanSiswaAktif = 1;
+      tandaiBelumDisimpan(false);
+      renderPemilihPeriode();
+      await muatSemuaData(true, { abaikanCache: true });
+    }
+
+    function pindahKePeriodeTerbaru() {
+      const urut = urutkanPeriode(daftarPeriode);
+      if (urut.length) pindahPeriode(urut[urut.length - 1].id);
+    }
+
+    function gantiTahunAjaran(val) {
+      const p = getPeriodeAktif();
+      const kandidat = urutkanPeriode(daftarPeriode).filter(x => x.tahunAjaran === val);
+      if (kandidat.length === 0) return;
+      const target = kandidat.find(x => p && x.semester === p.semester) || kandidat[0];
+      pindahPeriode(target.id);
+    }
+
+    function gantiSemesterPeriode(val) {
+      const p = getPeriodeAktif();
+      if (!p) return;
+      const target = daftarPeriode.find(x => x.tahunAjaran === p.tahunAjaran && x.semester === val);
+      if (target) pindahPeriode(target.id);
+    }
+
+    function sarankanPeriodeBaru() {
+      const basis = urutkanPeriode(daftarPeriode).slice(-1)[0] ||
+        { tahunAjaran: (configGlobal.identitas || {}).tahunAjaran || "2026/2027", semester: (configGlobal.identitas || {}).semester || "Ganjil" };
+      if (basis.semester === "Ganjil") return { ta: basis.tahunAjaran, sem: "Genap" };
+      const m = String(basis.tahunAjaran).match(/^(\d{4})\/(\d{4})$/);
+      return m ? { ta: `${Number(m[1]) + 1}/${Number(m[2]) + 1}`, sem: "Ganjil" } : { ta: basis.tahunAjaran, sem: "Ganjil" };
+    }
+
+    function bukaModalPeriodeBaru() {
+      if (!dataSiap) return showToast("Tunggu data selesai dimuat terlebih dahulu.", "error");
+      const sar = sarankanPeriodeBaru();
+      document.getElementById('pb-tahun').value = sar.ta;
+      document.getElementById('pb-semester').value = sar.sem;
+      document.getElementById('pb-sumber').innerHTML = urutkanPeriode(daftarPeriode)
+        .map(p => `<option value="${p.id}" ${p.id === periodeAktifId ? 'selected' : ''}>${p.tahunAjaran} • ${p.semester}</option>`).join('');
+      document.getElementById('modal-periode-baru').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function tutupModalPeriodeBaru() { document.getElementById('modal-periode-baru').classList.add('hidden'); }
+
+    async function prosesBuatPeriode(e) {
+      e.preventDefault();
+      const ta = document.getElementById('pb-tahun').value.trim();
+      const sem = document.getElementById('pb-semester').value;
+      const sumber = document.getElementById('pb-sumber').value;
+      if (!/^\d{4}\/\d{4}$/.test(ta)) return showToast("Format Tahun Ajaran harus seperti 2026/2027", "error");
+      const id = `${ta}_${sem}`;
+      if (daftarPeriode.some(p => p.id === id)) return showToast("Periode tersebut sudah ada. Pilih lewat menu Tahun Ajaran / Semester di bilah atas.", "error");
+      try {
+        const res = await apiPost({ action: "createPeriode", tahunAjaran: ta, semester: sem, sumberPeriodeId: sumber }).then(r => r.json());
+        if (res.status !== "success") throw new Error(res.message || "Gagal membuat periode");
+        if (Array.isArray(res.periodes)) daftarPeriode = res.periodes;
+        tutupModalPeriodeBaru();
+        showToast(`Periode ${ta} • ${sem} berhasil dibuat`);
+        await pindahPeriode(res.periodeId || id);
+      } catch (err) {
+        // pesan kesalahan sudah ditampilkan oleh apiPost
+      }
+    }
+
+    function bukaSpreadsheetPeriode() {
+      const p = getPeriodeAktif();
+      if (p && p.url) window.open(p.url, "_blank");
+      else showToast("Link spreadsheet periode belum tersedia. Sinkronkan ulang data.", "info");
     }
 
     function sinkronTopbar() {
@@ -1530,6 +1761,7 @@
       const iden = configGlobal.identitas || {};
       const guru = configGlobal.guru || {};
 
+      renderPemilihPeriode();
       document.getElementById('sidebar-periode-aktif').innerText = `${iden.tahunAjaran || '2026/2027'} • ${iden.semester || 'Ganjil'}`;
       document.getElementById('sidebar-nama-guru').innerText = guru.nama || iden.namaGuru || "Guru Mapel";
       document.getElementById('sidebar-mapel-aktif').innerText = mAktif.nama;
@@ -1864,18 +2096,42 @@
    const baru = document.getElementById('input-kelas-nama').value.trim();
    if (!baru) return;
 
-   if (lama && lama !== baru) {
-     delete configGlobal.kelasMeta[lama];
-     dataSiswaGlobal.forEach(s => { if (String(s.ID_Kelas) === lama) s.ID_Kelas = baru; });
-   }
-   configGlobal.kelasMeta[baru] = {
+   const metaBaru = {
      fase: document.getElementById('input-kelas-fase').value,
      waliKelas: document.getElementById('input-kelas-walas').value.trim(),
      waWaliKelas: document.getElementById('input-kelas-wa').value.trim(),
      tahunAjaran: document.getElementById('input-kelas-ta').value.trim()
    };
 
-   await apiPost({ action: "saveConfig", data: configGlobal });
+   try {
+     if (lama && lama !== baru) {
+       if (getSemuaKelasUnik().map(String).includes(baru)) {
+         showToast(`Kelas "${baru}" sudah ada. Gunakan nama lain.`, "error");
+         return;
+       }
+       // 1) Ubah nama kelas di Data_Siswa, Nilai_Detail_TP & Rekap pada Cloud
+       await apiPost({ action: "renameKelas", lama: lama, baru: baru });
+       // 2) Ubah di memori: siswa, kelasMeta, TP per kelas, jadwal, filter aktif
+       dataSiswaGlobal.forEach(s => { if (String(s.ID_Kelas) === lama) s.ID_Kelas = baru; });
+       delete configGlobal.kelasMeta[lama];
+       (configGlobal.mapels || []).forEach(m => {
+         if (m.babsByKelas && m.babsByKelas[lama] !== undefined) {
+           m.babsByKelas[baru] = m.babsByKelas[lama];
+           delete m.babsByKelas[lama];
+         }
+       });
+       (configGlobal.jadwal || []).forEach(j => { if (String(j.kelas) === lama) j.kelas = baru; });
+       if (String(kelasAktifFilter) === lama) {
+         kelasAktifFilter = baru;
+         sessionStorage.setItem("bnd_kelas_aktif", baru);
+       }
+     }
+     configGlobal.kelasMeta[baru] = metaBaru;
+     // 3) Simpan konfigurasi (TP per kelas ikut berpindah ke nama baru)
+     await apiPost({ action: "saveConfig", data: configGlobal });
+   } catch (err) {
+     return; // pesan kesalahan sudah ditampilkan oleh apiPost
+   }
    simpanCacheLokal();
    tutupFormKelas();
    sinkronTopbar();
@@ -2526,7 +2782,17 @@
     }
 
     async function simpanNilaiPSASCloud() {
-      await simpanRekapCloud(true);
+      const mId = getMapelAktif().id;
+      const items = getSiswaTerfilter().map(s => ({
+        nisn: s.NISN,
+        nilai: nilaiPSASGlobal[`${mId}_${s.NISN}`] ?? ""
+      }));
+      try {
+        await apiPost({ action: "savePSAS", mapelId: mId, items });
+        await simpanRekapCloud(true);
+      } catch (err) {
+        return;
+      }
       showToast("Nilai PSAS & Leger tersimpan!");
     }
 
@@ -3809,21 +4075,8 @@
       showToast("Akun login berhasil diperbarui!");
     }
 
-    async function arsipkanDanResetSemester() {
-      const iden = configGlobal.identitas;
-      const labelLama = `${iden.tahunAjaran}_${iden.semester}`;
-      if (!confirm(`Arsipkan seluruh nilai ${labelLama} dan mulai semester baru?`)) return;
-      configGlobal.mapels.forEach(m => { m.babsByKelas = {}; });
-      await apiPost({ action: "archiveAndReset", labelArsip: labelLama, newConfig: configGlobal });
-      nilaiDetailGlobal = {};
-      nilaiPSASGlobal = {};
-      simpanCacheLokal();
-      gantiMenu(menuAktif);
-      showToast(`Data ${labelLama} berhasil diarsipkan!`);
-    }
-
     async function bersihkanSheetCloud() {
-      if (!confirm("Hapus semua tab (sheet) yang tidak terpakai di Google Sheets?")) return;
+      if (!confirm("Hapus semua tab (sheet) yang tidak terpakai di spreadsheet periode yang sedang dibuka? (Tab berawalan Arsip_ tidak dihapus)")) return;
       const btn = document.getElementById('btn-cleanup-sheets');
       btn.innerText = "Membersihkan..."; btn.disabled = true;
       try {
