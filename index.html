@@ -27,6 +27,12 @@
       to { transform: translateY(0); opacity: 1; }
     }
     .toast-enter { animation: slideUp 0.25s ease-out forwards; }
+    /* Freeze 4 kolom identitas di Rekap Leger (No, NISN/NIS, Nama, L/P) */
+    .freeze-no   { position: sticky; left: 0px;   width: 42px;  min-width: 42px;  max-width: 42px;  z-index: 15; }
+    .freeze-nisn { position: sticky; left: 42px;  width: 105px; min-width: 105px; max-width: 105px; z-index: 15; }
+    .freeze-nama { position: sticky; left: 147px; width: 205px; min-width: 205px; max-width: 205px; z-index: 15; }
+    .freeze-lp   { position: sticky; left: 352px; width: 42px;  min-width: 42px;  max-width: 42px;  z-index: 15; box-shadow: 3px 0 6px -2px rgba(15, 23, 42, 0.14); }
+    thead .freeze-no, thead .freeze-nisn, thead .freeze-nama, thead .freeze-lp { z-index: 30; }
   </style>
 </head>
 <body class="bg-slate-100 flex h-screen text-slate-800 overflow-hidden antialiased">
@@ -2525,65 +2531,65 @@
       const siswaList = hanyaTampilkanRemedial ? siswaSemua.filter(s => hitungRekapSiswa(s.NISN, s.ID_Kelas).nilaiRapor < kktp) : siswaSemua;
 
       // --- BAGIAN YANG DIGANTI MULAI DARI SINI ---
-      let row1 = `<tr class="bg-slate-200 border-b border-slate-300 font-bold text-center text-[11px] uppercase text-slate-800">
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300">No</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300">NISN / NIS</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 text-left">Nama Lengkap</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300">L/P</th>`;
-      daftarTP.forEach(tp => {
-        row1 += `<th colspan="${tp.tugas.length + 3}" class="px-3 py-2 border-r border-emerald-700 bg-emerald-600 text-white">${tp.nama}</th>`;
-      });
-      row1 += `
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-blue-100 text-blue-950">Rata TP</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-amber-100 text-amber-950">PSAS</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-emerald-700 text-white">Rapor</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-indigo-700 text-white">Predikat</th>
-        <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-4 py-2.5 bg-slate-800 text-white text-left min-w-[340px]">Deskripsi Capaian Pembelajaran (Otomatis)</th>
-      </tr>`;
+   let row1 = `<tr class="bg-slate-200 border-b border-slate-300 font-bold text-center text-[11px] uppercase text-slate-800">
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300 freeze-no bg-slate-200">No</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 freeze-nisn bg-slate-200">NISN / NIS</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 text-left freeze-nama bg-slate-200">Nama Lengkap</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-2 py-2.5 border-r border-slate-300 freeze-lp bg-slate-200">L/P</th>`;
+   daftarTP.forEach(tp => {
+     row1 += `<th colspan="${tp.tugas.length + 3}" class="px-3 py-2 border-r border-emerald-700 bg-emerald-600 text-white">${tp.nama}</th>`;
+   });
+   row1 += `
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-blue-100 text-blue-950">Rata TP</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-amber-100 text-amber-950">PSAS</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-emerald-700 text-white">Rapor</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-3 py-2.5 border-r border-slate-300 bg-indigo-700 text-white">Predikat</th>
+     <th ${daftarTP.length ? 'rowspan="2"' : ''} class="px-4 py-2.5 bg-slate-800 text-white text-left min-w-[340px]">Deskripsi Capaian Pembelajaran (Otomatis)</th>
+   </tr>`;
 
-      let row2 = "";
-      if (daftarTP.length > 0) {
-        row2 = `<tr class="bg-slate-100 border-b-2 border-slate-300 font-bold text-center text-[11px] text-slate-700">`;
-        daftarTP.forEach(tp => {
-          tp.tugas.forEach(t => { row2 += `<th class="px-2 py-1.5 border-r border-slate-300">${t}</th>`; });
-          row2 += `<th class="px-2 py-1.5 border-r border-slate-300 bg-yellow-100">Rata</th><th class="px-2 py-1.5 border-r border-slate-300">PH</th><th class="px-2 py-1.5 border-r border-slate-300 bg-emerald-100">Total</th>`;
-        });
-        row2 += `</tr>`;
-      }
-      thead.innerHTML = row1 + row2;
-      // --- AKHIR BAGIAN YANG DIGANTI ---
+   let row2 = "";
+   if (daftarTP.length > 0) {
+     row2 = `<tr class="bg-slate-100 border-b-2 border-slate-300 font-bold text-center text-[11px] text-slate-700">`;
+     daftarTP.forEach(tp => {
+       tp.tugas.forEach(t => { row2 += `<th class="px-2 py-1.5 border-r border-slate-300">${t}</th>`; });
+       row2 += `<th class="px-2 py-1.5 border-r border-slate-300 bg-yellow-100">Rata</th><th class="px-2 py-1.5 border-r border-slate-300">PH</th><th class="px-2 py-1.5 border-r border-slate-300 bg-emerald-100">Total</th>`;
+     });
+     row2 += `</tr>`;
+   }
+   thead.innerHTML = row1 + row2;
+   // --- AKHIR BAGIAN YANG DIGANTI ---
 
-      tbody.innerHTML = siswaList.map((s, idx) => {
-        const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
-        let cellsTP = "";
-        daftarTP.forEach(tp => {
-          const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`] || { tugas: {}, psh: "" };
-          const h = hitungNilaiTPSiswa(s.NISN, tp);
-          tp.tugas.forEach(t => {
-            const v = rec.tugas?.[t] ?? "-";
-            cellsTP += `<td class="py-2 px-2 border-r text-center ${isDiBawahKKTP(v) ? 'text-rose-600 font-bold' : ''}">${v}</td>`;
-          });
-          cellsTP += `<td class="py-2 px-2 border-r text-center font-bold bg-yellow-50/70">${h.rataTugasStr}</td>
-            <td class="py-2 px-2 border-r text-center">${h.nilaiPH !== "" ? h.nilaiPH : "-"}</td>
-            <td class="py-2 px-2 border-r text-center font-extrabold bg-emerald-50/70">${h.nilaiAkhirTP}</td>`;
-        });
+   tbody.innerHTML = siswaList.map((s, idx) => {
+     const rekap = hitungRekapSiswa(s.NISN, s.ID_Kelas);
+     let cellsTP = "";
+     daftarTP.forEach(tp => {
+       const rec = nilaiDetailGlobal[`${mAktif.id}_${s.NISN}_${tp.id}`] || { tugas: {}, psh: "" };
+       const h = hitungNilaiTPSiswa(s.NISN, tp);
+       tp.tugas.forEach(t => {
+         const v = rec.tugas?.[t] ?? "-";
+         cellsTP += `<td class="py-2 px-2 border-r text-center ${isDiBawahKKTP(v) ? 'text-rose-600 font-bold' : ''}">${v}</td>`;
+       });
+       cellsTP += `<td class="py-2 px-2 border-r text-center font-bold bg-yellow-50/70">${h.rataTugasStr}</td>
+         <td class="py-2 px-2 border-r text-center">${h.nilaiPH !== "" ? h.nilaiPH : "-"}</td>
+         <td class="py-2 px-2 border-r text-center font-extrabold bg-emerald-50/70">${h.nilaiAkhirTP}</td>`;
+     });
 
-        return `
-          <tr class="border-b border-slate-200 hover:bg-slate-50">
-            <td class="py-2 px-2 border-r text-center text-slate-400">${idx + 1}</td>
-            <td class="py-2 px-3 border-r text-slate-600">${s.NISN}</td>
-            <td class="py-2 px-3 border-r font-semibold text-slate-900">${s.Nama_Lengkap}</td>
-            <td class="py-2 px-2 border-r text-center">${s["L/P"]}</td>
-            ${cellsTP}
-            <td class="py-2 px-3 border-r text-center font-bold bg-blue-50/60">${rekap.rataSeluruhTPStr}</td>
-            <td class="py-2 px-3 border-r text-center font-bold bg-amber-50/60">${rekap.psasRaw !== "" ? rekap.psasRaw : "-"}</td>
-            <td class="py-2 px-3 border-r text-center font-extrabold ${isDiBawahKKTP(rekap.nilaiRapor) ? 'text-rose-600 bg-rose-50' : 'text-emerald-950 bg-emerald-50'}">${rekap.nilaiRapor}</td>
-            <td class="py-2 px-3 border-r text-center font-extrabold text-indigo-800 bg-indigo-50/60">${rekap.predikat}</td>
-            <td class="py-2 px-4 text-left text-[11px] text-slate-700 whitespace-normal max-w-[400px]">${rekap.deskripsi}</td>
-          </tr>
-        `;
-      }).join('');
-    }
+     return `
+       <tr class="group border-b border-slate-200 hover:bg-slate-50">
+         <td class="py-2 px-2 border-r text-center text-slate-400 freeze-no bg-white group-hover:bg-slate-50">${idx + 1}</td>
+         <td class="py-2 px-3 border-r text-slate-600 freeze-nisn bg-white group-hover:bg-slate-50 overflow-hidden truncate">${s.NISN}</td>
+         <td class="py-2 px-3 border-r font-semibold text-slate-900 freeze-nama bg-white group-hover:bg-slate-50 overflow-hidden truncate" title="${s.Nama_Lengkap}">${s.Nama_Lengkap}</td>
+         <td class="py-2 px-2 border-r text-center freeze-lp bg-white group-hover:bg-slate-50">${s["L/P"]}</td>
+         ${cellsTP}
+         <td class="py-2 px-3 border-r text-center font-bold bg-blue-50/60">${rekap.rataSeluruhTPStr}</td>
+         <td class="py-2 px-3 border-r text-center font-bold bg-amber-50/60">${rekap.psasRaw !== "" ? rekap.psasRaw : "-"}</td>
+         <td class="py-2 px-3 border-r text-center font-extrabold ${isDiBawahKKTP(rekap.nilaiRapor) ? 'text-rose-600 bg-rose-50' : 'text-emerald-950 bg-emerald-50'}">${rekap.nilaiRapor}</td>
+         <td class="py-2 px-3 border-r text-center font-extrabold text-indigo-800 bg-indigo-50/60">${rekap.predikat}</td>
+         <td class="py-2 px-4 text-left text-[11px] text-slate-700 whitespace-normal max-w-[400px]">${rekap.deskripsi}</td>
+       </tr>
+     `;
+   }).join('');
+ }
 
     async function simpanRekapCloud(silent = false) {
       const mAktif = getMapelAktif();
