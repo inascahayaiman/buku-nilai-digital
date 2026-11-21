@@ -3048,6 +3048,15 @@
     // HALAMAN 8: PENGATURAN LENGKAP
     // =========================================================================
     function renderHalamanPengaturan() {
+      if (!Array.isArray(configGlobal.mapels) || configGlobal.mapels.length === 0) {
+        configGlobal.mapels = [{
+          id: "MAPEL_DEFAULT",
+          nama: "Pendidikan Agama Islam dan Budi Pekerti",
+          kktp: 75,
+          bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30,
+          babsByKelas: {}
+        }];
+      }
       const g = configGlobal.guru || {};
       const iden = configGlobal.identitas || {};
       const r = configGlobal.rubrik || {};
