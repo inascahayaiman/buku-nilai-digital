@@ -848,6 +848,7 @@
            </div>
          </div>
         </div>
+       </div>
      </div>
 
       <!-- =================================================================== -->
@@ -3047,7 +3048,7 @@
     // =========================================================================
     // HALAMAN 8: PENGATURAN LENGKAP
     // =========================================================================
-    function renderHalamanPengaturan() {
+    function renderHalamanPengaturan(pertahankanPilihanMapel = false) {
       if (!Array.isArray(configGlobal.mapels) || configGlobal.mapels.length === 0) {
         configGlobal.mapels = [{
           id: "MAPEL_DEFAULT",
@@ -3093,7 +3094,9 @@
       document.getElementById('set-sek-sem').value = iden.semester || "Ganjil";
 
       // Mapel & Rubrik
-      mapelPengaturanId = mapelAktifId;
+      if (!pertahankanPilihanMapel || !configGlobal.mapels.some(m => m.id === mapelPengaturanId)) {
+        mapelPengaturanId = mapelAktifId;
+      }
       document.getElementById('set-pilih-mapel').innerHTML = configGlobal.mapels.map(m =>
         `<option value="${m.id}" ${m.id === mapelPengaturanId ? 'selected' : ''}>${m.nama}</option>`
       ).join('');
@@ -3127,13 +3130,21 @@
       const id = "MAPEL_" + Date.now();
       configGlobal.mapels.push({ id, nama: "Mata Pelajaran Baru", kktp: 75, bobotTugas: 70, bobotPSH: 30, bobotBAB: 70, bobotPSAS: 30, babsByKelas: {} });
       mapelPengaturanId = id;
-      renderHalamanPengaturan();
+      renderHalamanPengaturan(true);
+      showToast("Mapel baru ditambahkan. Silakan ubah nama lalu klik Simpan Mapel & Rubrik.", "info");
     }
     function hapusMapelPengaturan() {
       if (configGlobal.mapels.length <= 1) return showToast("Minimal harus ada 1 mata pelajaran!", "error");
+      if (!confirm("Hapus mata pelajaran yang dipilih ini?")) return;
       configGlobal.mapels = configGlobal.mapels.filter(x => x.id !== mapelPengaturanId);
       mapelPengaturanId = configGlobal.mapels[0].id;
-      renderHalamanPengaturan();
+      if (!configGlobal.mapels.some(x => x.id === mapelAktifId)) {
+        mapelAktifId = mapelPengaturanId;
+        sessionStorage.setItem("bnd_mapel_aktif", mapelAktifId);
+      }
+      renderHalamanPengaturan(true);
+      sinkronTopbar();
+      showToast("Mata pelajaran dihapus. Klik Simpan Mapel & Rubrik untuk memperbarui Cloud.", "info");
     }
 
     // Kompresi gambar agar ringan disimpan ke Google Sheets JSON
@@ -3209,14 +3220,22 @@
     }
 
     async function simpanPengaturanMapelDanRubrik() {
+      const bTugas = Number(document.getElementById('set-bobot-tugas').value) || 0;
+      const bPsh = Number(document.getElementById('set-bobot-psh').value) || 0;
+      const bBab = Number(document.getElementById('set-bobot-bab').value) || 0;
+      const bPsas = Number(document.getElementById('set-bobot-psas').value) || 0;
+
+      if (bTugas + bPsh !== 100) return showToast("Jumlah Bobot Tugas + Bobot PH harus tepat 100%!", "error");
+      if (bBab + bPsas !== 100) return showToast("Jumlah Bobot Rata TP + Bobot PSAS harus tepat 100%!", "error");
+
       const m = configGlobal.mapels.find(x => x.id === mapelPengaturanId);
       if (m) {
         m.nama = document.getElementById('set-nama-mapel').value.trim();
         m.kktp = Number(document.getElementById('set-kktp-mapel').value) || 75;
-        m.bobotTugas = Number(document.getElementById('set-bobot-tugas').value) || 0;
-        m.bobotPSH = Number(document.getElementById('set-bobot-psh').value) || 0;
-        m.bobotBAB = Number(document.getElementById('set-bobot-bab').value) || 0;
-        m.bobotPSAS = Number(document.getElementById('set-bobot-psas').value) || 0;
+        m.bobotTugas = bTugas;
+        m.bobotPSH = bPsh;
+        m.bobotBAB = bBab;
+        m.bobotPSAS = bPsas;
       }
       configGlobal.rubrik = {
         aMin: Number(document.getElementById('rubrik-a-min').value) || 90,
@@ -3229,6 +3248,7 @@
       };
       await apiPost({ action: "saveConfig", data: configGlobal });
       simpanCacheLokal();
+      renderHalamanPengaturan(true);
       sinkronTopbar();
       showToast("Pengaturan mapel & rubrik CP tersimpan!");
     }
