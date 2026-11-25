@@ -145,6 +145,10 @@
         <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0"></i>
         <span class="truncate">Rekap Nilai Leger</span>
       </button>
+      <button onclick="gantiMenu('Konversi Nilai')" id="btn-Konversi Nilai" class="menu-btn w-full text-left px-3 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5">
+        <i data-lucide="trending-up" class="w-4 h-4 shrink-0"></i>
+        <span class="truncate">Konversi Nilai</span>
+      </button>
       <button onclick="gantiMenu('Cetak Buku Nilai')" id="btn-Cetak Buku Nilai" class="menu-btn w-full text-left px-3 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5">
         <i data-lucide="printer" class="w-4 h-4 shrink-0"></i>
         <span class="truncate">Cetak Buku Nilai</span>
@@ -689,6 +693,156 @@
               <thead id="thead-leger"></thead>
               <tbody id="tbody-leger"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- HALAMAN: KONVERSI NILAI (NILAI AKHIR / NILAI RAPOR)                 -->
+      <!-- =================================================================== -->
+      <div id="halaman-Konversi Nilai" class="halaman hidden max-w-6xl mx-auto space-y-5">
+
+        <!-- Penunjuk langkah -->
+        <div id="konv-stepper" class="flex flex-wrap items-center gap-2 text-[11px] font-bold"></div>
+
+        <!-- LANGKAH 1: PILIH KELAS -->
+        <div id="konv-langkah-1" class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 space-y-4">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900 tracking-tight">Langkah 1 — Pilih Kelas</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Mata pelajaran: <strong id="konv-info-mapel" class="text-slate-800">-</strong> (ikuti pilihan mapel di bilah atas). Nilai yang dikonversi adalah <strong>Nilai Rapor</strong> dari menu Rekap Nilai Leger.</p>
+          </div>
+          <div id="konv-daftar-kelas" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+        </div>
+
+        <!-- LANGKAH 2: DATA NILAI + SEMESTER LALU + PENGATURAN -->
+        <div id="konv-langkah-2" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 space-y-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h2 id="konv-judul-kelas" class="text-base font-extrabold text-slate-900 tracking-tight">Langkah 2 — Data Nilai Kelas</h2>
+                <p id="konv-sub-kelas" class="text-xs text-slate-500 mt-0.5"></p>
+              </div>
+              <button onclick="konvKeLangkah(1)" class="h-9 px-3.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Ganti Kelas</button>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <label class="block">
+                <span class="block text-[11px] font-bold text-slate-600 mb-1">KKTP (nilai terendah hasil)</span>
+                <input id="konv-kktp" type="number" min="0" max="100" step="1" onchange="konvUbahParam('kktp', this)" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </label>
+              <label class="block">
+                <span class="block text-[11px] font-bold text-slate-600 mb-1">Nilai Tertinggi (hasil)</span>
+                <input id="konv-top" type="number" min="0" max="100" step="1" onchange="konvUbahParam('top', this)" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </label>
+              <label class="block">
+                <span class="block text-[11px] font-bold text-slate-600 mb-1">Kenaikan minimal dari sem. lalu</span>
+                <input id="konv-min-naik" type="number" min="0" max="20" step="1" onchange="konvUbahParam('minNaik', this)" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm font-bold bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </label>
+              <label class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 cursor-pointer select-none">
+                <input id="konv-naik" type="checkbox" onchange="konvUbahParam('naik', this)" class="w-4 h-4 accent-emerald-600">
+                <span class="text-[11px] font-bold text-emerald-900 leading-tight">Jaga agar tidak turun dari semester lalu</span>
+              </label>
+            </div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-[11px] text-slate-600 leading-relaxed">
+              <strong class="text-slate-800">Rumus konversi (sama dengan file Excel):</strong>
+              Hasil = KKTP + ((Nilai Asli − Nilai Asli Terkecil) ÷ (Nilai Asli Terbesar − Nilai Asli Terkecil)) × (Nilai Tertinggi − KKTP).
+              Nilai terkecil di kelas menjadi KKTP, nilai terbesar menjadi Nilai Tertinggi, lalu dibulatkan.
+              Bila opsi <em>"Jaga agar tidak turun"</em> aktif dan nilai semester lalu terisi, hasil minimal = nilai semester lalu + kenaikan minimal (maksimum 100).
+              Siswa yang nilai rapornya masih 0 (belum ada nilai) tidak ikut dikonversi.
+            </div>
+            <p id="konv-peringatan" class="hidden text-xs font-bold text-rose-600"></p>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="text-sm font-extrabold">Nilai Rapor &amp; Nilai Semester Sebelumnya</h3>
+                <p class="text-[11px] text-slate-300 mt-0.5">Isi kolom "Semester Lalu" sebagai patokan. Anda bisa menempel (paste) satu kolom nilai dari Excel langsung ke kolom pertama.</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="konvUnduhTemplatePrev()" class="h-9 px-3 rounded-xl text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">Template Excel</button>
+                <button onclick="document.getElementById('file-konv-prev').click()" class="h-9 px-3 rounded-xl text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">Impor Sem. Lalu (Excel)</button>
+                <input type="file" id="file-konv-prev" onchange="konvImporPrev(event)" accept=".xlsx, .xls" class="hidden" />
+                <button onclick="konvSimpan()" class="h-9 px-3 rounded-xl text-[11px] font-bold bg-emerald-600 text-white hover:bg-emerald-500">Simpan Pengaturan &amp; Nilai</button>
+              </div>
+            </div>
+            <div class="w-full overflow-x-auto table-scroll-x">
+              <table class="min-w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
+                <thead>
+                  <tr class="bg-slate-200 text-[11px] uppercase font-bold text-slate-800 text-center">
+                    <th class="px-2 py-2.5 border-r border-slate-300 w-10">No</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300">NISN</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 text-left">Nama Lengkap</th>
+                    <th class="px-2 py-2.5 border-r border-slate-300">L/P</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 bg-emerald-100 text-emerald-950">Nilai Rapor (Asli)</th>
+                    <th class="px-3 py-2.5 bg-amber-100 text-amber-950">Semester Lalu</th>
+                  </tr>
+                </thead>
+                <tbody id="konv-tbody-input"></tbody>
+              </table>
+            </div>
+            <div class="p-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50">
+              <p class="text-[11px] text-slate-500">Pengaturan &amp; nilai semester lalu disimpan per mapel, per kelas, per periode. Data nilai TP/PSAS tidak diubah.</p>
+              <button onclick="konvJalankan()" class="h-10 px-5 rounded-xl text-xs font-extrabold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition">Konversi Nilai &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANGKAH 3: HASIL, GRAFIK, UNDUH -->
+        <div id="konv-langkah-3" class="hidden space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0">
+              <h2 id="konv-judul-hasil" class="text-base font-extrabold text-slate-900 tracking-tight">Langkah 3 — Hasil Konversi</h2>
+              <p id="konv-sub-hasil" class="text-xs text-slate-500 mt-0.5"></p>
+            </div>
+            <button onclick="konvKeLangkah(2)" class="h-9 px-3.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">&larr; Ubah Pengaturan / Sem. Lalu</button>
+          </div>
+
+          <div id="konv-stat" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-sm font-extrabold text-slate-900">Grafik Perbandingan per Siswa</h3>
+              <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold">
+                <span class="flex items-center gap-1.5 text-slate-500"><span class="w-3 h-0.5 bg-slate-400 inline-block"></span> Semester Lalu</span>
+                <span class="flex items-center gap-1.5 text-amber-700"><span class="w-3 h-0.5 bg-amber-600 inline-block"></span> Nilai Asli</span>
+                <span class="flex items-center gap-1.5 text-emerald-700"><span class="w-3 h-0.5 bg-emerald-600 inline-block"></span> Hasil Konversi</span>
+              </div>
+            </div>
+            <div id="konv-grafik" class="w-full overflow-x-auto"></div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="p-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+              <h3 class="text-sm font-extrabold">Tabel Hasil Konversi</h3>
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="konv-isi-unduh" class="h-9 bg-slate-800 border border-slate-700 text-slate-100 px-3 rounded-xl text-[11px] font-bold focus:outline-none">
+                  <option value="hasil">Unduh: Hasil Konversi (lengkap)</option>
+                  <option value="asli">Unduh: Nilai Rapor Asli saja</option>
+                </select>
+                <button onclick="konvUnduhPDF()" class="h-9 px-4 rounded-xl text-[11px] font-bold bg-rose-600 text-white hover:bg-rose-500">Unduh PDF</button>
+                <button onclick="konvUnduhExcel()" class="h-9 px-4 rounded-xl text-[11px] font-bold bg-indigo-600 text-white hover:bg-indigo-500">Unduh Excel</button>
+              </div>
+            </div>
+            <div class="w-full overflow-x-auto table-scroll-x">
+              <table class="min-w-full text-left border-collapse text-xs tabular-nums whitespace-nowrap">
+                <thead>
+                  <tr class="bg-slate-200 text-[11px] uppercase font-bold text-slate-800 text-center">
+                    <th class="px-2 py-2.5 border-r border-slate-300 w-10">No</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300">NISN</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 text-left">Nama Lengkap</th>
+                    <th class="px-2 py-2.5 border-r border-slate-300">L/P</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 bg-slate-100">Sem. Lalu</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 bg-amber-100 text-amber-950">Nilai Asli</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 bg-emerald-700 text-white">Hasil Konversi</th>
+                    <th class="px-3 py-2.5 border-r border-slate-300 bg-indigo-700 text-white">Predikat</th>
+                    <th class="px-3 py-2.5">Perubahan vs Sem. Lalu</th>
+                  </tr>
+                </thead>
+                <tbody id="konv-tbody-hasil"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1333,6 +1487,7 @@
       "Input Nilai TP": "Input nilai formatif tugas & penilaian harian (PH) per Tujuan Pembelajaran",
       "Input Nilai PSAS": "Penilaian Sumatif Akhir Semester untuk kalkulasi nilai rapor",
       "Rekap Nilai Leger": "Leger lengkap dengan Predikat dan Deskripsi Capaian Pembelajaran otomatis",
+      "Konversi Nilai": "Konversi nilai rapor secara adil berdasarkan KKTP, dengan patokan nilai semester sebelumnya",
       "Cetak Buku Nilai": "Cetak cover, daftar nilai, pengaturan margin kertas, serta ekspor PDF, Excel & Word",
       "Pengaturan": "Profil guru, konfigurasi satuan pendidikan, rubrik CP, keamanan akun & arsip"
     };
@@ -1575,6 +1730,7 @@
       if (namaMenu === 'Input Nilai TP') renderHalamanInputTP();
       if (namaMenu === 'Input Nilai PSAS') renderHalamanPSAS();
       if (namaMenu === 'Rekap Nilai Leger') renderHalamanLeger();
+      if (namaMenu === 'Konversi Nilai') renderHalamanKonversi();
       if (namaMenu === 'Cetak Buku Nilai') renderHalamanCetakKirim();
       if (namaMenu === 'Pengaturan') renderHalamanPengaturan();
       lucide.createIcons();
@@ -4098,6 +4254,687 @@
         }
       } catch (e) { showToast("Gagal terhubung ke Cloud", "error"); }
       btn.innerText = "Hapus Sheet Tidak Terpakai di Spreadsheet"; btn.disabled = false;
+    }
+
+    // =========================================================================
+    // MENU BARU: KONVERSI NILAI (NILAI AKHIR / NILAI RAPOR)
+    // Berdiri sendiri: hanya MEMBACA nilai rapor dari hitungRekapSiswa().
+    // Yang disimpan hanya pengaturan konversi + nilai semester lalu di
+    // configGlobal.konversi (ikut tersimpan lewat aksi saveConfig yang sudah ada).
+    // =========================================================================
+    let konvKelas = "";
+    let konvLangkah = 1;
+
+    function konvEsc(t) {
+      return String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function konvNormNisn(v) { return String(v ?? "").trim().replace(/^0+/, ""); }
+    function konvNamaFile(t) { return String(t || "").replace(/[^a-zA-Z0-9]/g, "_"); }
+
+    // Penyimpanan: configGlobal.konversi = { _periode, data: { [mapelId]: { [kelas]: {...} } } }
+    function konvStore() {
+      if (!configGlobal.konversi || typeof configGlobal.konversi !== "object") configGlobal.konversi = { _periode: periodeAktifId, data: {} };
+      const k = configGlobal.konversi;
+      if (!k.data || typeof k.data !== "object") k.data = {};
+      // Periode baru menyalin konfigurasi periode lama: nilai "semester lalu" milik periode lain dikosongkan
+      if (k._periode !== periodeAktifId) {
+        Object.keys(k.data).forEach(m => Object.keys(k.data[m]).forEach(kl => { k.data[m][kl].prev = {}; }));
+        k._periode = periodeAktifId;
+      }
+      return k;
+    }
+
+    function konvCfg(kelas) {
+      const st = konvStore();
+      const mId = getMapelAktif().id;
+      if (!st.data[mId]) st.data[mId] = {};
+      if (!st.data[mId][kelas]) st.data[mId][kelas] = { kktp: getKKTPAktif(), top: 95, naik: true, minNaik: 1, prev: {} };
+      const c = st.data[mId][kelas];
+      if (!c.prev || typeof c.prev !== "object") c.prev = {};
+      return c;
+    }
+
+    // Inti perhitungan (rumus sama dengan file Excel "Aplikasi Konversi Nilai")
+    function konvHitung(kelas) {
+      const cfg = konvCfg(kelas);
+      const kktp = Number(cfg.kktp), top = Number(cfg.top);
+      const minNaik = Math.max(0, Number(cfg.minNaik) || 0);
+      const siswa = dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kelas));
+      const rows = siswa.map(s => {
+        const asli = hitungRekapSiswa(s.NISN, s.ID_Kelas).nilaiRapor;
+        const pv = cfg.prev[konvNormNisn(s.NISN)];
+        const prev = (pv === "" || pv === null || pv === undefined || isNaN(Number(pv))) ? null : Number(pv);
+        return { s, asli, ada: asli > 0, prev, hasil: null, dinaikkan: false, predikat: "", selisih: null };
+      });
+      const aktif = rows.filter(r => r.ada);
+      const min = aktif.length ? Math.min(...aktif.map(r => r.asli)) : 0;
+      const max = aktif.length ? Math.max(...aktif.map(r => r.asli)) : 0;
+      const valid = isFinite(kktp) && isFinite(top) && top > kktp;
+      rows.forEach(r => {
+        if (!r.ada) return;
+        let h;
+        if (!valid || max === min) h = r.asli;
+        else h = kktp + ((r.asli - min) / (max - min)) * (top - kktp);
+        h = Math.round(h);
+        if (cfg.naik && r.prev !== null) {
+          const target = Math.min(100, Math.round(r.prev + minNaik));
+          if (h < target) { h = target; r.dinaikkan = true; }
+        }
+        r.hasil = h;
+        r.predikat = tentukanPredikat(h);
+        r.selisih = r.prev !== null ? h - r.prev : null;
+      });
+      return { cfg, rows, min, max, valid, kktp, top, minNaik, seragam: aktif.length > 0 && max === min };
+    }
+
+    function konvRata(arr) {
+      const a = arr.filter(v => v !== null && v !== undefined && !isNaN(v));
+      return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Navigasi langkah
+    // -------------------------------------------------------------------------
+    function konvKeLangkah(n) {
+      if (n >= 2 && !konvKelas) return;
+      konvLangkah = n;
+      renderHalamanKonversi();
+      window.scrollTo(0, 0);
+      const main = document.querySelector('main'); if (main) main.scrollTop = 0;
+    }
+
+    function konvPilihKelas(idx) {
+      const list = getSemuaKelasUnik();
+      if (!list[idx]) return;
+      konvKelas = String(list[idx]);
+      konvKeLangkah(2);
+    }
+
+    function konvJalankan() {
+      const hit = konvHitung(konvKelas);
+      if (!hit.valid) return showToast("Nilai Tertinggi harus lebih besar dari KKTP.", "error");
+      if (!hit.rows.some(r => r.ada)) return showToast("Belum ada nilai rapor di kelas ini. Isi nilai TP & PSAS terlebih dulu.", "error");
+      konvKeLangkah(3);
+    }
+
+    function konvRenderStepper() {
+      const langkah = [
+        { n: 1, t: "Pilih Kelas" },
+        { n: 2, t: "Data Nilai & Semester Lalu" },
+        { n: 3, t: "Hasil Konversi & Unduh" }
+      ];
+      document.getElementById('konv-stepper').innerHTML = langkah.map((l, i) => {
+        const aktif = konvLangkah === l.n;
+        const bisa = l.n === 1 || (l.n === 2 && konvKelas) || (l.n === 3 && konvKelas && konvLangkah === 3);
+        const cls = aktif ? "bg-emerald-600 text-white" : (bisa ? "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 cursor-pointer" : "bg-slate-100 text-slate-400 cursor-default");
+        return `${i > 0 ? '<span class="text-slate-300">›</span>' : ''}
+          <button ${bisa ? `onclick="konvKeLangkah(${l.n})"` : 'disabled'} class="px-3 py-1.5 rounded-full flex items-center gap-1.5 transition ${cls}">
+            <span class="w-4 h-4 rounded-full ${aktif ? 'bg-white/25' : 'bg-slate-200 text-slate-600'} text-[10px] flex items-center justify-center">${l.n}</span>${l.t}
+          </button>`;
+      }).join('');
+    }
+
+    // -------------------------------------------------------------------------
+    // Render halaman
+    // -------------------------------------------------------------------------
+    function renderHalamanKonversi() {
+      const kelasList = getSemuaKelasUnik();
+      if (konvKelas && !kelasList.map(String).includes(String(konvKelas))) { konvKelas = ""; konvLangkah = 1; }
+      if (!konvKelas) konvLangkah = 1;
+
+      document.getElementById('konv-info-mapel').innerText = getMapelAktif().nama;
+      konvRenderStepper();
+      [1, 2, 3].forEach(n => document.getElementById('konv-langkah-' + n).classList.toggle('hidden', konvLangkah !== n));
+
+      if (konvLangkah === 1) konvRenderPilihKelas(kelasList);
+      if (konvLangkah === 2) konvRenderInput();
+      if (konvLangkah === 3) konvRenderHasil();
+    }
+
+    function konvRenderPilihKelas(kelasList) {
+      const box = document.getElementById('konv-daftar-kelas');
+      if (kelasList.length === 0) {
+        box.innerHTML = `<div class="col-span-full p-6 text-center text-xs font-bold text-slate-500">Belum ada data kelas/siswa. Tambahkan di menu Data Siswa.</div>`;
+        return;
+      }
+      box.innerHTML = kelasList.map((k, idx) => {
+        const siswa = dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(k));
+        const berNilai = siswa.filter(s => hitungRekapSiswa(s.NISN, s.ID_Kelas).nilaiRapor > 0).length;
+        const meta = (configGlobal.kelasMeta || {})[k] || {};
+        return `<button onclick="konvPilihKelas(${idx})" class="text-left p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-400 transition group">
+          <div class="text-lg font-extrabold text-slate-900 group-hover:text-emerald-800">Kelas ${konvEsc(k)}</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">${konvEsc(meta.fase || "")}</div>
+          <div class="mt-2 text-[11px] font-bold text-slate-700">${siswa.length} siswa</div>
+          <div class="text-[11px] font-semibold ${berNilai === siswa.length && siswa.length ? 'text-emerald-700' : 'text-amber-700'}">${berNilai} sudah bernilai rapor</div>
+        </button>`;
+      }).join('');
+    }
+
+    function konvRenderInput() {
+      const hit = konvHitung(konvKelas);
+      const cfg = hit.cfg;
+      const iden = configGlobal.identitas || {};
+      document.getElementById('konv-judul-kelas').innerText = `Langkah 2 — Data Nilai Kelas ${konvKelas}`;
+      document.getElementById('konv-sub-kelas').innerText = `${getMapelAktif().nama} • ${iden.tahunAjaran || "-"} (${iden.semester || "-"}) • ${hit.rows.length} siswa`;
+      document.getElementById('konv-kktp').value = cfg.kktp;
+      document.getElementById('konv-top').value = cfg.top;
+      document.getElementById('konv-min-naik').value = cfg.minNaik;
+      document.getElementById('konv-naik').checked = !!cfg.naik;
+      konvTampilPeringatan(hit);
+
+      const tb = document.getElementById('konv-tbody-input');
+      if (hit.rows.length === 0) {
+        tb.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-xs font-bold text-slate-500">Tidak ada siswa di kelas ini.</td></tr>`;
+        return;
+      }
+      tb.innerHTML = hit.rows.map((r, i) => {
+        const pv = cfg.prev[konvNormNisn(r.s.NISN)];
+        return `<tr class="border-b border-slate-200 hover:bg-slate-50">
+          <td class="py-2 px-2 border-r text-center text-slate-400">${i + 1}</td>
+          <td class="py-2 px-3 border-r text-slate-600">${konvEsc(r.s.NISN)}</td>
+          <td class="py-2 px-3 border-r font-semibold text-slate-900">${konvEsc(r.s.Nama_Lengkap)}</td>
+          <td class="py-2 px-2 border-r text-center">${konvEsc(r.s["L/P"])}</td>
+          <td class="py-2 px-3 border-r text-center font-extrabold ${r.ada ? (isDiBawahKKTP(r.asli) ? 'text-rose-600 bg-rose-50' : 'text-emerald-900 bg-emerald-50/60') : 'text-slate-400'}">${r.ada ? r.asli : '-'}</td>
+          <td class="py-1.5 px-3 text-center">
+            <input type="number" min="0" max="100" step="any" inputmode="decimal"
+              class="konv-input-prev w-24 h-8 text-center border border-slate-300 rounded-lg text-xs font-bold bg-white focus:border-amber-500 focus:outline-none"
+              data-nisn="${konvEsc(konvNormNisn(r.s.NISN))}" value="${pv === undefined || pv === null ? '' : konvEsc(pv)}"
+              oninput="konvUbahPrev(this)" onpaste="konvPaste(event, this)" placeholder="-">
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function konvTampilPeringatan(hit) {
+      const el = document.getElementById('konv-peringatan');
+      let pesan = "";
+      if (!hit.valid) pesan = "Nilai Tertinggi harus lebih besar dari KKTP agar konversi bisa dijalankan.";
+      else if (hit.seragam) pesan = "Semua nilai asli di kelas ini sama, sehingga rumus tidak bisa meregangkan nilai (nilai dipertahankan).";
+      el.innerText = pesan;
+      el.classList.toggle('hidden', !pesan);
+    }
+
+    // -------------------------------------------------------------------------
+    // Perubahan input
+    // -------------------------------------------------------------------------
+    function konvUbahParam(kunci, el) {
+      const cfg = konvCfg(konvKelas);
+      if (kunci === 'naik') cfg.naik = !!el.checked;
+      else {
+        let v = Number(el.value);
+        if (isNaN(v)) v = kunci === 'kktp' ? getKKTPAktif() : (kunci === 'top' ? 95 : 1);
+        cfg[kunci] = Math.max(0, Math.min(100, v));
+        el.value = cfg[kunci];
+      }
+      tandaiBelumDisimpan(true);
+      konvTampilPeringatan(konvHitung(konvKelas));
+    }
+
+    function konvUbahPrev(el) {
+      const cfg = konvCfg(konvKelas);
+      const nisn = el.dataset.nisn;
+      const raw = String(el.value).trim().replace(",", ".");
+      let bad = false;
+      if (raw === "") delete cfg.prev[nisn];
+      else if (isNaN(Number(raw)) || Number(raw) < 0 || Number(raw) > 100) bad = true;
+      else cfg.prev[nisn] = Number(raw);
+      el.classList.toggle('border-rose-500', bad);
+      el.classList.toggle('bg-rose-50', bad);
+      tandaiBelumDisimpan(true);
+    }
+
+    function konvPaste(e, el) {
+      const txt = (e.clipboardData || window.clipboardData).getData('text') || "";
+      if (!/[\n\r]/.test(txt.trim())) return; // satu nilai: perilaku paste biasa
+      e.preventDefault();
+      const vals = txt.trim().split(/\r?\n/).map(l => { const c = l.split('\t'); return String(c[c.length - 1]).trim().replace(",", "."); });
+      const inputs = [...document.querySelectorAll('.konv-input-prev')];
+      let i = inputs.indexOf(el);
+      let n = 0;
+      vals.forEach(v => { if (inputs[i]) { inputs[i].value = v; konvUbahPrev(inputs[i]); n++; } i++; });
+      showToast(`${n} nilai ditempel. Klik "Simpan" agar tersimpan permanen.`, "info");
+    }
+
+    async function konvSimpan() {
+      try {
+        await apiPost({ action: "saveConfig", data: configGlobal });
+        simpanCacheLokal();
+        tandaiBelumDisimpan(false);
+        showToast("Pengaturan konversi & nilai semester lalu tersimpan!");
+      } catch (e) { /* pesan error sudah ditampilkan oleh apiPost */ }
+    }
+
+    // -------------------------------------------------------------------------
+    // Template & impor nilai semester lalu (Excel)
+    // -------------------------------------------------------------------------
+    function konvUnduhTemplatePrev() {
+      if (!konvKelas) return;
+      const cfg = konvCfg(konvKelas);
+      const rows = dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(konvKelas)).map(s => ({
+        NISN: String(s.NISN), Nama_Lengkap: s.Nama_Lengkap, Nilai_Semester_Lalu: cfg.prev[konvNormNisn(s.NISN)] ?? ""
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ NISN: "", Nama_Lengkap: "", Nilai_Semester_Lalu: "" }]);
+      ws['!cols'] = [{ wch: 16 }, { wch: 34 }, { wch: 20 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Semester_Lalu");
+      XLSX.writeFile(wb, `Template_Semester_Lalu_${konvNamaFile(konvKelas)}.xlsx`);
+    }
+
+    function konvImporPrev(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
+          const aoa = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: false, defval: "" });
+          if (!aoa.length) throw new Error("File kosong");
+          // Cari kolom NISN & Nilai dari header; jika tidak ada, pakai kolom A (NISN) dan kolom terakhir (nilai)
+          let cNisn = 0, cNilai = -1, mulai = 0;
+          const head = aoa[0].map(h => String(h).toLowerCase());
+          const iN = head.findIndex(h => h.includes("nisn"));
+          const iV = head.findIndex(h => h.includes("nilai"));
+          if (iN >= 0 && iV >= 0) { cNisn = iN; cNilai = iV; mulai = 1; }
+          const cfg = konvCfg(konvKelas);
+          const valid = new Set(dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(konvKelas)).map(s => konvNormNisn(s.NISN)));
+          let cocok = 0, lewat = 0;
+          for (let i = mulai; i < aoa.length; i++) {
+            const row = aoa[i];
+            const nisn = konvNormNisn(row[cNisn]);
+            const v = String(row[cNilai >= 0 ? cNilai : row.length - 1]).trim().replace(",", ".");
+            if (!nisn || v === "" || isNaN(Number(v))) continue;
+            if (!valid.has(nisn) || Number(v) < 0 || Number(v) > 100) { lewat++; continue; }
+            cfg.prev[nisn] = Number(v); cocok++;
+          }
+          tandaiBelumDisimpan(true);
+          konvRenderInput();
+          showToast(`${cocok} nilai semester lalu diimpor${lewat ? `, ${lewat} baris dilewati (NISN tidak ada di kelas ini / nilai tidak valid)` : ""}.`, lewat ? "info" : "success");
+        } catch (err) {
+          showToast("Gagal membaca file Excel: " + (err.message || err), "error");
+        }
+        e.target.value = "";
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // -------------------------------------------------------------------------
+    // Hasil: statistik, grafik, tabel
+    // -------------------------------------------------------------------------
+    function konvRenderHasil() {
+      const hit = konvHitung(konvKelas);
+      const iden = configGlobal.identitas || {};
+      document.getElementById('konv-judul-hasil').innerText = `Langkah 3 — Hasil Konversi Kelas ${konvKelas}`;
+      document.getElementById('konv-sub-hasil').innerText =
+        `${getMapelAktif().nama} • KKTP ${hit.kktp} • Tertinggi ${hit.top} • Nilai asli terkecil ${hit.min} → ${hit.kktp}, terbesar ${hit.max} → ${hit.top}` +
+        (hit.cfg.naik ? ` • Tidak turun dari sem. lalu (+${hit.minNaik})` : "");
+
+      const rows = hit.rows;
+      const rLalu = konvRata(rows.map(r => r.prev));
+      const rAsli = konvRata(rows.filter(r => r.ada).map(r => r.asli));
+      const rHasil = konvRata(rows.map(r => r.hasil));
+      const adaPrev = rows.filter(r => r.prev !== null && r.hasil !== null);
+      const naik = adaPrev.filter(r => r.hasil > r.prev).length;
+      const tetap = adaPrev.filter(r => r.hasil === r.prev).length;
+      const turun = adaPrev.filter(r => r.hasil < r.prev).length;
+      const f = v => v === null ? "-" : v.toFixed(1);
+      const kartu = (judul, nilai, warna, sub = "") => `<div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="text-[11px] font-bold ${warna} uppercase">${judul}</div>
+        <div class="text-2xl font-extrabold text-slate-900 mt-1 tabular-nums">${nilai}</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">${sub}</div></div>`;
+      document.getElementById('konv-stat').innerHTML =
+        kartu("Rata-rata Sem. Lalu", f(rLalu), "text-slate-500", adaPrev.length ? `${adaPrev.length} siswa terisi` : "belum diisi") +
+        kartu("Rata-rata Nilai Asli", f(rAsli), "text-amber-600") +
+        kartu("Rata-rata Hasil", f(rHasil), "text-emerald-600", rLalu !== null && rHasil !== null ? `${rHasil - rLalu >= 0 ? "▲" : "▼"} ${Math.abs(rHasil - rLalu).toFixed(1)} dari sem. lalu` : "") +
+        kartu("Siswa Naik", `${naik}`, "text-emerald-600", `${tetap} tetap`) +
+        kartu("Siswa Turun", `${turun}`, turun ? "text-rose-600" : "text-slate-500", "dibanding sem. lalu");
+
+      document.getElementById('konv-grafik').innerHTML = konvGrafikSVG(rows);
+
+      document.getElementById('konv-tbody-hasil').innerHTML = rows.map((r, i) => {
+        let ket = `<span class="text-slate-400">-</span>`;
+        if (r.selisih !== null) {
+          if (r.selisih > 0) ket = `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">▲ +${r.selisih}</span>`;
+          else if (r.selisih < 0) ket = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold">▼ ${r.selisih}</span>`;
+          else ket = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">= tetap</span>`;
+          if (r.dinaikkan) ket += ` <span class="text-[10px] text-amber-700 font-bold" title="Dinaikkan ke batas minimal dari nilai semester lalu">(dikerek)</span>`;
+        }
+        return `<tr class="border-b border-slate-200 hover:bg-slate-50">
+          <td class="py-2 px-2 border-r text-center text-slate-400">${i + 1}</td>
+          <td class="py-2 px-3 border-r text-slate-600">${konvEsc(r.s.NISN)}</td>
+          <td class="py-2 px-3 border-r font-semibold text-slate-900">${konvEsc(r.s.Nama_Lengkap)}</td>
+          <td class="py-2 px-2 border-r text-center">${konvEsc(r.s["L/P"])}</td>
+          <td class="py-2 px-3 border-r text-center">${r.prev !== null ? r.prev : '-'}</td>
+          <td class="py-2 px-3 border-r text-center ${r.ada && isDiBawahKKTP(r.asli) ? 'text-rose-600 font-bold' : ''}">${r.ada ? r.asli : '-'}</td>
+          <td class="py-2 px-3 border-r text-center font-extrabold text-emerald-900 bg-emerald-50">${r.hasil !== null ? r.hasil : '-'}</td>
+          <td class="py-2 px-3 border-r text-center font-extrabold text-indigo-800 bg-indigo-50/60">${r.hasil !== null ? r.predikat : '-'}</td>
+          <td class="py-2 px-3 text-[11px]">${ket}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function konvSkalaGrafik(rows) {
+      const all = rows.flatMap(r => [r.prev, r.ada ? r.asli : null, r.hasil]).filter(v => v !== null && v !== undefined);
+      if (!all.length) return null;
+      let ymin = Math.max(0, Math.floor((Math.min(...all) - 5) / 5) * 5);
+      let ymax = Math.min(100, Math.ceil((Math.max(...all) + 3) / 5) * 5);
+      if (ymax <= ymin) ymax = ymin + 10;
+      const step = (ymax - ymin) > 40 ? 10 : 5;
+      ymin = Math.max(0, Math.floor(ymin / step) * step);
+      ymax = Math.min(100, Math.ceil(ymax / step) * step);
+      return { ymin, ymax, step };
+    }
+
+    function konvGrafikSVG(rows) {
+      const sk = konvSkalaGrafik(rows);
+      if (!sk || !rows.length) return `<p class="text-xs text-slate-500 p-4">Belum ada data untuk digambar.</p>`;
+      const W = 900, H = 300, L = 42, R = 16, T = 14, B = 40;
+      const n = rows.length;
+      const xs = i => L + (n <= 1 ? (W - L - R) / 2 : i * (W - L - R) / (n - 1));
+      const ys = v => T + (sk.ymax - v) / (sk.ymax - sk.ymin) * (H - T - B);
+      let g = "";
+      for (let v = sk.ymin; v <= sk.ymax; v += sk.step) {
+        g += `<line x1="${L}" x2="${W - R}" y1="${ys(v)}" y2="${ys(v)}" stroke="#e2e8f0" stroke-width="1"/><text x="${L - 6}" y="${ys(v) + 3}" text-anchor="end" font-size="10" fill="#64748b">${v}</text>`;
+      }
+      const lompat = Math.ceil(n / 24);
+      rows.forEach((r, i) => {
+        if (i % lompat === 0) g += `<text x="${xs(i)}" y="${H - B + 14}" text-anchor="middle" font-size="10" fill="#64748b">${i + 1}</text>`;
+      });
+      g += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#94a3b8">Nomor urut siswa</text>`;
+
+      const seri = [
+        { nama: "Semester Lalu", warna: "#94a3b8", dash: "5 4", val: r => r.prev },
+        { nama: "Nilai Asli", warna: "#d97706", dash: "", val: r => (r.ada ? r.asli : null) },
+        { nama: "Hasil Konversi", warna: "#059669", dash: "", val: r => r.hasil }
+      ];
+      seri.forEach(sr => {
+        let d = "", putus = true;
+        rows.forEach((r, i) => {
+          const v = sr.val(r);
+          if (v === null || v === undefined) { putus = true; return; }
+          d += `${putus ? "M" : "L"}${xs(i).toFixed(1)} ${ys(v).toFixed(1)} `;
+          putus = false;
+        });
+        if (d) g += `<path d="${d}" fill="none" stroke="${sr.warna}" stroke-width="2" ${sr.dash ? `stroke-dasharray="${sr.dash}"` : ""} stroke-linejoin="round"/>`;
+        rows.forEach((r, i) => {
+          const v = sr.val(r);
+          if (v === null || v === undefined) return;
+          g += `<circle cx="${xs(i).toFixed(1)}" cy="${ys(v).toFixed(1)}" r="3" fill="${sr.warna}"><title>${konvEsc(r.s.Nama_Lengkap)} — ${sr.nama}: ${v}</title></circle>`;
+        });
+      });
+      return `<svg viewBox="0 0 ${W} ${H}" class="w-full min-w-[640px] h-auto" role="img" aria-label="Grafik perbandingan nilai semester lalu, nilai asli, dan hasil konversi">${g}</svg>`;
+    }
+
+    // -------------------------------------------------------------------------
+    // Unduh PDF
+    // -------------------------------------------------------------------------
+    function konvGrafikPDF(doc, rows, x, y, w, h) {
+      const sk = konvSkalaGrafik(rows);
+      if (!sk || !rows.length) return;
+      const n = rows.length;
+      const px = i => x + 10 + (n <= 1 ? (w - 14) / 2 : i * (w - 14) / (n - 1));
+      const py = v => y + (sk.ymax - v) / (sk.ymax - sk.ymin) * (h - 10);
+      doc.setLineWidth(0.15); doc.setDrawColor(203, 213, 225);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(100, 116, 139);
+      for (let v = sk.ymin; v <= sk.ymax; v += sk.step) {
+        doc.line(x + 10, py(v), x + w, py(v));
+        doc.text(String(v), x + 8, py(v) + 1, { align: "right" });
+      }
+      const lompat = Math.ceil(n / 30);
+      rows.forEach((r, i) => { if (i % lompat === 0) doc.text(String(i + 1), px(i), y + h - 3, { align: "center" }); });
+      doc.text("Nomor urut siswa", x + 10 + (w - 10) / 2, y + h + 1, { align: "center" });
+      const seri = [
+        { c: [148, 163, 184], val: r => r.prev },
+        { c: [217, 119, 6], val: r => (r.ada ? r.asli : null) },
+        { c: [5, 150, 105], val: r => r.hasil }
+      ];
+      seri.forEach(sr => {
+        doc.setDrawColor(...sr.c); doc.setFillColor(...sr.c); doc.setLineWidth(0.5);
+        let last = null;
+        rows.forEach((r, i) => {
+          const v = sr.val(r);
+          if (v === null || v === undefined) { last = null; return; }
+          if (last) doc.line(last[0], last[1], px(i), py(v));
+          doc.circle(px(i), py(v), 0.6, "F");
+          last = [px(i), py(v)];
+        });
+      });
+      // Legenda
+      const lg = [["Semester Lalu", [148, 163, 184]], ["Nilai Asli", [217, 119, 6]], ["Hasil Konversi", [5, 150, 105]]];
+      let lx = x + 10;
+      lg.forEach(([t, c]) => {
+        doc.setDrawColor(...c); doc.setLineWidth(0.7); doc.line(lx, y - 4, lx + 6, y - 4);
+        doc.setTextColor(51, 65, 85); doc.text(t, lx + 8, y - 3);
+        lx += 38;
+      });
+    }
+
+    function konvUnduhPDF() {
+      if (!konvKelas) return;
+      const hit = konvHitung(konvKelas);
+      if (!hit.rows.length) return showToast("Tidak ada siswa di kelas ini.", "error");
+      const mode = document.getElementById('konv-isi-unduh')?.value || "hasil";
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const opsi = { mAtas: 12, mBawah: 12, mKiri: 12, mKanan: 12, tampilHal: true, halAwal: 1 };
+      const iden = configGlobal.identitas || {};
+      const mAktif = getMapelAktif();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const usableW = pageWidth - opsi.mKiri - opsi.mKanan;
+
+      const judul = mode === "hasil"
+        ? `KONVERSI NILAI RAPOR — ${mAktif.nama.toUpperCase()}`
+        : `DAFTAR NILAI RAPOR — ${mAktif.nama.toUpperCase()}`;
+      const sub = `Kelas: ${konvKelas}  |  Tahun Ajaran: ${iden.tahunAjaran || "-"} (${iden.semester || "-"})  |  KKTP: ${mode === "hasil" ? hit.kktp : getKKTPAktif()}` +
+        (mode === "hasil" ? `  |  Nilai Tertinggi: ${hit.top}  |  Asli terkecil ${hit.min}, terbesar ${hit.max}` : "");
+      const startY = gambarHeaderPDF(doc, opsi, judul, sub);
+
+      let head, body, colStyles, idxNilai;
+      if (mode === "hasil") {
+        head = [["No", "NISN", "Nama Lengkap", "L/P", "Sem. Lalu", "Nilai Asli", "Hasil Konversi", "Pred.", "Perubahan"]];
+        body = hit.rows.map((r, i) => [
+          i + 1, r.s.NISN, r.s.Nama_Lengkap, r.s["L/P"],
+          r.prev !== null ? r.prev : "-", r.ada ? r.asli : "-", r.hasil !== null ? r.hasil : "-", r.hasil !== null ? r.predikat : "-",
+          r.selisih === null ? "-" : (r.selisih > 0 ? `+${r.selisih}` : (r.selisih < 0 ? `${r.selisih}` : "tetap"))
+        ]);
+        colStyles = { 0: { cellWidth: 8 }, 1: { cellWidth: 25 }, 2: { halign: "left", cellWidth: usableW - (8 + 25 + 9 + 16 + 16 + 22 + 11 + 18) }, 3: { cellWidth: 9 }, 4: { cellWidth: 16 }, 5: { cellWidth: 16 }, 6: { cellWidth: 22, fontStyle: "bold" }, 7: { cellWidth: 11, fontStyle: "bold" }, 8: { cellWidth: 18 } };
+        idxNilai = [5, 6];
+      } else {
+        head = [["No", "NISN", "Nama Lengkap", "L/P", "Nilai Rapor", "Predikat"]];
+        body = hit.rows.map((r, i) => [i + 1, r.s.NISN, r.s.Nama_Lengkap, r.s["L/P"], r.ada ? r.asli : "-", r.ada ? tentukanPredikat(r.asli) : "-"]);
+        colStyles = { 0: { cellWidth: 9 }, 1: { cellWidth: 28 }, 2: { halign: "left", cellWidth: usableW - (9 + 28 + 10 + 24 + 22) }, 3: { cellWidth: 10 }, 4: { cellWidth: 24, fontStyle: "bold" }, 5: { cellWidth: 22, fontStyle: "bold" } };
+        idxNilai = [4];
+      }
+
+      doc.autoTable({
+        head, body, startY, tableWidth: usableW,
+        margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
+        theme: "grid",
+        styles: { fontSize: 8, cellPadding: 1.4, halign: "center", valign: "middle", lineColor: [203, 213, 225], lineWidth: 0.2 },
+        columnStyles: colStyles,
+        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+        didParseCell: function (data) {
+          if (data.section === "body" && idxNilai.includes(data.column.index) && isDiBawahKKTP(data.cell.raw)) {
+            data.cell.styles.textColor = [220, 38, 38];
+            data.cell.styles.fillColor = [254, 226, 226];
+            data.cell.styles.fontStyle = "bold";
+          }
+          if (data.section === "body" && mode === "hasil" && data.column.index === 8) {
+            const t = String(data.cell.raw);
+            if (t.startsWith("+")) data.cell.styles.textColor = [4, 120, 87];
+            else if (t.startsWith("-") && t.length > 1) data.cell.styles.textColor = [220, 38, 38];
+          }
+        },
+        didDrawPage: function () {
+          doc.setFontSize(7.5); doc.setTextColor(120);
+          doc.text(`Halaman ${doc.internal.getNumberOfPages()}`, pageWidth - opsi.mKanan, doc.internal.pageSize.getHeight() - 4, { align: "right" });
+        }
+      });
+
+      gambarPengesahanPDF(doc, opsi);
+
+      if (mode === "hasil") {
+        doc.addPage();
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(15, 23, 42);
+        doc.text("GRAFIK PERBANDINGAN NILAI", opsi.mKiri, opsi.mAtas + 4);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(71, 85, 105);
+        doc.text(`Kelas ${konvKelas} — ${mAktif.nama}`, opsi.mKiri, opsi.mAtas + 9);
+        konvGrafikPDF(doc, hit.rows, opsi.mKiri, opsi.mAtas + 24, usableW, 90);
+        const rLalu = konvRata(hit.rows.map(r => r.prev)), rAsli = konvRata(hit.rows.filter(r => r.ada).map(r => r.asli)), rHasil = konvRata(hit.rows.map(r => r.hasil));
+        const f = v => v === null ? "-" : v.toFixed(1);
+        doc.setFontSize(8.5); doc.setTextColor(15, 23, 42);
+        doc.text(`Rata-rata semester lalu: ${f(rLalu)}   |   Rata-rata nilai asli: ${f(rAsli)}   |   Rata-rata hasil konversi: ${f(rHasil)}`, opsi.mKiri, opsi.mAtas + 128);
+        doc.setFontSize(7.5); doc.setTextColor(100, 116, 139);
+        doc.text(`Rumus: Hasil = KKTP + ((Nilai - Terkecil) / (Terbesar - Terkecil)) x (Nilai Tertinggi - KKTP)${hit.cfg.naik ? "; minimal = nilai semester lalu + " + hit.minNaik : ""}.`, opsi.mKiri, opsi.mAtas + 134);
+      }
+
+      doc.save(`${mode === "hasil" ? "Konversi_Nilai" : "Nilai_Rapor"}_${konvNamaFile(konvKelas)}_${konvNamaFile(mAktif.nama)}.pdf`);
+    }
+
+    // -------------------------------------------------------------------------
+    // Unduh Excel (hasil memakai rumus hidup, sama seperti file Excel konversi)
+    // -------------------------------------------------------------------------
+    async function konvUnduhExcel() {
+      if (!konvKelas) return;
+      const hit = konvHitung(konvKelas);
+      if (!hit.rows.length) return showToast("Tidak ada siswa di kelas ini.", "error");
+      const mode = document.getElementById('konv-isi-unduh')?.value || "hasil";
+      const iden = configGlobal.identitas || {};
+      const guru = configGlobal.guru || {};
+      const mAktif = getMapelAktif();
+      const rub = configGlobal.rubrik || { aMin: 90, bMin: 80, cMin: 75 };
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet(mode === "hasil" ? "Konversi Nilai" : "Nilai Rapor");
+      const border = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } };
+      const hijau = { type: "pattern", pattern: "solid", fgColor: { argb: "FF065F46" } };
+      const gelap = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F172A" } };
+
+      const judul = mode === "hasil" ? "KONVERSI NILAI RAPOR" : "DAFTAR NILAI RAPOR";
+      ws.getCell("A1").value = `${(iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase()} — ${judul}`;
+      ws.getCell("A1").font = { bold: true, size: 13 };
+      ws.getCell("A2").value = `Mata Pelajaran: ${mAktif.nama} | Kelas: ${konvKelas} | Tahun Ajaran: ${iden.tahunAjaran || "-"} (${iden.semester || "-"})`;
+      ws.getCell("A2").font = { bold: true, size: 10 };
+
+      let headerRow, firstData, lastData, totalCols;
+
+      if (mode === "hasil") {
+        // Blok parameter (sel E4:E12) — dipakai oleh rumus kolom Hasil
+        const par = [
+          ["KKTP (nilai terendah hasil)", hit.kktp],
+          ["Nilai Tertinggi (hasil)", hit.top],
+          ["Nilai Asli Terkecil", null],
+          ["Nilai Asli Terbesar", null],
+          ["Kenaikan minimal dari semester lalu", hit.minNaik],
+          ["Jaga tidak turun dari sem. lalu (1 = ya, 0 = tidak)", hit.cfg.naik ? 1 : 0],
+          ["Batas predikat A (>=)", Number(rub.aMin)],
+          ["Batas predikat B (>=)", Number(rub.bMin)],
+          ["Batas predikat C (>=)", Number(rub.cMin)]
+        ];
+        par.forEach((p, i) => {
+          const r = 4 + i;
+          ws.mergeCells(r, 1, r, 4);
+          ws.getCell(r, 1).value = p[0];
+          ws.getCell(r, 1).font = { size: 9.5, bold: true };
+          if (p[1] !== null) ws.getCell(r, 5).value = p[1];
+          ws.getCell(r, 5).alignment = { horizontal: "center" };
+          ws.getCell(r, 5).font = { bold: true };
+          ws.getCell(r, 5).border = border;
+          if (i < 2 || i >= 4) ws.getCell(r, 5).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEF3C7" } };
+        });
+
+        headerRow = 14; firstData = 15; lastData = firstData + hit.rows.length - 1;
+        totalCols = 9;
+        const head = ws.getRow(headerRow);
+        head.values = ["No", "NISN", "Nama Lengkap", "L/P", "Semester Lalu", "Nilai Asli", "Hasil Konversi", "Predikat", "Selisih vs Sem. Lalu"];
+
+        ws.getCell("E6").value = { formula: `MIN(F${firstData}:F${lastData})`, result: hit.min };
+        ws.getCell("E7").value = { formula: `MAX(F${firstData}:F${lastData})`, result: hit.max };
+
+        hit.rows.forEach((r, i) => {
+          const n = firstData + i;
+          const inner = `ROUND(IF($E$7=$E$6,F${n},$E$4+((F${n}-$E$6)/($E$7-$E$6))*($E$5-$E$4)),0)`;
+          const fHasil = `IF(ISNUMBER(F${n}),IF(AND($E$9=1,ISNUMBER(E${n})),MAX(${inner},MIN(100,ROUND(E${n}+$E$8,0))),${inner}),"")`;
+          const row = ws.getRow(n);
+          row.getCell(1).value = i + 1;
+          row.getCell(2).value = String(r.s.NISN);
+          row.getCell(3).value = r.s.Nama_Lengkap;
+          row.getCell(4).value = r.s["L/P"];
+          row.getCell(5).value = r.prev !== null ? r.prev : null;
+          row.getCell(6).value = r.ada ? r.asli : null;
+          row.getCell(7).value = { formula: fHasil, result: r.hasil !== null ? r.hasil : "" };
+          row.getCell(8).value = { formula: `IF(G${n}="","",IF(G${n}>=$E$10,"A",IF(G${n}>=$E$11,"B",IF(G${n}>=$E$12,"C","D"))))`, result: r.hasil !== null ? r.predikat : "" };
+          row.getCell(9).value = { formula: `IF(AND(ISNUMBER(E${n}),ISNUMBER(G${n})),G${n}-E${n},"")`, result: r.selisih !== null ? r.selisih : "" };
+        });
+
+        // Baris rata-rata
+        const rr = lastData + 1;
+        ws.mergeCells(rr, 1, rr, 4);
+        ws.getCell(rr, 1).value = "Rata-rata";
+        ws.getCell(rr, 5).value = { formula: `IFERROR(AVERAGE(E${firstData}:E${lastData}),"")`, result: konvRata(hit.rows.map(r => r.prev)) ?? "" };
+        ws.getCell(rr, 6).value = { formula: `IFERROR(AVERAGE(F${firstData}:F${lastData}),"")`, result: konvRata(hit.rows.filter(r => r.ada).map(r => r.asli)) ?? "" };
+        ws.getCell(rr, 7).value = { formula: `IFERROR(AVERAGE(G${firstData}:G${lastData}),"")`, result: konvRata(hit.rows.map(r => r.hasil)) ?? "" };
+        for (let c = 1; c <= totalCols; c++) {
+          const cell = ws.getCell(rr, c);
+          cell.font = { bold: true, size: 9.5 };
+          cell.border = border;
+          cell.alignment = { horizontal: c === 1 ? "left" : "center" };
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } };
+          if (c >= 5 && c <= 7) cell.numFmt = "0.0";
+        }
+      } else {
+        headerRow = 4; firstData = 5; lastData = firstData + hit.rows.length - 1;
+        totalCols = 6;
+        ws.getRow(headerRow).values = ["No", "NISN", "Nama Lengkap", "L/P", "Nilai Rapor", "Predikat"];
+        hit.rows.forEach((r, i) => {
+          const row = ws.getRow(firstData + i);
+          row.values = [i + 1, String(r.s.NISN), r.s.Nama_Lengkap, r.s["L/P"], r.ada ? r.asli : "-", r.ada ? tentukanPredikat(r.asli) : "-"];
+        });
+      }
+
+      // Gaya header
+      ws.getRow(headerRow).height = 28;
+      for (let c = 1; c <= totalCols; c++) {
+        const cell = ws.getRow(headerRow).getCell(c);
+        const spesial = mode === "hasil" && c === 7;
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 9.5 };
+        cell.fill = spesial ? hijau : gelap;
+        cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+        cell.border = border;
+      }
+      // Gaya data
+      for (let n = firstData; n <= lastData; n++) {
+        for (let c = 1; c <= totalCols; c++) {
+          const cell = ws.getRow(n).getCell(c);
+          cell.border = border;
+          cell.font = { size: 9.5, bold: (mode === "hasil" ? (c === 7 || c === 8) : (c === 5 || c === 6)) };
+          cell.alignment = { vertical: "middle", horizontal: c === 3 ? "left" : "center" };
+        }
+        const rIdx = n - firstData;
+        const r = hit.rows[rIdx];
+        if (mode === "hasil") {
+          if (r.ada && isDiBawahKKTP(r.asli)) terapkanWarnaMerahExcel(ws.getRow(n).getCell(6), r.asli);
+          if (r.hasil !== null && isDiBawahKKTP(r.hasil)) terapkanWarnaMerahExcel(ws.getRow(n).getCell(7), r.hasil);
+        } else if (r.ada && isDiBawahKKTP(r.asli)) terapkanWarnaMerahExcel(ws.getRow(n).getCell(5), r.asli);
+      }
+
+      // Pengesahan
+      const base = lastData + (mode === "hasil" ? 3 : 2);
+      ws.getCell(base, 1).value = "Mengetahui, Kepala Sekolah";
+      ws.getCell(base, mode === "hasil" ? 6 : 4).value = "Guru Mata Pelajaran";
+      ws.getCell(base + 4, 1).value = `${iden.namaKepsek || "-"} (NIP. ${iden.nipKepsek || "-"})`;
+      ws.getCell(base + 4, mode === "hasil" ? 6 : 4).value = `${guru.nama || "-"} (NIP. ${guru.nip || "-"})`;
+      ws.getRow(base + 4).font = { bold: true, size: 10 };
+
+      ws.getColumn(1).width = 6; ws.getColumn(2).width = 16; ws.getColumn(3).width = 32; ws.getColumn(4).width = 7;
+      for (let c = 5; c <= totalCols; c++) ws.getColumn(c).width = 14;
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${mode === "hasil" ? "Konversi_Nilai" : "Nilai_Rapor"}_${konvNamaFile(konvKelas)}_${konvNamaFile(mAktif.nama)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast("File Excel berhasil dibuat.");
     }
 
     window.onload = () => {
