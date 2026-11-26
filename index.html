@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buku Nilai Digital • Kurikulum Merdeka</title>
+  <title>SAPA GURU • Sistem Administrasi Pembelajaran Guru</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -58,8 +58,8 @@
         <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
           <i data-lucide="book-open-check" class="w-7 h-7"></i>
         </div>
-        <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">BUKU NILAI DIGITAL</h2>
-        <p class="text-xs text-slate-500">Masuk dengan akun guru untuk mengakses database</p>
+        <h2 class="text-lg font-extrabold text-slate-900 tracking-tight">SAPA GURU</h2>
+        <p class="text-xs text-slate-500">Sistem Administrasi Pembelajaran Guru<br>Masuk dengan akun guru untuk mengakses database</p>
       </div>
       <form onsubmit="prosesLoginAkun(event)" class="space-y-3.5">
         <div>
@@ -98,7 +98,7 @@
         <i data-lucide="graduation-cap" class="w-5 h-5"></i>
       </div>
       <div class="min-w-0">
-        <div class="text-sm font-extrabold tracking-tight text-white truncate">BUKU NILAI DIGITAL</div>
+        <div class="text-sm font-extrabold tracking-tight text-white truncate">SAPA GURU</div>
         <div id="sidebar-periode-aktif" class="text-[11px] font-medium text-emerald-400 truncate">2026/2027 • Ganjil</div>
       </div>
     </div>
@@ -133,6 +133,40 @@
         <i data-lucide="calendar-clock" class="w-4 h-4 shrink-0"></i>
         <span class="truncate">Jadwal Mengajar</span>
       </button>
+      <!-- ===== SAPA GURU: GRUP MENU PRESENSI & JURNAL (BARU) ===== -->
+      <div class="pt-1">
+        <button onclick="sapaToggleGrup('presensi')" id="grup-presensi" class="grup-btn w-full text-left px-3 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5">
+          <i data-lucide="clipboard-check" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate flex-1">Presensi Murid</span>
+          <span id="chev-presensi" class="shrink-0 transition-transform inline-flex"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+        </button>
+        <div id="sub-presensi" class="hidden ml-5 pl-2 mt-1 border-l border-slate-700 space-y-1">
+          <button onclick="gantiMenu('Input Presensi')" id="btn-Input Presensi" class="menu-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">Input Presensi</span>
+          </button>
+          <button onclick="gantiMenu('Rekap Presensi')" id="btn-Rekap Presensi" class="menu-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="table-2" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">Rekap Presensi</span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <button onclick="sapaToggleGrup('jurnal')" id="grup-jurnal" class="grup-btn w-full text-left px-3 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5">
+          <i data-lucide="notebook-pen" class="w-4 h-4 shrink-0"></i>
+          <span class="truncate flex-1">Jurnal Mengajar</span>
+          <span id="chev-jurnal" class="shrink-0 transition-transform inline-flex"><i data-lucide="chevron-down" class="w-3.5 h-3.5"></i></span>
+        </button>
+        <div id="sub-jurnal" class="hidden ml-5 pl-2 mt-1 border-l border-slate-700 space-y-1">
+          <button onclick="gantiMenu('Input Jurnal')" id="btn-Input Jurnal" class="menu-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="pencil-line" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">Input Jurnal Mengajar</span>
+          </button>
+          <button onclick="gantiMenu('Lihat Jurnal')" id="btn-Lihat Jurnal" class="menu-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">Lihat Jurnal Mengajar</span>
+          </button>
+          <button onclick="gantiMenu('Cetak Jurnal')" id="btn-Cetak Jurnal" class="menu-btn w-full text-left px-3 py-2 rounded-lg font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2">
+            <i data-lucide="printer" class="w-3.5 h-3.5 shrink-0"></i><span class="truncate">Cetak Jurnal</span>
+          </button>
+        </div>
+      </div>
       <button onclick="gantiMenu('Input Nilai TP')" id="btn-Input Nilai TP" class="menu-btn w-full text-left px-3 py-2.5 rounded-xl font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5">
         <i data-lucide="file-edit" class="w-4 h-4 shrink-0"></i>
         <span class="truncate">Input Nilai TP</span>
@@ -1037,6 +1071,207 @@
       </div>
 
       <!-- =================================================================== -->
+      <!-- SAPA GURU (BARU): PRESENSI MURID & JURNAL MENGAJAR                  -->
+      <!-- =================================================================== -->
+
+      <!-- INPUT PRESENSI -->
+      <div id="halaman-Input Presensi" class="halaman hidden max-w-5xl mx-auto space-y-4">
+        <div id="pi-banner" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500"></div>
+        <div id="pi-isi" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Tanggal</label>
+                <input type="date" id="pi-tanggal" onchange="sapaGantiPresensi()" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Kelas</label>
+                <select id="pi-kelas" onchange="sapaGantiPresensi()" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <button onclick="sapaSemuaHadir()" class="h-10 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">Semua Hadir</button>
+              <button onclick="sapaSimpanPresensiManual()" class="h-10 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                <i data-lucide="save" class="w-4 h-4"></i><span>Simpan Presensi</span>
+              </button>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div id="pi-ringkasan" class="flex flex-wrap gap-2 text-[11px] font-bold"></div>
+              <div id="pi-status" class="text-[11px] font-bold text-slate-500"></div>
+            </div>
+            <p class="text-[11px] text-slate-400">Semua murid otomatis berstatus <strong>Hadir</strong>. Klik <strong>Sakit / Izin / Alpha</strong> untuk mencatat ketidakhadiran (klik lagi untuk membatalkan). Data tersimpan otomatis setiap kali Anda mengklik.</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto table-scroll-x">
+              <table class="w-full text-xs">
+                <thead class="bg-slate-900 text-white">
+                  <tr>
+                    <th class="px-3 py-2.5 text-center w-10">No</th>
+                    <th class="px-3 py-2.5 text-left">NISN</th>
+                    <th class="px-3 py-2.5 text-left">Nama Lengkap</th>
+                    <th class="px-3 py-2.5 text-center w-10">L/P</th>
+                    <th class="px-3 py-2.5 text-center">Kehadiran</th>
+                  </tr>
+                </thead>
+                <tbody id="pi-tbody" onclick="sapaKlikTabelPresensi(event)" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REKAP PRESENSI -->
+      <div id="halaman-Rekap Presensi" class="halaman hidden max-w-7xl mx-auto space-y-4">
+        <div id="pr-banner" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500"></div>
+        <div id="pr-isi" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold">
+                <button id="pr-mode-harian" onclick="sapaGantiModeRekap('harian')" class="px-4 h-8 rounded-lg">Harian</button>
+                <button id="pr-mode-bulanan" onclick="sapaGantiModeRekap('bulanan')" class="px-4 h-8 rounded-lg">Bulanan</button>
+              </div>
+              <button onclick="sapaMuatUlang()" class="h-8 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold flex items-center gap-1.5"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>Muat ulang dari Cloud</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div id="pr-wrap-tanggal">
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Tanggal</label>
+                <input type="date" id="pr-tanggal" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+              <div id="pr-wrap-bulan" class="hidden">
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Bulan</label>
+                <input type="month" id="pr-bulan" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Kelas</label>
+                <select id="pr-kelas" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <button onclick="sapaTampilkanRekapPresensi()" class="h-10 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">Tampilkan</button>
+              <div class="flex gap-2">
+                <button onclick="sapaRekapPresensiPDF()" class="flex-1 h-10 px-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">Cetak PDF</button>
+                <button onclick="sapaRekapPresensiExcel()" class="flex-1 h-10 px-3 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold transition">Excel</button>
+              </div>
+            </div>
+          </div>
+          <div id="pr-hasil"></div>
+        </div>
+      </div>
+
+      <!-- INPUT JURNAL MENGAJAR -->
+      <div id="halaman-Input Jurnal" class="halaman hidden max-w-5xl mx-auto space-y-4">
+        <div id="ji-banner" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500"></div>
+        <div id="ji-isi" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <div class="col-span-2 lg:col-span-1">
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Tanggal</label>
+                <input type="date" id="ji-tanggal" onchange="sapaGantiFormJurnal('tanggal')" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Jam ke-</label>
+                <select id="ji-jam-mulai" onchange="sapaGantiFormJurnal('jamMulai')" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Sampai jam ke-</label>
+                <select id="ji-jam-selesai" onchange="sapaGantiFormJurnal('jamSelesai')" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Kelas</label>
+                <select id="ji-kelas" onchange="sapaGantiFormJurnal('kelas')" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Mata Pelajaran</label>
+                <select id="ji-mapel" onchange="sapaGantiFormJurnal('mapel')" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+              <div class="text-[11px] font-bold text-slate-500 uppercase">Kehadiran Murid (otomatis dari Presensi Murid)</div>
+              <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="bg-white rounded-lg border border-slate-200 py-2"><div class="text-[10px] font-bold text-slate-400">JUMLAH</div><div id="ji-jml" class="text-lg font-extrabold text-slate-900 tabular-nums">0</div></div>
+                <div class="bg-white rounded-lg border border-amber-200 py-2"><div class="text-[10px] font-bold text-amber-600">SAKIT</div><div id="ji-s" class="text-lg font-extrabold text-amber-700 tabular-nums">0</div></div>
+                <div class="bg-white rounded-lg border border-sky-200 py-2"><div class="text-[10px] font-bold text-sky-600">IZIN</div><div id="ji-i" class="text-lg font-extrabold text-sky-700 tabular-nums">0</div></div>
+                <div class="bg-white rounded-lg border border-rose-200 py-2"><div class="text-[10px] font-bold text-rose-600">ALPHA</div><div id="ji-a" class="text-lg font-extrabold text-rose-700 tabular-nums">0</div></div>
+              </div>
+              <div id="ji-info-presensi" class="text-[11px]"></div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">Materi yang Diajarkan</label>
+              <textarea id="ji-materi" rows="3" oninput="sapaInputTeksJurnal()" placeholder="Ketik materi yang diajarkan..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">Kegiatan Pembelajaran</label>
+              <textarea id="ji-kegiatan" rows="4" oninput="sapaInputTeksJurnal()" placeholder="Ketik kegiatan pembelajaran yang dilakukan..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></textarea>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div id="ji-status" class="text-[11px] font-bold text-slate-500"></div>
+              <button onclick="sapaSimpanJurnalManual()" class="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="save" class="w-4 h-4"></i><span>Simpan Jurnal</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400">Jurnal tersimpan otomatis beberapa saat setelah Anda berhenti mengetik. Untuk mengubah jurnal yang sudah ada, pilih kembali tanggal, jam ke-, kelas, dan mapel yang sama.</p>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-2">
+            <div class="text-[11px] font-bold text-slate-500 uppercase">Pertemuan Sebelumnya (kelas &amp; mapel terpilih)</div>
+            <div id="ji-prev" class="text-xs text-slate-600"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIHAT JURNAL MENGAJAR -->
+      <div id="halaman-Lihat Jurnal" class="halaman hidden max-w-5xl mx-auto space-y-4">
+        <div id="jl-banner" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500"></div>
+        <div id="jl-isi" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Kelas</label>
+                <select id="jl-kelas" onchange="sapaTampilLihatJurnal()" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Mata Pelajaran</label>
+                <select id="jl-mapel" onchange="sapaTampilLihatJurnal()" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <button onclick="sapaMuatUlang()" class="h-10 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>Muat ulang dari Cloud</button>
+            </div>
+          </div>
+          <div id="jl-hasil" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- CETAK JURNAL -->
+      <div id="halaman-Cetak Jurnal" class="halaman hidden max-w-6xl mx-auto space-y-4">
+        <div id="jc-banner" class="hidden bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500"></div>
+        <div id="jc-isi" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Kelas</label>
+                <select id="jc-kelas" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Mata Pelajaran</label>
+                <select id="jc-mapel" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Tanggal Mulai</label>
+                <input type="date" id="jc-mulai" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Tanggal Akhir</label>
+                <input type="date" id="jc-akhir" class="w-full h-10 px-3 border border-slate-300 rounded-xl text-sm bg-slate-50 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="sapaTampilkanCetakJurnal()" class="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">Tampilkan</button>
+              <button onclick="sapaJurnalPDF()" class="h-10 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition">Cetak PDF</button>
+              <button onclick="sapaJurnalExcel()" class="h-10 px-4 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold transition">Excel</button>
+            </div>
+          </div>
+          <div id="jc-hasil"></div>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
       <!-- HALAMAN 8: PENGATURAN LENGKAP                                       -->
       <!-- =================================================================== -->
       <div id="halaman-Pengaturan" class="halaman hidden max-w-6xl mx-auto space-y-6">
@@ -1494,7 +1729,12 @@
       "Rekap Nilai Leger": "Leger lengkap dengan Predikat dan Deskripsi Capaian Pembelajaran otomatis",
       "Konversi Nilai": "Konversi nilai rapor secara adil berdasarkan KKTP, dengan patokan nilai semester sebelumnya",
       "Cetak Buku Nilai": "Cetak cover, daftar nilai, pengaturan margin kertas, serta ekspor PDF, Excel & Word",
-      "Pengaturan": "Profil guru, konfigurasi satuan pendidikan, rubrik CP, keamanan akun & arsip"
+      "Pengaturan": "Profil guru, konfigurasi satuan pendidikan, rubrik CP, keamanan akun & arsip",
+      "Input Presensi": "Catat kehadiran murid per tanggal dan kelas (tersimpan otomatis saat diklik)",
+      "Rekap Presensi": "Rekap kehadiran murid harian atau bulanan, cetak PDF & Excel",
+      "Input Jurnal": "Catat materi dan kegiatan pembelajaran; kehadiran murid terisi otomatis dari presensi",
+      "Lihat Jurnal": "Tinjau materi dan kegiatan yang telah diajarkan pada pertemuan sebelumnya",
+      "Cetak Jurnal": "Cetak jurnal mengajar per kelas dan rentang tanggal (PDF & Excel)"
     };
 
     const LABEL_AKSI_CLOUD = {
@@ -1585,7 +1825,7 @@
         sessionStorage.setItem(SESSION_AUTH_KEY, "true");
         document.getElementById('login-error-msg').classList.add('hidden');
         cekStatusLogin();
-        showToast("Berhasil masuk ke Buku Nilai Digital!");
+        showToast("Berhasil masuk ke SAPA GURU!");
       } else {
         document.getElementById('login-error-msg').classList.remove('hidden');
       }
@@ -1738,6 +1978,12 @@
       if (namaMenu === 'Konversi Nilai') renderHalamanKonversi();
       if (namaMenu === 'Cetak Buku Nilai') renderHalamanCetakKirim();
       if (namaMenu === 'Pengaturan') renderHalamanPengaturan();
+      sapaSinkronGrupMenu(namaMenu);
+      if (namaMenu === 'Input Presensi') renderInputPresensi();
+      if (namaMenu === 'Rekap Presensi') renderRekapPresensi();
+      if (namaMenu === 'Input Jurnal') renderInputJurnal();
+      if (namaMenu === 'Lihat Jurnal') renderLihatJurnal();
+      if (namaMenu === 'Cetak Jurnal') renderCetakJurnal();
       lucide.createIcons();
     }
 
@@ -4989,6 +5235,978 @@
       a.click();
       URL.revokeObjectURL(a.href);
       showToast("File Excel berhasil dibuat.");
+    }
+
+    // =========================================================================
+    // SAPA GURU — MODUL BARU: PRESENSI MURID & JURNAL MENGAJAR
+    // Berdiri sendiri: hanya MEMBACA dataSiswaGlobal / configGlobal.
+    // Data presensi & jurnal diambil & disimpan lewat aksi backend baru
+    // (getPresensiJurnal, savePresensi, saveJurnal) — tidak menyentuh data nilai.
+    // =========================================================================
+    const SAPA_NAMA_STATUS = { H: "Hadir", S: "Sakit", I: "Izin", A: "Alpha" };
+    const SAPA_BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    const SAPA_JAM_MAKS = 12;
+
+    let sapaPJ = { siap: false, periodeId: null, presensi: {}, jurnal: [], memuat: false, promiseMuat: null, error: "" };
+    const presInput = { tanggal: "", kelas: "" };
+    const jurInput = { tanggal: "", jamMulai: 1, jamSelesai: 1, kelas: "", mapelId: "", materi: "", kegiatan: "" };
+    const presRekap = { mode: "harian", tanggal: "", bulan: "", kelas: "" };
+    const jurLihat = { kelas: "", mapelId: "ALL" };
+    const jurCetak = { kelas: "", mapelId: "ALL", mulai: "", akhir: "" };
+    let jurLihatList = [];
+    const sapaTimers = {};   // "P|key" / "J|key" -> id timeout (simpan otomatis tertunda)
+    const sapaStatus = {};   // "P|key" / "J|key" -> pending | saving | saved | error
+    const jurDraft = {};     // key -> payload jurnal terakhir yang akan dikirim
+
+    // ---------- Utilitas ----------
+    function sapaEsc(t) {
+      return String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function sapaPad(n) { return String(n).padStart(2, "0"); }
+    function sapaHariIni() { const d = new Date(); return `${d.getFullYear()}-${sapaPad(d.getMonth() + 1)}-${sapaPad(d.getDate())}`; }
+    function sapaBulanIni() { return sapaHariIni().substring(0, 7); }
+    function sapaAwalBulan() { return sapaBulanIni() + "-01"; }
+    function sapaTglValid(t) { return /^\d{4}-\d{2}-\d{2}$/.test(String(t || "")); }
+    function sapaFormatTgl(iso, singkat) {
+      if (!sapaTglValid(iso)) return iso || "-";
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString("id-ID", singkat
+        ? { weekday: "short", day: "numeric", month: "short", year: "numeric" }
+        : { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    }
+    function sapaNamaFile(t) { return String(t || "").replace(/[^a-zA-Z0-9]/g, "_"); }
+    function sapaSiswaKelas(kelas) { return dataSiswaGlobal.filter(s => String(s.ID_Kelas) === String(kelas)); }
+    function sapaPeriodeTeks() {
+      const iden = configGlobal.identitas || {};
+      return `${iden.tahunAjaran || "-"} (${iden.semester || "-"})`;
+    }
+    function sapaNamaMapel(id) {
+      const m = (configGlobal.mapels || []).find(x => x.id === id);
+      return m ? m.nama : id;
+    }
+    function sapaIsiSelect(id, opsi, nilai) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = opsi.map(o => `<option value="${sapaEsc(o.v)}" ${String(o.v) === String(nilai) ? "selected" : ""}>${sapaEsc(o.t)}</option>`).join("");
+    }
+    function sapaOpsiKelas() { return getSemuaKelasUnik().map(k => ({ v: k, t: `Kelas ${k}` })); }
+    function sapaOpsiMapel(denganSemua) {
+      const o = (configGlobal.mapels || []).map(m => ({ v: m.id, t: m.nama }));
+      return denganSemua ? [{ v: "ALL", t: "Semua Mata Pelajaran" }, ...o] : o;
+    }
+    function sapaKelasAwal(kini) {
+      const daftar = getSemuaKelasUnik().map(String);
+      if (kini && daftar.includes(String(kini))) return String(kini);
+      if (kelasAktifFilter && kelasAktifFilter !== "ALL" && daftar.includes(String(kelasAktifFilter))) return String(kelasAktifFilter);
+      return daftar[0] || "";
+    }
+    function sapaHitungRec(rec) {
+      const r = { S: 0, I: 0, A: 0 };
+      if (rec && rec.data) Object.values(rec.data).forEach(v => { if (r[v] !== undefined) r[v]++; });
+      return r;
+    }
+
+    // ---------- Sidebar: grup menu ----------
+    function sapaToggleGrup(g, paksaBuka) {
+      const sub = document.getElementById("sub-" + g);
+      const chev = document.getElementById("chev-" + g);
+      if (!sub) return;
+      const buka = paksaBuka === undefined ? sub.classList.contains("hidden") : paksaBuka;
+      sub.classList.toggle("hidden", !buka);
+      if (chev) chev.style.transform = buka ? "rotate(180deg)" : "";
+    }
+    function sapaSinkronGrupMenu(namaMenu) {
+      const peta = { "Input Presensi": "presensi", "Rekap Presensi": "presensi", "Input Jurnal": "jurnal", "Lihat Jurnal": "jurnal", "Cetak Jurnal": "jurnal" };
+      if (peta[namaMenu]) sapaToggleGrup(peta[namaMenu], true);
+    }
+
+    // ---------- Memuat data dari Cloud ----------
+    async function sapaMuatPJ() {
+      if (sapaPJ.memuat) return sapaPJ.promiseMuat;
+      sapaPJ.memuat = true;
+      sapaPJ.promiseMuat = (async () => {
+        try {
+          const url = `${API_URL}?action=getPresensiJurnal&token=${encodeURIComponent(SECRET_TOKEN)}&periodeId=${encodeURIComponent(periodeAktifId || "")}`;
+          const res = await fetch(url).then(r => r.json());
+          if (res.status !== "success") throw new Error(res.message || "Server mengembalikan error");
+          if (!res.presensi || !Array.isArray(res.jurnal)) throw new Error("Backend Apps Script belum diperbarui. Salin kode bukunilai.gs terbaru lalu Deploy ulang (Manage deployments > Edit > New version).");
+          sapaPJ.presensi = res.presensi;
+          sapaPJ.jurnal = res.jurnal;
+          sapaPJ.periodeId = periodeAktifId || res.periodeId;
+          sapaPJ.siap = true;
+          sapaPJ.error = "";
+          return true;
+        } catch (e) {
+          sapaPJ.error = e.message || String(e);
+          return false;
+        } finally {
+          sapaPJ.memuat = false;
+        }
+      })();
+      return sapaPJ.promiseMuat;
+    }
+
+    function sapaTampilBanner(p, html, hapusIsi = true) {
+      const b = document.getElementById(p + "-banner"), isi = document.getElementById(p + "-isi");
+      if (b) { b.innerHTML = html; b.classList.remove("hidden"); }
+      if (isi && hapusIsi) isi.classList.add("hidden");
+    }
+    function sapaTampilIsi(p) {
+      const b = document.getElementById(p + "-banner"), isi = document.getElementById(p + "-isi");
+      if (b) b.classList.add("hidden");
+      if (isi) isi.classList.remove("hidden");
+    }
+
+    // Menyiapkan data lalu memanggil fungsi render. Jika data belum ada, ambil dulu dari Cloud.
+    function sapaSiapkan(menu, p, fn) {
+      if (!dataSiap) { sapaTampilBanner(p, "Memuat data periode..."); return; }
+      if (getSemuaKelasUnik().length === 0) {
+        sapaTampilBanner(p, "Belum ada data kelas / siswa. Tambahkan dulu di menu <strong>Data Kelas</strong> atau <strong>Data Siswa</strong>.");
+        return;
+      }
+      if (sapaPJ.siap && sapaPJ.periodeId === periodeAktifId) { sapaTampilIsi(p); fn(); lucide.createIcons(); return; }
+      sapaTampilBanner(p, "Memuat data presensi & jurnal dari Cloud...");
+      sapaMuatPJ().then(ok => {
+        if (menuAktif !== menu) return;
+        if (ok) { sapaTampilIsi(p); fn(); }
+        else sapaTampilBanner(p, `<div class="text-rose-600 font-bold mb-2">Gagal memuat data.</div><div class="mb-3">${sapaEsc(sapaPJ.error)}</div><button onclick="gantiMenu(menuAktif)" class="h-9 px-4 bg-emerald-600 text-white rounded-xl text-xs font-bold">Coba lagi</button>`);
+        lucide.createIcons();
+      });
+    }
+
+    async function sapaMuatUlang() {
+      if (sapaAdaProsesSimpan()) { showToast("Masih ada data yang sedang disimpan. Tunggu sebentar.", "info"); return; }
+      sapaPJ.siap = false;
+      gantiMenu(menuAktif);
+    }
+
+    // ---------- Penyimpanan (otomatis, berantai per kunci) ----------
+    async function sapaPostSenyap(payloadObj) {
+      if (!dataSiap) throw new Error("Data periode belum selesai dimuat.");
+      setCloudStatus("syncing", "Menyimpan...");
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST", redirect: "follow",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ periodeId: periodeAktifId, ...payloadObj, token: SECRET_TOKEN })
+        });
+        const json = JSON.parse(await res.text());
+        if (json.status === "error") throw new Error(json.message || "Server mengembalikan error");
+        return json;
+      } finally {
+        setCloudStatus("ok", "Tersinkronisasi");
+      }
+    }
+
+    function sapaBuatPenyimpan(prefix, kirimFn, onStatus) {
+      const st = {};
+      return async function (key) {
+        const s = st[key] || (st[key] = { saving: false, dirty: false, promise: null });
+        if (s.saving) { s.dirty = true; return s.promise; }
+        s.saving = true;
+        sapaStatus[prefix + "|" + key] = "saving";
+        onStatus(key);
+        s.promise = (async () => {
+          let ok = true;
+          try { do { s.dirty = false; await kirimFn(key); } while (s.dirty); }
+          catch (e) { ok = false; sapaPJ.error = e.message || String(e); showToast("Gagal menyimpan: " + sapaPJ.error, "error"); }
+          s.saving = false;
+          sapaStatus[prefix + "|" + key] = ok ? "saved" : "error";
+          onStatus(key);
+          return ok;
+        })();
+        return s.promise;
+      };
+    }
+
+    function sapaAdaProsesSimpan() {
+      return Object.keys(sapaTimers).length > 0 || Object.values(sapaStatus).some(v => v === "saving");
+    }
+    window.addEventListener("beforeunload", e => {
+      if (sapaAdaProsesSimpan()) { e.preventDefault(); e.returnValue = ""; }
+    });
+
+    function sapaJadwalSimpan(prefix, key, delay) {
+      const tk = prefix + "|" + key;
+      sapaStatus[tk] = "pending";
+      clearTimeout(sapaTimers[tk]);
+      sapaTimers[tk] = setTimeout(() => {
+        delete sapaTimers[tk];
+        (prefix === "P" ? sapaSimpanPres : sapaSimpanJur)(key);
+      }, delay);
+      (prefix === "P" ? sapaUpdateStatusPres : sapaUpdateStatusJur)();
+    }
+
+    async function sapaFlushSemua() {
+      const tugas = [];
+      Object.keys(sapaTimers).forEach(tk => {
+        clearTimeout(sapaTimers[tk]);
+        delete sapaTimers[tk];
+        const [prefix, ...sisa] = tk.split("|");
+        const key = sisa.join("|");
+        tugas.push((prefix === "P" ? sapaSimpanPres : sapaSimpanJur)(key));
+      });
+      await Promise.all(tugas);
+    }
+
+    function sapaTeksStatus(st, adaTersimpan) {
+      if (st === "pending") return { t: "Menunggu... akan tersimpan otomatis", c: "text-amber-600" };
+      if (st === "saving") return { t: "Menyimpan ke Cloud...", c: "text-sky-600" };
+      if (st === "saved") return { t: "✓ Tersimpan otomatis", c: "text-emerald-600" };
+      if (st === "error") return { t: "Gagal menyimpan — klik tombol Simpan untuk mencoba lagi", c: "text-rose-600" };
+      return adaTersimpan ? { t: "Tersimpan di Cloud", c: "text-emerald-600" } : { t: "Belum ada data tersimpan", c: "text-slate-400" };
+    }
+
+    // =========================================================================
+    // 1. INPUT PRESENSI
+    // =========================================================================
+    function sapaKeyPres() {
+      return (sapaTglValid(presInput.tanggal) && presInput.kelas) ? `${presInput.tanggal}|${presInput.kelas}` : "";
+    }
+
+    function renderInputPresensi() { sapaSiapkan("Input Presensi", "pi", sapaRenderInputPresensi); }
+
+    function sapaRenderInputPresensi() {
+      if (!sapaTglValid(presInput.tanggal)) presInput.tanggal = sapaHariIni();
+      presInput.kelas = sapaKelasAwal(presInput.kelas);
+      document.getElementById("pi-tanggal").value = presInput.tanggal;
+      sapaIsiSelect("pi-kelas", sapaOpsiKelas(), presInput.kelas);
+      sapaRenderTabelPresensi();
+    }
+
+    function sapaGantiPresensi() {
+      presInput.tanggal = document.getElementById("pi-tanggal").value;
+      presInput.kelas = document.getElementById("pi-kelas").value;
+      sapaRenderTabelPresensi();
+    }
+
+    function sapaRenderTabelPresensi() {
+      const tbody = document.getElementById("pi-tbody");
+      const key = sapaKeyPres();
+      const siswa = sapaSiswaKelas(presInput.kelas);
+      const rec = key ? sapaPJ.presensi[key] : null;
+      const data = rec ? rec.data : {};
+
+      if (!key) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500">Pilih tanggal dan kelas.</td></tr>`; document.getElementById("pi-ringkasan").innerHTML = ""; return; }
+      if (siswa.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500">Kelas ini belum memiliki siswa.</td></tr>`; document.getElementById("pi-ringkasan").innerHTML = ""; sapaUpdateStatusPres(); return; }
+
+      const btn = (nisn, st, aktif) => {
+        const warna = { S: "bg-amber-500 border-amber-500", I: "bg-sky-500 border-sky-500", A: "bg-rose-500 border-rose-500" }[st];
+        const nama = SAPA_NAMA_STATUS[st];
+        return `<button data-nisn="${sapaEsc(nisn)}" data-st="${st}" class="h-8 min-w-[64px] px-2.5 rounded-lg border text-[11px] font-bold transition ${aktif ? warna + " text-white shadow-sm" : "bg-white border-slate-300 text-slate-600 hover:bg-slate-100"}">${nama}</button>`;
+      };
+
+      tbody.innerHTML = siswa.map((s, i) => {
+        const nisn = String(s.NISN);
+        const st = data[nisn] || "H";
+        return `<tr class="${st !== "H" ? "bg-slate-50" : ""}">
+          <td class="px-3 py-2 text-center text-slate-500 tabular-nums">${i + 1}</td>
+          <td class="px-3 py-2 text-slate-500 tabular-nums">${sapaEsc(nisn)}</td>
+          <td class="px-3 py-2 font-semibold text-slate-800">${sapaEsc(s.Nama_Lengkap)}</td>
+          <td class="px-3 py-2 text-center text-slate-500">${sapaEsc(s["L/P"])}</td>
+          <td class="px-3 py-2"><div class="flex items-center justify-center gap-1.5">${btn(nisn, "S", st === "S")}${btn(nisn, "I", st === "I")}${btn(nisn, "A", st === "A")}</div></td>
+        </tr>`;
+      }).join("");
+
+      const c = sapaHitungRec(rec);
+      const hadir = Math.max(0, siswa.length - c.S - c.I - c.A);
+      document.getElementById("pi-ringkasan").innerHTML = `
+        <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">Hadir ${hadir}</span>
+        <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800">Sakit ${c.S}</span>
+        <span class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800">Izin ${c.I}</span>
+        <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800">Alpha ${c.A}</span>
+        <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-700">Jumlah ${siswa.length}</span>`;
+      sapaUpdateStatusPres();
+    }
+
+    function sapaUpdateStatusPres() {
+      const el = document.getElementById("pi-status");
+      if (!el) return;
+      const key = sapaKeyPres();
+      const x = sapaTeksStatus(key ? sapaStatus["P|" + key] : null, !!(key && sapaPJ.presensi[key]));
+      el.className = "text-[11px] font-bold " + x.c;
+      el.innerText = x.t;
+    }
+
+    function sapaPastikanRecPres() {
+      const key = sapaKeyPres();
+      if (!key) { showToast("Pilih tanggal dan kelas terlebih dahulu.", "error"); return null; }
+      const siswa = sapaSiswaKelas(presInput.kelas);
+      if (siswa.length === 0) { showToast("Kelas ini belum memiliki siswa.", "error"); return null; }
+      let rec = sapaPJ.presensi[key];
+      if (!rec) rec = sapaPJ.presensi[key] = { tanggal: presInput.tanggal, kelas: presInput.kelas, jumlah: siswa.length, data: {} };
+      rec.jumlah = siswa.length;
+      return { key, rec };
+    }
+
+    function sapaKlikTabelPresensi(ev) {
+      const b = ev.target.closest("button[data-st]");
+      if (!b) return;
+      const r = sapaPastikanRecPres();
+      if (!r) return;
+      const nisn = b.dataset.nisn, st = b.dataset.st;
+      if (r.rec.data[nisn] === st) delete r.rec.data[nisn]; else r.rec.data[nisn] = st;
+      sapaRenderTabelPresensi();
+      sapaJadwalSimpan("P", r.key, 600);
+    }
+
+    function sapaSemuaHadir() {
+      const r = sapaPastikanRecPres();
+      if (!r) return;
+      r.rec.data = {};
+      sapaRenderTabelPresensi();
+      sapaJadwalSimpan("P", r.key, 300);
+    }
+
+    const sapaSimpanPres = sapaBuatPenyimpan("P", async key => {
+      const rec = sapaPJ.presensi[key];
+      if (!rec) return;
+      await sapaPostSenyap({ action: "savePresensi", tanggal: rec.tanggal, kelas: rec.kelas, jumlah: rec.jumlah, data: rec.data });
+    }, () => sapaUpdateStatusPres());
+
+    async function sapaSimpanPresensiManual() {
+      const r = sapaPastikanRecPres();
+      if (!r) return;
+      clearTimeout(sapaTimers["P|" + r.key]); delete sapaTimers["P|" + r.key];
+      setLoadingProses(true, "Menyimpan presensi...");
+      let ok = false;
+      try { ok = await sapaSimpanPres(r.key); } finally { setLoadingProses(false); }
+      sapaRenderTabelPresensi();
+      if (ok) showToast("Presensi berhasil disimpan!");
+    }
+
+    // =========================================================================
+    // 2. REKAP PRESENSI (HARIAN & BULANAN)
+    // =========================================================================
+    function renderRekapPresensi() { sapaSiapkan("Rekap Presensi", "pr", sapaRenderRekapPresensi); }
+
+    function sapaRenderRekapPresensi() {
+      if (!sapaTglValid(presRekap.tanggal)) presRekap.tanggal = sapaHariIni();
+      if (!/^\d{4}-\d{2}$/.test(presRekap.bulan)) presRekap.bulan = sapaBulanIni();
+      presRekap.kelas = sapaKelasAwal(presRekap.kelas);
+      document.getElementById("pr-tanggal").value = presRekap.tanggal;
+      document.getElementById("pr-bulan").value = presRekap.bulan;
+      sapaIsiSelect("pr-kelas", sapaOpsiKelas(), presRekap.kelas);
+      sapaGantiModeRekap(presRekap.mode, true);
+      sapaTampilkanRekapPresensi(true);
+    }
+
+    function sapaGantiModeRekap(mode, tanpaTampil) {
+      presRekap.mode = mode;
+      const aktif = "px-4 h-8 rounded-lg bg-white text-emerald-700 shadow-sm", mati = "px-4 h-8 rounded-lg text-slate-500 hover:text-slate-800";
+      document.getElementById("pr-mode-harian").className = mode === "harian" ? aktif : mati;
+      document.getElementById("pr-mode-bulanan").className = mode === "bulanan" ? aktif : mati;
+      document.getElementById("pr-wrap-tanggal").classList.toggle("hidden", mode !== "harian");
+      document.getElementById("pr-wrap-bulan").classList.toggle("hidden", mode !== "bulanan");
+      if (!tanpaTampil) document.getElementById("pr-hasil").innerHTML = "";
+    }
+
+    function sapaBacaFormRekap() {
+      presRekap.tanggal = document.getElementById("pr-tanggal").value;
+      presRekap.bulan = document.getElementById("pr-bulan").value;
+      presRekap.kelas = document.getElementById("pr-kelas").value;
+    }
+
+    function sapaDataHarian(tanggal, kelas) {
+      const rec = sapaPJ.presensi[`${tanggal}|${kelas}`] || null;
+      const siswa = sapaSiswaKelas(kelas);
+      const rows = siswa.map((s, i) => ({
+        no: i + 1, nisn: String(s.NISN), nama: s.Nama_Lengkap, lp: s["L/P"],
+        st: rec ? (rec.data[String(s.NISN)] || "H") : null
+      }));
+      const tot = { H: 0, S: 0, I: 0, A: 0 };
+      rows.forEach(r => { if (r.st) tot[r.st]++; });
+      return { rec, rows, tot, jumlah: siswa.length };
+    }
+
+    function sapaDataBulanan(bulan, kelas) {
+      const [y, m] = bulan.split("-").map(Number);
+      const n = new Date(y, m, 0).getDate();
+      const siswa = sapaSiswaKelas(kelas);
+      const recs = {}, hariTerisi = [];
+      for (let d = 1; d <= n; d++) {
+        const rec = sapaPJ.presensi[`${bulan}-${sapaPad(d)}|${kelas}`];
+        if (rec) { recs[d] = rec; hariTerisi.push(d); }
+      }
+      const rows = siswa.map((s, i) => {
+        let S = 0, I = 0, A = 0; const per = {};
+        hariTerisi.forEach(d => {
+          const st = recs[d].data[String(s.NISN)];
+          if (st) { per[d] = st; if (st === "S") S++; else if (st === "I") I++; else if (st === "A") A++; }
+        });
+        return { no: i + 1, nisn: String(s.NISN), nama: s.Nama_Lengkap, lp: s["L/P"], per, S, I, A, H: Math.max(0, hariTerisi.length - S - I - A) };
+      });
+      return { y, m, n, hariTerisi, rows };
+    }
+
+    const SAPA_WARNA_ST = { H: "text-emerald-700", S: "text-amber-700", I: "text-sky-700", A: "text-rose-700" };
+
+    function sapaTampilkanRekapPresensi(senyap) {
+      sapaBacaFormRekap();
+      const out = document.getElementById("pr-hasil");
+      const kelas = presRekap.kelas;
+      if (!kelas) { out.innerHTML = ""; return; }
+
+      if (presRekap.mode === "harian") {
+        if (!sapaTglValid(presRekap.tanggal)) { if (!senyap) showToast("Pilih tanggal.", "error"); return; }
+        const d = sapaDataHarian(presRekap.tanggal, kelas);
+        out.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+              <div><div class="text-sm font-extrabold text-slate-900">Rekap Presensi Harian — Kelas ${sapaEsc(kelas)}</div>
+              <div class="text-[11px] text-slate-500">${sapaEsc(sapaFormatTgl(presRekap.tanggal))}</div></div>
+              <div class="flex flex-wrap gap-2 text-[11px] font-bold">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">Hadir ${d.tot.H}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800">Sakit ${d.tot.S}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800">Izin ${d.tot.I}</span>
+                <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800">Alpha ${d.tot.A}</span>
+              </div>
+            </div>
+            ${d.rec ? "" : `<div class="px-4 py-2 bg-amber-50 text-amber-800 text-[11px] font-bold border-b border-amber-200">Presensi pada tanggal ini belum diisi.</div>`}
+            <div class="overflow-x-auto table-scroll-x"><table class="w-full text-xs">
+              <thead class="bg-slate-900 text-white"><tr><th class="px-3 py-2 w-10">No</th><th class="px-3 py-2 text-left">NISN</th><th class="px-3 py-2 text-left">Nama Lengkap</th><th class="px-3 py-2 w-10">L/P</th><th class="px-3 py-2">Keterangan</th></tr></thead>
+              <tbody class="divide-y divide-slate-100">${d.rows.map(r => `<tr>
+                <td class="px-3 py-1.5 text-center text-slate-500">${r.no}</td><td class="px-3 py-1.5 text-slate-500 tabular-nums">${sapaEsc(r.nisn)}</td>
+                <td class="px-3 py-1.5 font-semibold text-slate-800">${sapaEsc(r.nama)}</td><td class="px-3 py-1.5 text-center text-slate-500">${sapaEsc(r.lp)}</td>
+                <td class="px-3 py-1.5 text-center font-bold ${r.st ? SAPA_WARNA_ST[r.st] : "text-slate-400"}">${r.st ? SAPA_NAMA_STATUS[r.st] : "-"}</td></tr>`).join("") || `<tr><td colspan="5" class="p-6 text-center text-slate-500">Tidak ada siswa.</td></tr>`}</tbody>
+            </table></div>
+          </div>`;
+      } else {
+        if (!/^\d{4}-\d{2}$/.test(presRekap.bulan)) { if (!senyap) showToast("Pilih bulan.", "error"); return; }
+        const d = sapaDataBulanan(presRekap.bulan, kelas);
+        const hari = []; for (let i = 1; i <= d.n; i++) hari.push(i);
+        const warnaSel = { S: "text-amber-700 bg-amber-50", I: "text-sky-700 bg-sky-50", A: "text-rose-700 bg-rose-50" };
+        out.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100">
+              <div class="text-sm font-extrabold text-slate-900">Rekap Presensi Bulanan — Kelas ${sapaEsc(kelas)}</div>
+              <div class="text-[11px] text-slate-500">${SAPA_BULAN[d.m - 1]} ${d.y} • Hari efektif (presensi terisi): <strong>${d.hariTerisi.length}</strong> hari</div>
+            </div>
+            ${d.hariTerisi.length === 0 ? `<div class="px-4 py-2 bg-amber-50 text-amber-800 text-[11px] font-bold border-b border-amber-200">Belum ada presensi yang diisi pada bulan ini untuk kelas ini.</div>` : ""}
+            <div class="overflow-x-auto table-scroll-x"><table class="text-[11px] border-collapse">
+              <thead class="bg-slate-900 text-white"><tr>
+                <th class="px-2 py-2 w-9">No</th><th class="px-2 py-2 text-left">NISN</th><th class="px-2 py-2 text-left min-w-[170px]">Nama Lengkap</th><th class="px-2 py-2 w-8">L/P</th>
+                ${hari.map(h => `<th class="px-0 py-2 w-6 min-w-[24px] text-center">${h}</th>`).join("")}
+                <th class="px-2 py-2 bg-emerald-800">H</th><th class="px-2 py-2 bg-amber-700">S</th><th class="px-2 py-2 bg-sky-700">I</th><th class="px-2 py-2 bg-rose-700">A</th>
+              </tr></thead>
+              <tbody>${d.rows.map(r => `<tr class="border-b border-slate-100">
+                <td class="px-2 py-1 text-center text-slate-500">${r.no}</td><td class="px-2 py-1 text-slate-500 tabular-nums">${sapaEsc(r.nisn)}</td>
+                <td class="px-2 py-1 font-semibold text-slate-800 whitespace-nowrap">${sapaEsc(r.nama)}</td><td class="px-2 py-1 text-center text-slate-500">${sapaEsc(r.lp)}</td>
+                ${hari.map(h => {
+                  const terisi = d.hariTerisi.includes(h), st = r.per[h];
+                  return `<td class="px-0 py-1 text-center font-bold border-l border-slate-100 ${st ? warnaSel[st] : (terisi ? "" : "bg-slate-100")}">${st || ""}</td>`;
+                }).join("")}
+                <td class="px-2 py-1 text-center font-bold text-emerald-700 border-l border-slate-200">${r.H}</td>
+                <td class="px-2 py-1 text-center font-bold text-amber-700">${r.S}</td>
+                <td class="px-2 py-1 text-center font-bold text-sky-700">${r.I}</td>
+                <td class="px-2 py-1 text-center font-bold text-rose-700">${r.A}</td></tr>`).join("") || `<tr><td colspan="${d.n + 8}" class="p-6 text-center text-slate-500">Tidak ada siswa.</td></tr>`}</tbody>
+            </table></div>
+            <div class="px-4 py-2 text-[10px] text-slate-400">Kolom kosong = hadir. Kolom abu-abu = presensi hari itu belum diisi. H = Hadir (hari efektif dikurangi S, I, A).</div>
+          </div>`;
+      }
+      lucide.createIcons();
+    }
+
+    // ---------- Ekspor umum (PDF & Excel) ----------
+    function sapaOpsiPDF() { return { mAtas: 10, mBawah: 10, mKiri: 10, mKanan: 10, halAwal: 1, tampilHal: true }; }
+
+    function sapaFooterHalaman(doc, opsi) {
+      return function () {
+        if (!opsi.tampilHal) return;
+        doc.setFontSize(7.5); doc.setTextColor(120);
+        doc.text(`Halaman ${doc.internal.getNumberOfPages()}`, doc.internal.pageSize.getWidth() - opsi.mKanan, doc.internal.pageSize.getHeight() - 4, { align: "right" });
+      };
+    }
+
+    async function sapaBuatExcel(o) {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet(String(o.sheet).substring(0, 31));
+      const iden = configGlobal.identitas || {}, guru = configGlobal.guru || {};
+      const nCol = o.head.length;
+      const garis = { style: "thin", color: { argb: "FFCBD5E1" } };
+      const border = { top: garis, left: garis, bottom: garis, right: garis };
+
+      ws.addRow([`${(iden.sekolah || "SATUAN PENDIDIKAN").toUpperCase()} — ${o.judul}`]);
+      ws.addRow([o.sub]);
+      ws.addRow([]);
+      ws.mergeCells(1, 1, 1, nCol); ws.mergeCells(2, 1, 2, nCol);
+      ws.getRow(1).font = { bold: true, size: 13 };
+      ws.getRow(2).font = { size: 10, color: { argb: "FF475569" } };
+
+      const hr = ws.addRow(o.head);
+      hr.height = 22;
+      hr.eachCell(c => {
+        c.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 10 };
+        c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F172A" } };
+        c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        c.border = border;
+      });
+      o.body.forEach((r, ri) => {
+        const row = ws.addRow(r);
+        row.eachCell({ includeEmpty: true }, (c, cn) => {
+          c.border = border;
+          c.font = { size: 10 };
+          c.alignment = (o.kiri || []).includes(cn) ? { horizontal: "left", vertical: "top", wrapText: true } : { horizontal: "center", vertical: "middle" };
+          if (o.styleFn) o.styleFn(c, ri, cn, r[cn - 1]);
+        });
+      });
+
+      const base = ws.rowCount + 2;
+      const kolKanan = Math.max(2, Math.ceil(nCol * 0.65));
+      ws.getCell(base, 1).value = "Mengetahui, Kepala Sekolah";
+      ws.getCell(base, kolKanan).value = `${iden.kota || ""}, ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
+      ws.getCell(base + 1, kolKanan).value = "Guru Mata Pelajaran";
+      ws.getCell(base + 5, 1).value = `${iden.namaKepsek || "-"} (NIP. ${iden.nipKepsek || "-"})`;
+      ws.getCell(base + 5, kolKanan).value = `${guru.nama || iden.namaGuru || "-"} (NIP. ${guru.nip || "-"})`;
+      ws.getRow(base + 5).font = { bold: true, size: 10 };
+
+      (o.widths || []).forEach((w, i) => { ws.getColumn(i + 1).width = w; });
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = o.namaFile;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast("File Excel berhasil dibuat.");
+    }
+
+    function sapaRekapPresensiPDF() {
+      sapaBacaFormRekap();
+      const kelas = presRekap.kelas;
+      if (!kelas) return showToast("Pilih kelas.", "error");
+      const { jsPDF } = window.jspdf;
+      const opsi = sapaOpsiPDF();
+      const iden = configGlobal.identitas || {};
+
+      if (presRekap.mode === "harian") {
+        if (!sapaTglValid(presRekap.tanggal)) return showToast("Pilih tanggal.", "error");
+        const d = sapaDataHarian(presRekap.tanggal, kelas);
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const y0 = gambarHeaderPDF(doc, opsi, "REKAP PRESENSI MURID HARIAN",
+          `Kelas: ${kelas}  |  Hari/Tanggal: ${sapaFormatTgl(presRekap.tanggal)}  |  Tahun Ajaran: ${sapaPeriodeTeks()}${d.rec ? "" : "  |  (Presensi belum diisi)"}`);
+        const warna = { S: [180, 83, 9], I: [3, 105, 161], A: [190, 18, 60] };
+        doc.autoTable({
+          head: [["No", "NISN", "Nama Lengkap", "L/P", "Keterangan"]],
+          body: d.rows.map(r => [r.no, r.nisn, r.nama, r.lp, r.st ? SAPA_NAMA_STATUS[r.st] : "-"]),
+          foot: [[{ content: `Jumlah: ${d.jumlah}   |   Hadir: ${d.tot.H}   Sakit: ${d.tot.S}   Izin: ${d.tot.I}   Alpha: ${d.tot.A}`, colSpan: 5, styles: { halign: "left" } }]],
+          startY: y0, theme: "grid",
+          margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
+          styles: { fontSize: 8.5, cellPadding: 1.4, halign: "center", valign: "middle", lineColor: [203, 213, 225], lineWidth: 0.2 },
+          headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+          footStyles: { fillColor: [241, 245, 249], textColor: [15, 23, 42], fontStyle: "bold" },
+          columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 32 }, 2: { halign: "left" }, 3: { cellWidth: 10 }, 4: { cellWidth: 28 } },
+          didParseCell: data => {
+            if (data.section === "body" && data.column.index === 4) {
+              const st = d.rows[data.row.index].st;
+              if (st && warna[st]) { data.cell.styles.textColor = warna[st]; data.cell.styles.fontStyle = "bold"; }
+            }
+          },
+          didDrawPage: sapaFooterHalaman(doc, opsi)
+        });
+        gambarPengesahanPDF(doc, opsi);
+        doc.save(`Presensi_Harian_${sapaNamaFile(kelas)}_${presRekap.tanggal}.pdf`);
+      } else {
+        if (!/^\d{4}-\d{2}$/.test(presRekap.bulan)) return showToast("Pilih bulan.", "error");
+        const d = sapaDataBulanan(presRekap.bulan, kelas);
+        const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        const usableW = doc.internal.pageSize.getWidth() - opsi.mKiri - opsi.mKanan;
+        const y0 = gambarHeaderPDF(doc, opsi, "REKAP PRESENSI MURID BULANAN",
+          `Kelas: ${kelas}  |  Bulan: ${SAPA_BULAN[d.m - 1]} ${d.y}  |  Tahun Ajaran: ${sapaPeriodeTeks()}  |  Hari efektif: ${d.hariTerisi.length} hari`);
+        const hari = []; for (let i = 1; i <= d.n; i++) hari.push(i);
+        const idx0 = 4, idxTot = idx0 + d.n;
+        const wTetap = 7 + 17 + 6 + 4 * 7.5;
+        const wNama = Math.max(34, Math.min(52, usableW * 0.2));
+        const wHari = Math.max(4.2, (usableW - wTetap - wNama) / d.n);
+        const colStyles = { 0: { cellWidth: 7 }, 1: { cellWidth: 17 }, 2: { halign: "left", cellWidth: wNama }, 3: { cellWidth: 6 } };
+        hari.forEach((h, i) => { colStyles[idx0 + i] = { cellWidth: wHari }; });
+        for (let k = 0; k < 4; k++) colStyles[idxTot + k] = { cellWidth: 7.5, fontStyle: "bold" };
+        const warna = { S: [180, 83, 9], I: [3, 105, 161], A: [190, 18, 60] };
+        doc.autoTable({
+          head: [["No", "NISN", "Nama Lengkap", "L/P", ...hari.map(String), "H", "S", "I", "A"]],
+          body: d.rows.map(r => [r.no, r.nisn, r.nama, r.lp, ...hari.map(h => r.per[h] || ""), r.H, r.S, r.I, r.A]),
+          startY: y0, theme: "grid", tableWidth: usableW,
+          margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
+          styles: { fontSize: 6.2, cellPadding: 0.9, halign: "center", valign: "middle", lineColor: [203, 213, 225], lineWidth: 0.2, overflow: "ellipsize" },
+          headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+          columnStyles: colStyles,
+          didParseCell: data => {
+            if (data.section === "body" && data.column.index >= idx0 && data.column.index < idxTot) {
+              const h = data.column.index - idx0 + 1;
+              const st = d.rows[data.row.index].per[h];
+              if (st) { data.cell.styles.textColor = warna[st]; data.cell.styles.fontStyle = "bold"; }
+              else if (!d.hariTerisi.includes(h)) data.cell.styles.fillColor = [226, 232, 240];
+            }
+          },
+          didDrawPage: sapaFooterHalaman(doc, opsi)
+        });
+        gambarPengesahanPDF(doc, opsi);
+        doc.save(`Presensi_Bulanan_${sapaNamaFile(kelas)}_${presRekap.bulan}.pdf`);
+      }
+      showToast("PDF rekap presensi berhasil dibuat.");
+    }
+
+    async function sapaRekapPresensiExcel() {
+      sapaBacaFormRekap();
+      const kelas = presRekap.kelas;
+      if (!kelas) return showToast("Pilih kelas.", "error");
+      if (presRekap.mode === "harian") {
+        if (!sapaTglValid(presRekap.tanggal)) return showToast("Pilih tanggal.", "error");
+        const d = sapaDataHarian(presRekap.tanggal, kelas);
+        const body = d.rows.map(r => [r.no, r.nisn, r.nama, r.lp, r.st ? SAPA_NAMA_STATUS[r.st] : "-"]);
+        body.push(["", "", `Jumlah: ${d.jumlah} | Hadir: ${d.tot.H} | Sakit: ${d.tot.S} | Izin: ${d.tot.I} | Alpha: ${d.tot.A}`, "", ""]);
+        await sapaBuatExcel({
+          sheet: `Presensi_${kelas}`, judul: "REKAP PRESENSI MURID HARIAN",
+          sub: `Kelas: ${kelas} | Hari/Tanggal: ${sapaFormatTgl(presRekap.tanggal)} | Tahun Ajaran: ${sapaPeriodeTeks()}${d.rec ? "" : " | (Presensi belum diisi)"}`,
+          head: ["No", "NISN", "Nama Lengkap", "L/P", "Keterangan"], body, kiri: [3], widths: [6, 16, 36, 7, 16],
+          styleFn: (c, ri, cn) => {
+            const st = d.rows[ri] && d.rows[ri].st;
+            if (cn === 5 && st && st !== "H") c.font = { bold: true, size: 10, color: { argb: { S: "FFB45309", I: "FF0369A1", A: "FFBE123C" }[st] } };
+          },
+          namaFile: `Presensi_Harian_${sapaNamaFile(kelas)}_${presRekap.tanggal}.xlsx`
+        });
+      } else {
+        if (!/^\d{4}-\d{2}$/.test(presRekap.bulan)) return showToast("Pilih bulan.", "error");
+        const d = sapaDataBulanan(presRekap.bulan, kelas);
+        const hari = []; for (let i = 1; i <= d.n; i++) hari.push(i);
+        await sapaBuatExcel({
+          sheet: `Presensi_${kelas}`, judul: "REKAP PRESENSI MURID BULANAN",
+          sub: `Kelas: ${kelas} | Bulan: ${SAPA_BULAN[d.m - 1]} ${d.y} | Tahun Ajaran: ${sapaPeriodeTeks()} | Hari efektif: ${d.hariTerisi.length} hari`,
+          head: ["No", "NISN", "Nama Lengkap", "L/P", ...hari.map(String), "H", "S", "I", "A"],
+          body: d.rows.map(r => [r.no, r.nisn, r.nama, r.lp, ...hari.map(h => r.per[h] || ""), r.H, r.S, r.I, r.A]),
+          kiri: [3], widths: [5, 15, 32, 6, ...hari.map(() => 3.6), 5, 5, 5, 5],
+          styleFn: (c, ri, cn) => {
+            if (cn >= 5 && cn < 5 + d.n) {
+              const h = cn - 4, st = d.rows[ri].per[h];
+              if (st) c.font = { bold: true, size: 10, color: { argb: { S: "FFB45309", I: "FF0369A1", A: "FFBE123C" }[st] } };
+              else if (!d.hariTerisi.includes(h)) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } };
+            }
+          },
+          namaFile: `Presensi_Bulanan_${sapaNamaFile(kelas)}_${presRekap.bulan}.xlsx`
+        });
+      }
+    }
+
+    // =========================================================================
+    // 3. INPUT JURNAL MENGAJAR
+    // =========================================================================
+    function sapaKeyJurnal() {
+      return (sapaTglValid(jurInput.tanggal) && jurInput.kelas && jurInput.mapelId && jurInput.jamMulai >= 1)
+        ? `${jurInput.tanggal}|${jurInput.kelas}|${jurInput.mapelId}|${jurInput.jamMulai}` : "";
+    }
+    function sapaCariJurnal(key) { return sapaPJ.jurnal.find(j => j.key === key) || null; }
+
+    function renderInputJurnal() { sapaSiapkan("Input Jurnal", "ji", sapaRenderInputJurnal); }
+
+    function sapaRenderInputJurnal() {
+      if (!sapaTglValid(jurInput.tanggal)) jurInput.tanggal = sapaHariIni();
+      jurInput.kelas = sapaKelasAwal(jurInput.kelas);
+      const mapels = configGlobal.mapels || [];
+      if (!jurInput.mapelId) jurInput.mapelId = (mapels.find(m => m.id === mapelAktifId) || mapels[0] || {}).id || "";
+      const opsiMapel = sapaOpsiMapel(false);
+      if (jurInput.mapelId && !opsiMapel.some(o => o.v === jurInput.mapelId)) opsiMapel.push({ v: jurInput.mapelId, t: jurInput.mapelId });
+      const jam = []; for (let i = 1; i <= SAPA_JAM_MAKS; i++) jam.push({ v: i, t: String(i) });
+
+      document.getElementById("ji-tanggal").value = jurInput.tanggal;
+      sapaIsiSelect("ji-jam-mulai", jam, jurInput.jamMulai);
+      sapaIsiSelect("ji-jam-selesai", jam, jurInput.jamSelesai);
+      sapaIsiSelect("ji-kelas", sapaOpsiKelas(), jurInput.kelas);
+      sapaIsiSelect("ji-mapel", opsiMapel, jurInput.mapelId);
+      document.getElementById("ji-materi").value = jurInput.materi;
+      document.getElementById("ji-kegiatan").value = jurInput.kegiatan;
+      sapaRenderPanelJurnal();
+    }
+
+    async function sapaGantiFormJurnal(field) {
+      await sapaFlushSemua(); // simpan dulu draft jurnal sebelumnya agar tidak hilang
+      jurInput.tanggal = document.getElementById("ji-tanggal").value;
+      jurInput.jamMulai = Number(document.getElementById("ji-jam-mulai").value) || 1;
+      jurInput.jamSelesai = Number(document.getElementById("ji-jam-selesai").value) || jurInput.jamMulai;
+      jurInput.kelas = document.getElementById("ji-kelas").value;
+      jurInput.mapelId = document.getElementById("ji-mapel").value;
+
+      if (jurInput.jamSelesai < jurInput.jamMulai) {
+        if (field === "jamSelesai") showToast("Jam selesai tidak boleh sebelum jam mulai.", "error");
+        jurInput.jamSelesai = jurInput.jamMulai;
+        document.getElementById("ji-jam-selesai").value = jurInput.jamSelesai;
+      }
+
+      if (field !== "jamSelesai") {
+        const ada = sapaCariJurnal(sapaKeyJurnal());
+        if (ada) {
+          jurInput.materi = ada.materi; jurInput.kegiatan = ada.kegiatan; jurInput.jamSelesai = ada.jamSelesai || jurInput.jamMulai;
+          document.getElementById("ji-jam-selesai").value = jurInput.jamSelesai;
+        } else {
+          jurInput.materi = ""; jurInput.kegiatan = "";
+        }
+        document.getElementById("ji-materi").value = jurInput.materi;
+        document.getElementById("ji-kegiatan").value = jurInput.kegiatan;
+      } else if (jurInput.materi.trim() || jurInput.kegiatan.trim()) {
+        sapaPersiapkanDraftJurnal(1000);
+      }
+      sapaRenderPanelJurnal();
+    }
+
+    function sapaPresensiUntuk(tanggal, kelas) {
+      const rec = sapaPJ.presensi[`${tanggal}|${kelas}`];
+      return rec ? { rec, ...sapaHitungRec(rec) } : null;
+    }
+
+    function sapaRenderPanelJurnal() {
+      const siswa = sapaSiswaKelas(jurInput.kelas);
+      const p = sapaPresensiUntuk(jurInput.tanggal, jurInput.kelas);
+      document.getElementById("ji-jml").innerText = siswa.length;
+      document.getElementById("ji-s").innerText = p ? p.S : 0;
+      document.getElementById("ji-i").innerText = p ? p.I : 0;
+      document.getElementById("ji-a").innerText = p ? p.A : 0;
+
+      const info = document.getElementById("ji-info-presensi");
+      if (p) {
+        const namaList = st => siswa.filter(s => p.rec.data[String(s.NISN)] === st).map(s => sapaEsc(s.Nama_Lengkap)).join(", ");
+        const baris = [["Sakit", "S", "text-amber-700"], ["Izin", "I", "text-sky-700"], ["Alpha", "A", "text-rose-700"]]
+          .map(([n, st, w]) => { const l = namaList(st); return l ? `<div><span class="font-bold ${w}">${n}:</span> <span class="text-slate-600">${l}</span></div>` : ""; }).join("");
+        info.innerHTML = baris || `<span class="text-emerald-700 font-bold">Semua murid hadir.</span>`;
+      } else {
+        info.innerHTML = `<span class="text-amber-700 font-bold">Presensi kelas ${sapaEsc(jurInput.kelas)} pada ${sapaEsc(sapaFormatTgl(jurInput.tanggal, true))} belum diisi.</span>
+          <button onclick="sapaKePresensiDariJurnal()" class="ml-1 underline font-bold text-emerald-700">Isi presensi sekarang</button>`;
+      }
+
+      // pertemuan sebelumnya (kelas & mapel yang sama)
+      const sebelum = sapaPJ.jurnal
+        .filter(j => j.kelas === jurInput.kelas && j.mapelId === jurInput.mapelId &&
+          (j.tanggal < jurInput.tanggal || (j.tanggal === jurInput.tanggal && j.jamMulai < jurInput.jamMulai)))
+        .sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.jamMulai - a.jamMulai)[0];
+      document.getElementById("ji-prev").innerHTML = sebelum ? `
+        <div class="font-bold text-slate-800 mb-1">${sapaEsc(sapaFormatTgl(sebelum.tanggal))} • Jam ke-${sebelum.jamMulai}${sebelum.jamSelesai > sebelum.jamMulai ? "–" + sebelum.jamSelesai : ""}</div>
+        <div class="mb-1"><span class="font-bold text-slate-500">Materi:</span> ${sapaEsc(sebelum.materi).replace(/\n/g, "<br>") || "-"}</div>
+        <div><span class="font-bold text-slate-500">Kegiatan:</span> ${sapaEsc(sebelum.kegiatan).replace(/\n/g, "<br>") || "-"}</div>`
+        : `<span class="text-slate-400">Belum ada jurnal sebelumnya untuk kelas dan mapel ini.</span>`;
+      sapaUpdateStatusJur();
+    }
+
+    function sapaKePresensiDariJurnal() {
+      presInput.tanggal = jurInput.tanggal; presInput.kelas = jurInput.kelas;
+      gantiMenu("Input Presensi");
+    }
+
+    function sapaBangunPayloadJurnal() {
+      const p = sapaPresensiUntuk(jurInput.tanggal, jurInput.kelas);
+      return {
+        action: "saveJurnal",
+        key: sapaKeyJurnal(),
+        tanggal: jurInput.tanggal, jamMulai: jurInput.jamMulai, jamSelesai: Math.max(jurInput.jamSelesai, jurInput.jamMulai),
+        kelas: jurInput.kelas, mapelId: jurInput.mapelId, mapelNama: sapaNamaMapel(jurInput.mapelId),
+        jumlah: sapaSiswaKelas(jurInput.kelas).length,
+        s: p ? p.S : 0, i: p ? p.I : 0, a: p ? p.A : 0,
+        materi: jurInput.materi, kegiatan: jurInput.kegiatan
+      };
+    }
+
+    function sapaPersiapkanDraftJurnal(delay) {
+      const key = sapaKeyJurnal();
+      if (!key) return false;
+      jurDraft[key] = sapaBangunPayloadJurnal();
+      sapaJadwalSimpan("J", key, delay);
+      return true;
+    }
+
+    function sapaInputTeksJurnal() {
+      jurInput.materi = document.getElementById("ji-materi").value;
+      jurInput.kegiatan = document.getElementById("ji-kegiatan").value;
+      if (!jurInput.materi.trim() && !jurInput.kegiatan.trim()) return;
+      sapaPersiapkanDraftJurnal(1500);
+    }
+
+    function sapaUpdateStatusJur() {
+      const el = document.getElementById("ji-status");
+      if (!el) return;
+      const key = sapaKeyJurnal();
+      const x = sapaTeksStatus(key ? sapaStatus["J|" + key] : null, !!(key && sapaCariJurnal(key)));
+      el.className = "text-[11px] font-bold " + x.c;
+      el.innerText = x.t;
+    }
+
+    const sapaSimpanJur = sapaBuatPenyimpan("J", async key => {
+      const d = jurDraft[key];
+      if (!d) return;
+      // perbarui salinan lokal agar menu Lihat/Cetak Jurnal langsung mutakhir
+      const lokal = { key: d.key, tanggal: d.tanggal, jamMulai: d.jamMulai, jamSelesai: d.jamSelesai, kelas: d.kelas, mapelId: d.mapelId, mapelNama: d.mapelNama, jumlah: d.jumlah, s: d.s, i: d.i, a: d.a, materi: d.materi, kegiatan: d.kegiatan };
+      const idx = sapaPJ.jurnal.findIndex(j => j.key === key);
+      if (idx >= 0) sapaPJ.jurnal[idx] = lokal; else sapaPJ.jurnal.push(lokal);
+      await sapaPostSenyap(d);
+    }, () => sapaUpdateStatusJur());
+
+    async function sapaSimpanJurnalManual() {
+      jurInput.materi = document.getElementById("ji-materi").value;
+      jurInput.kegiatan = document.getElementById("ji-kegiatan").value;
+      const key = sapaKeyJurnal();
+      if (!key) return showToast("Lengkapi tanggal, jam ke-, kelas, dan mapel.", "error");
+      if (!jurInput.materi.trim() && !jurInput.kegiatan.trim()) return showToast("Isi materi atau kegiatan pembelajaran terlebih dahulu.", "error");
+      clearTimeout(sapaTimers["J|" + key]); delete sapaTimers["J|" + key];
+      jurDraft[key] = sapaBangunPayloadJurnal();
+      setLoadingProses(true, "Menyimpan jurnal mengajar...");
+      let ok = false;
+      try { ok = await sapaSimpanJur(key); } finally { setLoadingProses(false); }
+      sapaUpdateStatusJur();
+      if (ok) showToast("Jurnal mengajar berhasil disimpan!");
+    }
+
+    // =========================================================================
+    // 4. LIHAT JURNAL MENGAJAR
+    // =========================================================================
+    function renderLihatJurnal() { sapaSiapkan("Lihat Jurnal", "jl", sapaRenderLihatJurnal); }
+
+    function sapaRenderLihatJurnal() {
+      jurLihat.kelas = sapaKelasAwal(jurLihat.kelas);
+      sapaIsiSelect("jl-kelas", sapaOpsiKelas(), jurLihat.kelas);
+      sapaIsiSelect("jl-mapel", sapaOpsiMapel(true), jurLihat.mapelId);
+      sapaTampilLihatJurnal();
+    }
+
+    function sapaLabelJam(j) { return `Jam ke-${j.jamMulai}${j.jamSelesai > j.jamMulai ? "–" + j.jamSelesai : ""}`; }
+
+    function sapaTampilLihatJurnal() {
+      jurLihat.kelas = document.getElementById("jl-kelas").value;
+      jurLihat.mapelId = document.getElementById("jl-mapel").value;
+      jurLihatList = sapaPJ.jurnal
+        .filter(j => j.kelas === jurLihat.kelas && (jurLihat.mapelId === "ALL" || j.mapelId === jurLihat.mapelId))
+        .sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.jamMulai - a.jamMulai);
+      const out = document.getElementById("jl-hasil");
+      if (jurLihatList.length === 0) {
+        out.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">Belum ada jurnal mengajar untuk kelas ini.</div>`;
+        return;
+      }
+      out.innerHTML = `<div class="text-[11px] text-slate-500 font-semibold">${jurLihatList.length} pertemuan • terbaru di atas</div>` + jurLihatList.map((j, i) => {
+        const p = sapaPresensiUntuk(j.tanggal, j.kelas);
+        return `<div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 space-y-2">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="text-sm font-extrabold text-slate-900">${sapaEsc(sapaFormatTgl(j.tanggal))}</div>
+              <div class="text-[11px] text-slate-500 font-semibold">${sapaLabelJam(j)} • ${sapaEsc(j.mapelNama || sapaNamaMapel(j.mapelId))}</div>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] font-bold">
+              <span class="px-2 py-1 rounded-lg bg-slate-100 text-slate-700">${j.jumlah} murid</span>
+              <span class="px-2 py-1 rounded-lg bg-amber-100 text-amber-800">S ${p ? p.S : "-"}</span>
+              <span class="px-2 py-1 rounded-lg bg-sky-100 text-sky-800">I ${p ? p.I : "-"}</span>
+              <span class="px-2 py-1 rounded-lg bg-rose-100 text-rose-800">A ${p ? p.A : "-"}</span>
+              <button onclick="sapaEditJurnal(${i})" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white">Edit</button>
+            </div>
+          </div>
+          <div class="text-xs"><span class="font-bold text-slate-500">Materi:</span> <span class="text-slate-800">${sapaEsc(j.materi).replace(/\n/g, "<br>") || "-"}</span></div>
+          <div class="text-xs"><span class="font-bold text-slate-500">Kegiatan:</span> <span class="text-slate-800">${sapaEsc(j.kegiatan).replace(/\n/g, "<br>") || "-"}</span></div>
+        </div>`;
+      }).join("");
+    }
+
+    function sapaEditJurnal(i) {
+      const j = jurLihatList[i];
+      if (!j) return;
+      Object.assign(jurInput, { tanggal: j.tanggal, jamMulai: j.jamMulai, jamSelesai: j.jamSelesai || j.jamMulai, kelas: j.kelas, mapelId: j.mapelId, materi: j.materi, kegiatan: j.kegiatan });
+      gantiMenu("Input Jurnal");
+    }
+
+    // =========================================================================
+    // 5. CETAK JURNAL MENGAJAR
+    // =========================================================================
+    function renderCetakJurnal() { sapaSiapkan("Cetak Jurnal", "jc", sapaRenderCetakJurnal); }
+
+    function sapaRenderCetakJurnal() {
+      jurCetak.kelas = sapaKelasAwal(jurCetak.kelas);
+      if (!sapaTglValid(jurCetak.mulai)) jurCetak.mulai = sapaAwalBulan();
+      if (!sapaTglValid(jurCetak.akhir)) jurCetak.akhir = sapaHariIni();
+      sapaIsiSelect("jc-kelas", sapaOpsiKelas(), jurCetak.kelas);
+      sapaIsiSelect("jc-mapel", sapaOpsiMapel(true), jurCetak.mapelId);
+      document.getElementById("jc-mulai").value = jurCetak.mulai;
+      document.getElementById("jc-akhir").value = jurCetak.akhir;
+      sapaTampilkanCetakJurnal(true);
+    }
+
+    function sapaDataCetakJurnal(senyap) {
+      jurCetak.kelas = document.getElementById("jc-kelas").value;
+      jurCetak.mapelId = document.getElementById("jc-mapel").value;
+      jurCetak.mulai = document.getElementById("jc-mulai").value;
+      jurCetak.akhir = document.getElementById("jc-akhir").value;
+      if (!jurCetak.kelas) { if (!senyap) showToast("Pilih kelas.", "error"); return null; }
+      if (!sapaTglValid(jurCetak.mulai) || !sapaTglValid(jurCetak.akhir)) { if (!senyap) showToast("Pilih tanggal mulai dan tanggal akhir.", "error"); return null; }
+      if (jurCetak.mulai > jurCetak.akhir) { if (!senyap) showToast("Tanggal mulai tidak boleh setelah tanggal akhir.", "error"); return null; }
+      return sapaPJ.jurnal
+        .filter(j => j.kelas === jurCetak.kelas && j.tanggal >= jurCetak.mulai && j.tanggal <= jurCetak.akhir &&
+          (jurCetak.mapelId === "ALL" || j.mapelId === jurCetak.mapelId))
+        .sort((a, b) => a.tanggal.localeCompare(b.tanggal) || a.jamMulai - b.jamMulai);
+    }
+
+    function sapaBarisJurnal(list) {
+      return list.map((j, i) => {
+        const p = sapaPresensiUntuk(j.tanggal, j.kelas);
+        return [i + 1, sapaFormatTgl(j.tanggal, true), sapaLabelJam(j).replace("Jam ke-", ""), j.mapelNama || sapaNamaMapel(j.mapelId),
+          j.materi, j.kegiatan, j.jumlah, p ? p.S : "-", p ? p.I : "-", p ? p.A : "-"];
+      });
+    }
+
+    function sapaTampilkanCetakJurnal(senyap) {
+      const list = sapaDataCetakJurnal(senyap);
+      const out = document.getElementById("jc-hasil");
+      if (!list) { out.innerHTML = ""; return; }
+      if (list.length === 0) {
+        out.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">Tidak ada jurnal pada rentang tanggal tersebut.</div>`;
+        return;
+      }
+      const rows = sapaBarisJurnal(list);
+      out.innerHTML = `<div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100"><div class="text-sm font-extrabold text-slate-900">Jurnal Mengajar — Kelas ${sapaEsc(jurCetak.kelas)}</div>
+        <div class="text-[11px] text-slate-500">${sapaEsc(sapaFormatTgl(jurCetak.mulai, true))} s.d. ${sapaEsc(sapaFormatTgl(jurCetak.akhir, true))} • ${rows.length} pertemuan</div></div>
+        <div class="overflow-x-auto table-scroll-x"><table class="w-full text-xs">
+          <thead class="bg-slate-900 text-white"><tr>
+            <th class="px-2 py-2 w-8">No</th><th class="px-2 py-2 text-left">Hari/Tanggal</th><th class="px-2 py-2">Jam</th><th class="px-2 py-2 text-left">Mapel</th>
+            <th class="px-2 py-2 text-left">Materi</th><th class="px-2 py-2 text-left">Kegiatan Pembelajaran</th><th class="px-2 py-2">Jml</th><th class="px-2 py-2">S</th><th class="px-2 py-2">I</th><th class="px-2 py-2">A</th></tr></thead>
+          <tbody class="divide-y divide-slate-100 align-top">${rows.map(r => `<tr>
+            <td class="px-2 py-1.5 text-center text-slate-500">${r[0]}</td><td class="px-2 py-1.5 whitespace-nowrap">${sapaEsc(r[1])}</td><td class="px-2 py-1.5 text-center">${sapaEsc(r[2])}</td>
+            <td class="px-2 py-1.5">${sapaEsc(r[3])}</td><td class="px-2 py-1.5 min-w-[160px]">${sapaEsc(r[4]).replace(/\n/g, "<br>")}</td><td class="px-2 py-1.5 min-w-[200px]">${sapaEsc(r[5]).replace(/\n/g, "<br>")}</td>
+            <td class="px-2 py-1.5 text-center">${r[6]}</td><td class="px-2 py-1.5 text-center">${r[7]}</td><td class="px-2 py-1.5 text-center">${r[8]}</td><td class="px-2 py-1.5 text-center">${r[9]}</td></tr>`).join("")}</tbody>
+        </table></div></div>`;
+    }
+
+    function sapaSubInfoJurnal() {
+      return `Kelas: ${jurCetak.kelas}  |  Mapel: ${jurCetak.mapelId === "ALL" ? "Semua Mata Pelajaran" : sapaNamaMapel(jurCetak.mapelId)}  |  Tanggal: ${sapaFormatTgl(jurCetak.mulai, true)} s.d. ${sapaFormatTgl(jurCetak.akhir, true)}  |  Tahun Ajaran: ${sapaPeriodeTeks()}`;
+    }
+
+    function sapaJurnalPDF() {
+      const list = sapaDataCetakJurnal();
+      if (!list) return;
+      if (list.length === 0) return showToast("Tidak ada jurnal pada rentang tanggal tersebut.", "error");
+      const { jsPDF } = window.jspdf;
+      const opsi = sapaOpsiPDF();
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const y0 = gambarHeaderPDF(doc, opsi, "JURNAL MENGAJAR GURU", sapaSubInfoJurnal());
+      doc.autoTable({
+        head: [["No", "Hari/Tanggal", "Jam Ke-", "Mata Pelajaran", "Materi yang Diajarkan", "Kegiatan Pembelajaran", "Jml", "S", "I", "A"]],
+        body: sapaBarisJurnal(list),
+        startY: y0, theme: "grid",
+        margin: { top: opsi.mAtas, bottom: opsi.mBawah, left: opsi.mKiri, right: opsi.mKanan },
+        styles: { fontSize: 7.5, cellPadding: 1.4, halign: "center", valign: "top", overflow: "linebreak", lineColor: [203, 213, 225], lineWidth: 0.2 },
+        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold", valign: "middle" },
+        columnStyles: {
+          0: { cellWidth: 8 }, 1: { cellWidth: 30, halign: "left" }, 2: { cellWidth: 13 }, 3: { cellWidth: 30, halign: "left" },
+          4: { halign: "left" }, 5: { halign: "left" }, 6: { cellWidth: 9 }, 7: { cellWidth: 7 }, 8: { cellWidth: 7 }, 9: { cellWidth: 7 }
+        },
+        didDrawPage: sapaFooterHalaman(doc, opsi)
+      });
+      gambarPengesahanPDF(doc, opsi);
+      doc.save(`Jurnal_Mengajar_${sapaNamaFile(jurCetak.kelas)}_${jurCetak.mulai}_sd_${jurCetak.akhir}.pdf`);
+      showToast("PDF jurnal mengajar berhasil dibuat.");
+    }
+
+    async function sapaJurnalExcel() {
+      const list = sapaDataCetakJurnal();
+      if (!list) return;
+      if (list.length === 0) return showToast("Tidak ada jurnal pada rentang tanggal tersebut.", "error");
+      await sapaBuatExcel({
+        sheet: `Jurnal_${jurCetak.kelas}`, judul: "JURNAL MENGAJAR GURU", sub: sapaSubInfoJurnal(),
+        head: ["No", "Hari/Tanggal", "Jam Ke-", "Mata Pelajaran", "Materi yang Diajarkan", "Kegiatan Pembelajaran", "Jml", "S", "I", "A"],
+        body: sapaBarisJurnal(list), kiri: [2, 4, 5, 6], widths: [5, 22, 9, 24, 40, 50, 7, 6, 6, 6],
+        namaFile: `Jurnal_Mengajar_${sapaNamaFile(jurCetak.kelas)}_${jurCetak.mulai}_sd_${jurCetak.akhir}.xlsx`
+      });
     }
 
     window.onload = () => {
